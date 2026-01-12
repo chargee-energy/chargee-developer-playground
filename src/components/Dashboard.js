@@ -16,6 +16,7 @@ const Dashboard = () => {
   // Devices state removed - now handled in DevicesDetails component
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const isFetchingAnalyticsRef = React.useRef(false);
   const [loading, setLoading] = useState({
     groups: false,
     addresses: false,
@@ -52,25 +53,31 @@ const Dashboard = () => {
 
   // Restore selection from URL after groups load, or auto-select if only 1 group
   useEffect(() => {
-    if (groups.length === 0 || selectedGroup) return;
-    
+    console.log('[useEffect] Groups changed, length:', groups.length, 'selectedGroup:', selectedGroup?.uuid);
+    if (groups.length === 0 || selectedGroup) {
+      console.log('[useEffect] Early return - no groups or already selected');
+      return;
+    }
+
     // If there's exactly 1 group, always select it
     if (groups.length === 1) {
+      console.log('[useEffect] Auto-selecting single group');
       const group = groups[0];
       handleGroupSelect(group);
       return;
     }
-    
+
     // Otherwise, restore from URL params (previously selected group)
     const groupUuid = searchParams.get('group');
     if (groupUuid) {
       const group = groups.find(g => g.uuid === groupUuid);
       if (group) {
+        console.log('[useEffect] Restoring group from URL');
         handleGroupSelect(group);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groups, searchParams]);
+  }, [groups]); // Only depend on groups, not searchParams
 
   // Restore address selection after addresses load
   useEffect(() => {
@@ -210,11 +217,12 @@ const Dashboard = () => {
   // fetchDevices removed - now handled in DevicesDetails component
 
   const handleGroupSelect = (group) => {
+    console.log('[handleGroupSelect] Called for group:', group.uuid);
     setSelectedGroup(group);
     setSelectedAddress(null); // Clear selected address when changing groups
     setAddressSearch('');
     setAddressPage(1);
-    
+
     // Only fetch analytics if user has extendeduser or admin role
     if (user?.role === 'extendeduser' || user?.role === 'admin') {
       // Check for cached analytics first
@@ -227,9 +235,12 @@ const Dashboard = () => {
           const cacheAge = Date.now() - parsed.timestamp;
           const oneHour = 60 * 60 * 1000;
           if (cacheAge < oneHour) {
+            console.log('[handleGroupSelect] Using cached analytics');
             setAnalytics(parsed.data);
+            // Don't call fetchGroupAnalytics at all
           } else {
             // Cache expired, fetch fresh data
+            console.log('[handleGroupSelect] Cache expired, fetching analytics');
             setAnalytics(null);
             fetchGroupAnalytics(group.uuid);
           }
@@ -240,6 +251,7 @@ const Dashboard = () => {
         }
       } else {
         // No cache, fetch fresh data
+        console.log('[handleGroupSelect] No cache, fetching analytics');
         setAnalytics(null);
         fetchGroupAnalytics(group.uuid);
       }
@@ -247,7 +259,7 @@ const Dashboard = () => {
       // User doesn't have permission, clear analytics
       setAnalytics(null);
     }
-    
+
     // Fetch addresses (will check cache internally)
     fetchAddresses(group.uuid, 1);
   };
@@ -312,23 +324,10 @@ const Dashboard = () => {
     setDeviceModalData({ type: deviceType, devices: [], count });
     
     try {
-      // Fetch all addresses for the group (we'll need to fetch devices from all addresses)
-      const MAX_ADDRESSES_FOR_DEVICE_LIST = 1000;
-      const firstPageData = await addressesAPI.getAddresses(selectedGroup.uuid, { offset: 0, limit: 1 });
-      const totalAddresses = firstPageData?.meta?.total || 0;
-      const addressesToProcess = Math.min(totalAddresses, MAX_ADDRESSES_FOR_DEVICE_LIST);
-      
-      // Fetch addresses in batches
-      const batchSize = 100;
-      const batches = Math.ceil(addressesToProcess / batchSize);
-      let allAddresses = [];
-      
-      for (let i = 0; i < batches; i++) {
-        const offset = i * batchSize;
-        const limit = Math.min(batchSize, addressesToProcess - offset);
-        const batchData = await addressesAPI.getAddresses(selectedGroup.uuid, { offset, limit });
-        allAddresses = allAddresses.concat(batchData?.results || []);
-      }
+      // Fetch all addresses for the group (API doesn't support pagination)
+      const addressData = await addressesAPI.getAddresses(selectedGroup.uuid);
+      const allAddresses = addressData?.results || [];
+      console.log(`[handleAnalyticsClick] Fetched ${allAddresses.length} addresses for ${deviceType}`);
 
       // Fetch devices from all addresses
       const deviceBatchSize = 50;
@@ -339,23 +338,8 @@ const Dashboard = () => {
       
       // Handle Sparky's separately (they're part of addresses, not devices)
       if (deviceType === 'sparkies') {
-        // Fetch all addresses and filter those with Sparky's
-        const MAX_ADDRESSES_FOR_DEVICE_LIST = 1000;
-        const firstPageData = await addressesAPI.getAddresses(selectedGroup.uuid, { offset: 0, limit: 1 });
-        const totalAddresses = firstPageData?.meta?.total || 0;
-        const addressesToProcess = Math.min(totalAddresses, MAX_ADDRESSES_FOR_DEVICE_LIST);
-        
-        // Fetch addresses in batches
-        const batchSize = 100;
-        const batches = Math.ceil(addressesToProcess / batchSize);
-        let allAddresses = [];
-        
-        for (let i = 0; i < batches; i++) {
-          const offset = i * batchSize;
-          const limit = Math.min(batchSize, addressesToProcess - offset);
-          const batchData = await addressesAPI.getAddresses(selectedGroup.uuid, { offset, limit });
-          allAddresses = allAddresses.concat(batchData?.results || []);
-        }
+        // Use the addresses we already fetched above
+        console.log(`[handleAnalyticsClick] Filtering ${allAddresses.length} addresses for Sparkies`);
 
         // Filter addresses that have Sparky's and format them for the modal
         const sparkyAddresses = allAddresses
@@ -368,13 +352,11 @@ const Dashboard = () => {
             addressSparky: address.sparky.serialNumber
           }));
 
-        setDeviceModalData({ 
-          type: deviceType, 
-          devices: sparkyAddresses, 
-          count: sparkyAddresses.length,
-          totalAddresses: totalAddresses,
-          sampledAddresses: addressesToProcess,
-          isSampled: totalAddresses > MAX_ADDRESSES_FOR_DEVICE_LIST
+        console.log(`[handleAnalyticsClick] Found ${sparkyAddresses.length} Sparkies`);
+        setDeviceModalData({
+          type: deviceType,
+          devices: sparkyAddresses,
+          count: sparkyAddresses.length
         });
         setDeviceModalLoading(false);
         return;
@@ -428,13 +410,11 @@ const Dashboard = () => {
         });
       }
 
-      setDeviceModalData({ 
-        type: deviceType, 
-        devices: allDevices, 
-        count: allDevices.length,
-        totalAddresses: totalAddresses,
-        sampledAddresses: addressesToProcess,
-        isSampled: totalAddresses > MAX_ADDRESSES_FOR_DEVICE_LIST
+      console.log(`[handleAnalyticsClick] Found ${allDevices.length} ${deviceType}`);
+      setDeviceModalData({
+        type: deviceType,
+        devices: allDevices,
+        count: allDevices.length
       });
     } catch (err) {
       console.error('Error fetching devices:', err);
@@ -476,25 +456,12 @@ const Dashboard = () => {
 
   const fetchAllSteerableInverters = async () => {
     if (!selectedGroup) return [];
-    
+
     try {
-      // Fetch all addresses for the group
-      const MAX_ADDRESSES = 1000;
-      const firstPageData = await addressesAPI.getAddresses(selectedGroup.uuid, { offset: 0, limit: 1 });
-      const totalAddresses = firstPageData?.meta?.total || 0;
-      const addressesToProcess = Math.min(totalAddresses, MAX_ADDRESSES);
-      
-      // Fetch addresses in batches
-      const batchSize = 100;
-      const batches = Math.ceil(addressesToProcess / batchSize);
-      let allAddresses = [];
-      
-      for (let i = 0; i < batches; i++) {
-        const offset = i * batchSize;
-        const limit = Math.min(batchSize, addressesToProcess - offset);
-        const batchData = await addressesAPI.getAddresses(selectedGroup.uuid, { offset, limit });
-        allAddresses = allAddresses.concat(batchData?.results || []);
-      }
+      // Fetch all addresses for the group (API doesn't support pagination)
+      const addressData = await addressesAPI.getAddresses(selectedGroup.uuid);
+      const allAddresses = addressData?.results || [];
+      console.log(`[fetchAllSteerableInverters] Fetched ${allAddresses.length} addresses`);
 
       // Fetch solar inverters from all addresses
       const deviceBatchSize = 50;
@@ -615,11 +582,21 @@ const Dashboard = () => {
 
   const fetchGroupAnalytics = async (groupUuid) => {
     if (!groupUuid) return;
-    
+
+    console.log(`[Analytics] fetchGroupAnalytics called for group:`, groupUuid);
+
+    // Prevent concurrent fetches
+    if (isFetchingAnalyticsRef.current) {
+      console.log('[Analytics] Fetch already in progress, skipping...');
+      return;
+    }
+
+    console.log(`[Analytics] Starting fetch for group:`, groupUuid);
+    isFetchingAnalyticsRef.current = true;
     setLoading(prev => ({ ...prev, analytics: true }));
     setError('');
     setAnalyticsProgress({ stage: 'initializing', progress: 0, message: 'Initializing analytics...' });
-    
+
     const startTime = Date.now();
     
     try {
@@ -627,6 +604,7 @@ const Dashboard = () => {
       setAnalyticsProgress({ stage: 'counting', progress: 5, message: 'Counting addresses...' });
       const firstPageData = await addressesAPI.getAddresses(groupUuid, { offset: 0, limit: 1 });
       const totalAddresses = firstPageData?.meta?.total || 0;
+      console.log(`[Analytics ${groupUuid}] API reports total addresses for this group:`, totalAddresses);
       
       if (totalAddresses === 0) {
         const emptyAnalytics = {
@@ -651,57 +629,35 @@ const Dashboard = () => {
           data: emptyAnalytics,
           timestamp: Date.now()
         }));
-        
+
         setLoading(prev => ({ ...prev, analytics: false }));
         setAnalyticsProgress(null);
+        isFetchingAnalyticsRef.current = false;
         return;
       }
 
-      // For performance, limit analytics to first 1000 addresses
-      // For very large groups, we sample instead of processing all
-      const MAX_ADDRESSES_FOR_ANALYTICS = 1000;
-      const addressesToProcess = Math.min(totalAddresses, MAX_ADDRESSES_FOR_ANALYTICS);
-      
-      // Show warning for very large datasets
-      if (totalAddresses > MAX_ADDRESSES_FOR_ANALYTICS) {
-        setAnalyticsProgress({ 
-          stage: 'warning', 
-          progress: 8, 
-          message: `Large dataset detected (${totalAddresses.toLocaleString()} addresses). Processing sample of ${addressesToProcess.toLocaleString()} for performance...` 
-        });
-        // Small delay to show the warning
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-      
-      // Fetch addresses in batches for analytics
-      const batchSize = 100;
-      const batches = Math.ceil(addressesToProcess / batchSize);
-      let allAddresses = [];
-      
-      setAnalyticsProgress({ 
-        stage: 'fetching_addresses', 
-        progress: 10, 
-        message: `Fetching addresses (0/${addressesToProcess})...`,
+      // Fetch all addresses for the group in a single call
+      // Note: The API doesn't support pagination (offset/limit), so we fetch all at once
+      setAnalyticsProgress({
+        stage: 'fetching_addresses',
+        progress: 10,
+        message: `Fetching addresses (0/${totalAddresses})...`,
         current: 0,
-        total: addressesToProcess
+        total: totalAddresses
       });
-      
-      // Fetch addresses in batches with progress updates
-      for (let i = 0; i < batches; i++) {
-        const offset = i * batchSize;
-        const limit = Math.min(batchSize, addressesToProcess - offset);
-        const batchData = await addressesAPI.getAddresses(groupUuid, { offset, limit });
-        allAddresses = allAddresses.concat(batchData?.results || []);
-        
-        const fetched = allAddresses.length;
-        setAnalyticsProgress({ 
-          stage: 'fetching_addresses', 
-          progress: 10 + (fetched / addressesToProcess) * 20, 
-          message: `Fetching addresses (${fetched}/${addressesToProcess})...`,
-          current: fetched,
-          total: addressesToProcess
-        });
-      }
+
+      console.log(`[Analytics ${groupUuid}] Fetching all addresses for group`);
+      const addressData = await addressesAPI.getAddresses(groupUuid);
+      const allAddresses = addressData?.results || [];
+      console.log(`[Analytics ${groupUuid}] Fetched ${allAddresses.length} addresses (expected: ${totalAddresses})`);
+
+      setAnalyticsProgress({
+        stage: 'fetching_addresses',
+        progress: 30,
+        message: `Fetched ${allAddresses.length} addresses`,
+        current: allAddresses.length,
+        total: totalAddresses
+      });
 
       if (allAddresses.length === 0) {
         setAnalytics({
@@ -716,15 +672,18 @@ const Dashboard = () => {
         });
         setLoading(prev => ({ ...prev, analytics: false }));
         setAnalyticsProgress(null);
+        isFetchingAnalyticsRef.current = false;
         return;
       }
 
       // Count connected Sparky's (addresses with sparky)
-      setAnalyticsProgress({ 
-        stage: 'counting_sparkies', 
-        progress: 30, 
-        message: 'Counting connected Sparky\'s...' 
+      setAnalyticsProgress({
+        stage: 'counting_sparkies',
+        progress: 30,
+        message: 'Counting connected Sparky\'s...'
       });
+      console.log(`[Analytics ${groupUuid}] Total addresses fetched:`, allAddresses.length);
+      console.log(`[Analytics ${groupUuid}] Addresses with Sparky:`, allAddresses.filter(addr => addr.sparky).length);
       const connectedSparkies = allAddresses.filter(addr => addr.sparky).length;
 
       // For reporting Sparky's, limit to first 100 to avoid too many API calls
@@ -749,15 +708,15 @@ const Dashboard = () => {
         result => result.status === 'fulfilled' && result.value !== null
       ).length;
 
-      setAnalyticsProgress({ 
-        stage: 'fetching_devices', 
-        progress: 50, 
+      setAnalyticsProgress({
+        stage: 'fetching_devices',
+        progress: 50,
         message: 'Fetching device data (0%)...',
         current: 0,
         total: allAddresses.length
       });
 
-      // Fetch devices in batches to avoid overwhelming the API
+      // Fetch ALL device types in a SINGLE loop to avoid overwhelming the API
       const deviceBatchSize = 50;
       const deviceBatches = Math.ceil(allAddresses.length / deviceBatchSize);
       const counters = {
@@ -765,58 +724,93 @@ const Dashboard = () => {
         solarInverters: 0,
         steerableInverters: 0,
         batteries: 0,
-        hvacs: 0
+        hvacs: 0,
+        chargers: 0,
+        smartMeters: 0,
+        gridConnections: 0
       };
 
       const extractResults = (data) => Array.isArray(data) ? data : (data?.results || []);
 
-      // Process devices in batches with progress updates
+      console.log(`[Analytics ${groupUuid}] Fetching all device types from ${allAddresses.length} addresses in ${deviceBatches} batches`);
+
+      // Process all device types in one loop to reduce total API calls
       for (let i = 0; i < deviceBatches; i++) {
         const batchStart = i * deviceBatchSize;
         const batchEnd = Math.min(batchStart + deviceBatchSize, allAddresses.length);
         const addressBatch = allAddresses.slice(batchStart, batchEnd);
+        console.log(`[Analytics ${groupUuid}] Batch ${i + 1}/${deviceBatches}: processing addresses ${batchStart}-${batchEnd - 1} (${addressBatch.length} addresses)`);
 
-        const deviceFetches = addressBatch.map(address => 
+        // Fetch all 7 device types for each address in one Promise.allSettled
+        const deviceFetches = addressBatch.map(address =>
           Promise.allSettled([
             devicesAPI.getVehicles(address.uuid),
             devicesAPI.getSolarInverters(address.uuid),
             devicesAPI.getBatteries(address.uuid),
-            devicesAPI.getHvacs(address.uuid)
+            devicesAPI.getHvacs(address.uuid),
+            devicesAPI.getChargers(address.uuid),
+            devicesAPI.getSmartMeters(address.uuid),
+            devicesAPI.getGridConnections(address.uuid)
           ])
         );
 
         const batchResults = await Promise.all(deviceFetches);
 
-        // Process results with proper closure to avoid unsafe references
+        let batchCounts = {
+          vehicles: 0,
+          solarInverters: 0,
+          steerableInverters: 0,
+          batteries: 0,
+          hvacs: 0,
+          chargers: 0,
+          smartMeters: 0,
+          gridConnections: 0
+        };
+
         batchResults.forEach((addressResults) => {
           addressResults.forEach((result, index) => {
             if (result.status === 'fulfilled') {
               try {
                 const data = result.value;
                 const deviceResults = extractResults(data);
-                
-                // Update counters object directly to avoid closure issues
+
                 switch (index) {
                   case 0: // vehicles
                     counters.vehicles += deviceResults.length;
+                    batchCounts.vehicles += deviceResults.length;
                     break;
                   case 1: // solarInverters
                     counters.solarInverters += deviceResults.length;
+                    batchCounts.solarInverters += deviceResults.length;
                     // Count steerable inverters separately
                     deviceResults.forEach(inverter => {
                       if (inverter.info?.isSteerable === true) {
                         counters.steerableInverters += 1;
+                        batchCounts.steerableInverters += 1;
                       }
                     });
                     break;
                   case 2: // batteries
                     counters.batteries += deviceResults.length;
+                    batchCounts.batteries += deviceResults.length;
                     break;
                   case 3: // hvacs
                     counters.hvacs += deviceResults.length;
+                    batchCounts.hvacs += deviceResults.length;
+                    break;
+                  case 4: // chargers
+                    counters.chargers += deviceResults.length;
+                    batchCounts.chargers += deviceResults.length;
+                    break;
+                  case 5: // smartMeters
+                    counters.smartMeters += deviceResults.length;
+                    batchCounts.smartMeters += deviceResults.length;
+                    break;
+                  case 6: // gridConnections
+                    counters.gridConnections += deviceResults.length;
+                    batchCounts.gridConnections += deviceResults.length;
                     break;
                   default:
-                    // Unknown device type
                     break;
                 }
               } catch (err) {
@@ -826,104 +820,52 @@ const Dashboard = () => {
           });
         });
 
+        console.log(`[Analytics ${groupUuid}] Batch ${i + 1} found:`, batchCounts);
+
         // Update progress with estimated time
         const processed = Math.min(batchEnd, allAddresses.length);
         const progress = 50 + (processed / allAddresses.length) * 45;
-        const elapsed = (Date.now() - startTime) / 1000; // seconds
-        const rate = processed / elapsed; // addresses per second
+        const elapsed = (Date.now() - startTime) / 1000;
+        const rate = processed / elapsed;
         const remaining = allAddresses.length - processed;
         const estimatedSeconds = rate > 0 ? Math.round(remaining / rate) : 0;
-        const estimatedTime = estimatedSeconds > 60 
+        const estimatedTime = estimatedSeconds > 60
           ? `${Math.round(estimatedSeconds / 60)}m ${estimatedSeconds % 60}s`
           : `${estimatedSeconds}s`;
-        
-        setAnalyticsProgress({ 
-          stage: 'fetching_devices', 
-          progress: Math.min(95, progress), 
+
+        setAnalyticsProgress({
+          stage: 'fetching_devices',
+          progress: Math.min(95, progress),
           message: `Fetching device data (${Math.round((processed / allAddresses.length) * 100)}%)${estimatedSeconds > 0 ? ` - Est. ${estimatedTime} remaining` : ''}...`,
           current: processed,
           total: allAddresses.length
         });
       }
 
-      setAnalyticsProgress({ 
-        stage: 'calculating', 
-        progress: 95, 
-        message: 'Calculating final results...' 
+      console.log(`[Analytics ${groupUuid}] Total devices found:`, counters);
+
+      setAnalyticsProgress({
+        stage: 'calculating',
+        progress: 95,
+        message: 'Calculating final results...'
       });
 
-      // If we sampled, scale the results proportionally
-      const scaleFactor = totalAddresses > MAX_ADDRESSES_FOR_ANALYTICS 
-        ? totalAddresses / addressesToProcess 
-        : 1;
-
-      // Also fetch chargers, smart meters, and grid connections for completeness
-      const additionalCounters = {
-        chargers: 0,
-        smartMeters: 0,
-        gridConnections: 0
-      };
-
-      // Fetch additional device types in a separate batch
-      for (let i = 0; i < deviceBatches; i++) {
-        const batchStart = i * deviceBatchSize;
-        const batchEnd = Math.min(batchStart + deviceBatchSize, allAddresses.length);
-        const addressBatch = allAddresses.slice(batchStart, batchEnd);
-
-        const additionalDeviceFetches = addressBatch.map(address => 
-          Promise.allSettled([
-            devicesAPI.getChargers(address.uuid),
-            devicesAPI.getSmartMeters(address.uuid),
-            devicesAPI.getGridConnections(address.uuid)
-          ])
-        );
-
-        const additionalBatchResults = await Promise.all(additionalDeviceFetches);
-
-        additionalBatchResults.forEach((addressResults) => {
-          addressResults.forEach((result, index) => {
-            if (result.status === 'fulfilled') {
-              try {
-                const data = result.value;
-                const deviceResults = extractResults(data);
-                
-                switch (index) {
-                  case 0: // chargers
-                    additionalCounters.chargers += deviceResults.length;
-                    break;
-                  case 1: // smartMeters
-                    additionalCounters.smartMeters += deviceResults.length;
-                    break;
-                  case 2: // gridConnections
-                    additionalCounters.gridConnections += deviceResults.length;
-                    break;
-                  default:
-                    break;
-                }
-              } catch (err) {
-                console.error('Error processing additional device data:', err);
-              }
-            }
-          });
-        });
-      }
-
       const analyticsData = {
-        connectedSparkies: Math.round(connectedSparkies * scaleFactor),
-        reportingSparkies: Math.round(reportingSparkies * scaleFactor),
-        vehicles: Math.round(counters.vehicles * scaleFactor),
-        solarInverters: Math.round(counters.solarInverters * scaleFactor),
-        steerableInverters: Math.round(counters.steerableInverters * scaleFactor),
-        batteries: Math.round(counters.batteries * scaleFactor),
-        hvacs: Math.round(counters.hvacs * scaleFactor),
-        chargers: Math.round(additionalCounters.chargers * scaleFactor),
-        smartMeters: Math.round(additionalCounters.smartMeters * scaleFactor),
-        gridConnections: Math.round(additionalCounters.gridConnections * scaleFactor),
+        connectedSparkies: connectedSparkies,
+        reportingSparkies: reportingSparkies,
+        vehicles: counters.vehicles,
+        solarInverters: counters.solarInverters,
+        steerableInverters: counters.steerableInverters,
+        batteries: counters.batteries,
+        hvacs: counters.hvacs,
+        chargers: counters.chargers,
+        smartMeters: counters.smartMeters,
+        gridConnections: counters.gridConnections,
         totalAddresses,
-        sampledAddresses: addressesToProcess,
-        isSampled: totalAddresses > MAX_ADDRESSES_FOR_ANALYTICS,
         timestamp: Date.now()
       };
+
+      console.log(`[Analytics ${groupUuid}] Final analytics data:`, analyticsData);
 
       setAnalytics(analyticsData);
 
@@ -951,6 +893,7 @@ const Dashboard = () => {
       setAnalyticsProgress(null);
     } finally {
       setLoading(prev => ({ ...prev, analytics: false }));
+      isFetchingAnalyticsRef.current = false;
     }
   };
 
@@ -1537,11 +1480,6 @@ const Dashboard = () => {
               </div>
             ) : analytics ? (
               <>
-                {analytics.isSampled && (
-                  <div className="analytics-note">
-                    ℹ️ Analytics based on sample of {analytics.sampledAddresses.toLocaleString()} addresses (scaled to {analytics.totalAddresses.toLocaleString()} total)
-                  </div>
-                )}
                 <div className="analytics-grid analytics-grid-horizontal">
                 <div className="analytics-card" onClick={() => handleAnalyticsClick('vehicles', analytics.vehicles)} style={{ cursor: analytics.vehicles > 0 ? 'pointer' : 'default' }}>
                   <div className="analytics-content">
@@ -1836,11 +1774,6 @@ const Dashboard = () => {
                 <div className="device-modal-error">Error: {deviceModalData.error}</div>
               ) : deviceModalData?.devices && deviceModalData.devices.length > 0 ? (
                 <>
-                  {deviceModalData.isSampled && (
-                    <div className="device-modal-note">
-                      ℹ️ Showing devices from {deviceModalData.sampledAddresses.toLocaleString()} of {deviceModalData.totalAddresses.toLocaleString()} addresses
-                              </div>
-                            )}
                   {/* Search Box */}
                   <div className="device-modal-search-box">
                     <input
@@ -1910,7 +1843,7 @@ const Dashboard = () => {
                           meterNumber.includes(searchLower);
                       })
                       .map((device, index) => (
-                      <div key={device.identifier || index} className="device-modal-item">
+                      <div key={`${device.addressUuid || 'unknown'}_${device.identifier || index}`} className="device-modal-item">
                         <div className="device-modal-item-header">
                           <div className="device-modal-item-title">
                             {device.info?.brand || device.brand || 'Unknown'} {device.info?.model || device.model || ''}
