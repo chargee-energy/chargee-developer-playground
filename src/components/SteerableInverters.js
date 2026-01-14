@@ -37,18 +37,27 @@ const SteerableInverters = () => {
       const batchSize = 100;
       const batches = Math.ceil(addressesToProcess / batchSize);
       let allAddresses = [];
+      const addressUuidSet = new Set(); // Track unique addresses
       
       for (let i = 0; i < batches; i++) {
         const offset = i * batchSize;
         const limit = Math.min(batchSize, addressesToProcess - offset);
         const batchData = await addressesAPI.getAddresses(group.uuid, { offset, limit });
-        allAddresses = allAddresses.concat(batchData?.results || []);
+        const batchResults = batchData?.results || [];
+        // Deduplicate addresses by UUID
+        batchResults.forEach(address => {
+          if (address.uuid && !addressUuidSet.has(address.uuid)) {
+            addressUuidSet.add(address.uuid);
+            allAddresses.push(address);
+          }
+        });
       }
 
       // Fetch solar inverters from all addresses
       const deviceBatchSize = 50;
       const deviceBatches = Math.ceil(allAddresses.length / deviceBatchSize);
       const allSteerableInverters = [];
+      const inverterKeySet = new Set(); // Track unique inverters by identifier + addressUuid
       
       const extractResults = (data) => Array.isArray(data) ? data : (data?.results || []);
 
@@ -69,15 +78,22 @@ const SteerableInverters = () => {
               const data = result.value;
               const inverters = extractResults(data);
               
-              // Filter for steerable inverters and add address info
+              // Filter for steerable inverters with lastProductionState and add address info
               inverters.forEach(inverter => {
-                if (inverter.info?.isSteerable === true) {
-                  allSteerableInverters.push({
-                    ...inverter,
-                    addressUuid: addressBatch[index].uuid,
-                    address: addressBatch[index],
-                    sparkySerialNumber: addressBatch[index].sparky?.serialNumber
-                  });
+                if (inverter.info?.isSteerable === true && inverter.lastProductionState) {
+                  const addressUuid = addressBatch[index].uuid;
+                  const inverterKey = `${inverter.identifier || inverter.uuid}-${addressUuid}`;
+                  
+                  // Only add if we haven't seen this inverter+address combination before
+                  if (!inverterKeySet.has(inverterKey)) {
+                    inverterKeySet.add(inverterKey);
+                    allSteerableInverters.push({
+                      ...inverter,
+                      addressUuid: addressUuid,
+                      address: addressBatch[index],
+                      sparkySerialNumber: addressBatch[index].sparky?.serialNumber
+                    });
+                  }
                 }
               });
             } catch (err) {

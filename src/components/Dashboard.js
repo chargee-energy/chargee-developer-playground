@@ -44,6 +44,8 @@ const Dashboard = () => {
   const [groupEnergy, setGroupEnergy] = useState(null);
   const [bulkScheduleModalOpen, setBulkScheduleModalOpen] = useState(false);
   const [steerableInverters, setSteerableInverters] = useState([]);
+  const [steerableInvertersCount, setSteerableInvertersCount] = useState(0);
+  const [steerableInvertersProgress, setSteerableInvertersProgress] = useState(null);
   const [bulkScheduleLoading, setBulkScheduleLoading] = useState(false);
 
   // Fetch groups on mount
@@ -129,6 +131,36 @@ const Dashboard = () => {
     const interval = setInterval(fetchGroupEnergy, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroup]);
+
+  // Fetch steerable inverters count when group is selected
+  useEffect(() => {
+    if (!selectedGroup) {
+      setSteerableInvertersCount(0);
+      setSteerableInvertersProgress(null);
+      return;
+    }
+
+    const fetchSteerableCount = async () => {
+      try {
+        setSteerableInvertersProgress({ stage: 'initializing', progress: 0, message: 'Initializing...' });
+        const inverters = await fetchAllSteerableInverters((progress) => {
+          setSteerableInvertersProgress(progress);
+        });
+        setSteerableInvertersCount(inverters.length);
+        setSteerableInverters(inverters);
+        setSteerableInvertersProgress({ stage: 'complete', progress: 100, message: 'Complete!' });
+        // Clear progress after a short delay
+        setTimeout(() => setSteerableInvertersProgress(null), 500);
+      } catch (err) {
+        console.error('Error fetching steerable inverters count:', err);
+        setSteerableInvertersCount(0);
+        setSteerableInvertersProgress(null);
+      }
+    };
+
+    fetchSteerableCount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
@@ -223,42 +255,42 @@ const Dashboard = () => {
     setAddressSearch('');
     setAddressPage(1);
 
-    // Only fetch analytics if user has extendeduser or admin role
-    if (user?.role === 'extendeduser' || user?.role === 'admin') {
-      // Check for cached analytics first
-      const analyticsCacheKey = `analytics_${group.uuid}`;
-      const cachedAnalytics = localStorage.getItem(analyticsCacheKey);
-      if (cachedAnalytics) {
-        try {
-          const parsed = JSON.parse(cachedAnalytics);
-          // Check if cache is less than 1 hour old (optional: you can adjust this)
-          const cacheAge = Date.now() - parsed.timestamp;
-          const oneHour = 60 * 60 * 1000;
-          if (cacheAge < oneHour) {
-            console.log('[handleGroupSelect] Using cached analytics');
-            setAnalytics(parsed.data);
-            // Don't call fetchGroupAnalytics at all
-          } else {
-            // Cache expired, fetch fresh data
-            console.log('[handleGroupSelect] Cache expired, fetching analytics');
-            setAnalytics(null);
-            fetchGroupAnalytics(group.uuid);
-          }
-        } catch (err) {
-          console.error('Error parsing cached analytics:', err);
-          setAnalytics(null);
-          fetchGroupAnalytics(group.uuid);
-        }
-      } else {
-        // No cache, fetch fresh data
-        console.log('[handleGroupSelect] No cache, fetching analytics');
-        setAnalytics(null);
-        fetchGroupAnalytics(group.uuid);
-      }
-    } else {
-      // User doesn't have permission, clear analytics
-      setAnalytics(null);
-    }
+    // Analytics fetching temporarily removed - Group Analytics tab is hidden
+    // if (user?.role === 'extendeduser' || user?.role === 'admin') {
+    //   // Check for cached analytics first
+    //   const analyticsCacheKey = `analytics_${group.uuid}`;
+    //   const cachedAnalytics = localStorage.getItem(analyticsCacheKey);
+    //   if (cachedAnalytics) {
+    //     try {
+    //       const parsed = JSON.parse(cachedAnalytics);
+    //       // Check if cache is less than 1 hour old (optional: you can adjust this)
+    //       const cacheAge = Date.now() - parsed.timestamp;
+    //       const oneHour = 60 * 60 * 1000;
+    //       if (cacheAge < oneHour) {
+    //         console.log('[handleGroupSelect] Using cached analytics');
+    //         setAnalytics(parsed.data);
+    //         // Don't call fetchGroupAnalytics at all
+    //       } else {
+    //         // Cache expired, fetch fresh data
+    //         console.log('[handleGroupSelect] Cache expired, fetching analytics');
+    //         setAnalytics(null);
+    //         fetchGroupAnalytics(group.uuid);
+    //       }
+    //     } catch (err) {
+    //       console.error('Error parsing cached analytics:', err);
+    //       setAnalytics(null);
+    //       fetchGroupAnalytics(group.uuid);
+    //     }
+    //   } else {
+    //     // No cache, fetch fresh data
+    //     console.log('[handleGroupSelect] No cache, fetching analytics');
+    //     setAnalytics(null);
+    //     fetchGroupAnalytics(group.uuid);
+    //   }
+    // } else {
+    //   // User doesn't have permission, clear analytics
+    //   setAnalytics(null);
+    // }
 
     // Fetch addresses (will check cache internally)
     fetchAddresses(group.uuid, 1);
@@ -454,21 +486,44 @@ const Dashboard = () => {
     }
   };
 
-  const fetchAllSteerableInverters = async () => {
+  const fetchAllSteerableInverters = async (onProgress) => {
     if (!selectedGroup) return [];
+
+    const startTime = Date.now();
 
     try {
       // Fetch all addresses for the group (API doesn't support pagination)
+      if (onProgress) {
+        onProgress({ stage: 'fetching_addresses', progress: 10, message: 'Fetching addresses...' });
+      }
       const addressData = await addressesAPI.getAddresses(selectedGroup.uuid);
       const allAddresses = addressData?.results || [];
       console.log(`[fetchAllSteerableInverters] Fetched ${allAddresses.length} addresses`);
+
+      if (allAddresses.length === 0) {
+        if (onProgress) {
+          onProgress({ stage: 'complete', progress: 100, message: 'No addresses found' });
+        }
+        return [];
+      }
 
       // Fetch solar inverters from all addresses
       const deviceBatchSize = 50;
       const deviceBatches = Math.ceil(allAddresses.length / deviceBatchSize);
       const allSteerableInverters = [];
+      const inverterKeySet = new Set(); // Track unique inverters by identifier + addressUuid
       
       const extractResults = (data) => Array.isArray(data) ? data : (data?.results || []);
+
+      if (onProgress) {
+        onProgress({ 
+          stage: 'fetching_inverters', 
+          progress: 20, 
+          message: `Fetching inverters (0/${allAddresses.length})...`,
+          current: 0,
+          total: allAddresses.length
+        });
+      }
 
       for (let i = 0; i < deviceBatches; i++) {
         const batchStart = i * deviceBatchSize;
@@ -487,14 +542,21 @@ const Dashboard = () => {
               const data = result.value;
               const inverters = extractResults(data);
               
-              // Filter for steerable inverters and add address info
+              // Filter for steerable inverters with lastProductionState and add address info
               inverters.forEach(inverter => {
-                if (inverter.info?.isSteerable === true) {
-                  allSteerableInverters.push({
-                    ...inverter,
-                    addressUuid: addressBatch[index].uuid,
-                    address: addressBatch[index]
-                  });
+                if (inverter.info?.isSteerable === true && inverter.lastProductionState) {
+                  const addressUuid = addressBatch[index].uuid;
+                  const inverterKey = `${inverter.identifier || inverter.uuid}-${addressUuid}`;
+                  
+                  // Only add if we haven't seen this inverter+address combination before
+                  if (!inverterKeySet.has(inverterKey)) {
+                    inverterKeySet.add(inverterKey);
+                    allSteerableInverters.push({
+                      ...inverter,
+                      addressUuid: addressUuid,
+                      address: addressBatch[index]
+                    });
+                  }
                 }
               });
             } catch (err) {
@@ -502,19 +564,48 @@ const Dashboard = () => {
             }
           }
         });
+
+        // Update progress
+        if (onProgress) {
+          const processed = Math.min(batchEnd, allAddresses.length);
+          const progress = 20 + (processed / allAddresses.length) * 75;
+          const elapsed = (Date.now() - startTime) / 1000;
+          const rate = processed / elapsed;
+          const remaining = allAddresses.length - processed;
+          const estimatedSeconds = rate > 0 ? Math.round(remaining / rate) : 0;
+          const estimatedTime = estimatedSeconds > 60
+            ? `${Math.round(estimatedSeconds / 60)}m ${estimatedSeconds % 60}s`
+            : `${estimatedSeconds}s`;
+
+          onProgress({
+            stage: 'fetching_inverters',
+            progress: Math.min(95, progress),
+            message: `Fetching inverters (${processed}/${allAddresses.length})${estimatedSeconds > 0 ? ` - Est. ${estimatedTime} remaining` : ''}...`,
+            current: processed,
+            total: allAddresses.length
+          });
+        }
       }
 
       return allSteerableInverters;
     } catch (err) {
       console.error('Error fetching steerable inverters:', err);
+      if (onProgress) {
+        onProgress(null);
+      }
       return [];
     }
   };
 
   const handleOpenBulkScheduleModal = async () => {
     setBulkScheduleModalOpen(true);
-    // Fetch steerable inverters when opening modal
-    const inverters = await fetchAllSteerableInverters();
+    // Use cached inverters if available, otherwise fetch (without progress reporting)
+    if (steerableInverters.length > 0) {
+      // Already have inverters, use them
+      return;
+    }
+    // Fetch steerable inverters when opening modal (no progress reporting for modal)
+    const inverters = await fetchAllSteerableInverters(null);
     setSteerableInverters(inverters);
   };
 
@@ -782,9 +873,9 @@ const Dashboard = () => {
                   case 1: // solarInverters
                     counters.solarInverters += deviceResults.length;
                     batchCounts.solarInverters += deviceResults.length;
-                    // Count steerable inverters separately
+                    // Count steerable inverters with lastProductionState separately
                     deviceResults.forEach(inverter => {
-                      if (inverter.info?.isSteerable === true) {
+                      if (inverter.info?.isSteerable === true && inverter.lastProductionState) {
                         counters.steerableInverters += 1;
                         batchCounts.steerableInverters += 1;
                       }
@@ -1437,115 +1528,42 @@ const Dashboard = () => {
             )}
           </div>
 
-        {/* Group Analytics Section - Full Width */}
-        {selectedGroup && (user?.role === 'extendeduser' || user?.role === 'admin') && (
-          <div className="section section-full-width">
-            <div className="section-header">
-              <h2>Group Analytics</h2>
-              {analytics && analytics.timestamp && (
-                <div className="analytics-header-actions">
-                  <span className="analytics-timestamp">
-                    Last updated: {formatTimeAgo(analytics.timestamp)}
-                  </span>
-                  <button 
-                    className="refresh-analytics-button"
-                    onClick={() => {
-                      setAnalytics(null);
-                      fetchGroupAnalytics(selectedGroup.uuid);
-                    }}
-                    disabled={loading.analytics}
-                    title="Refresh analytics"
-                  >
-                    🔄 Refresh
-                  </button>
-                </div>
-              )}
-            </div>
-            {loading.analytics ? (
-              <div className="analytics-loading">
-                <div className="analytics-progress-bar">
-                  <div 
-                    className="analytics-progress-fill" 
-                    style={{ width: `${analyticsProgress?.progress || 0}%` }}
-                  ></div>
-                </div>
-                <div className="analytics-progress-text">
-                  {analyticsProgress?.message || 'Loading analytics...'}
-                  {analyticsProgress?.current !== undefined && analyticsProgress?.total !== undefined && (
-                    <span className="analytics-progress-count">
-                      {' '}({analyticsProgress.current.toLocaleString()}/{analyticsProgress.total.toLocaleString()})
-                    </span>
-                  )}
-                </div>
-              </div>
-            ) : analytics ? (
-              <>
-                <div className="analytics-grid analytics-grid-horizontal">
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('vehicles', analytics.vehicles)} style={{ cursor: analytics.vehicles > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.vehicles}</div>
-                    <div className="analytics-label">Vehicles</div>
-                  </div>
-                </div>
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('solarInverters', analytics.solarInverters)} style={{ cursor: analytics.solarInverters > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.solarInverters}</div>
-                    <div className="analytics-label">Solar Inverters</div>
-                  </div>
-                </div>
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('batteries', analytics.batteries)} style={{ cursor: analytics.batteries > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.batteries}</div>
-                    <div className="analytics-label">Batteries</div>
-                  </div>
-                </div>
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('hvacs', analytics.hvacs)} style={{ cursor: analytics.hvacs > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.hvacs}</div>
-                    <div className="analytics-label">HVACs</div>
-                  </div>
-                </div>
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('chargers', analytics.chargers || 0)} style={{ cursor: (analytics.chargers || 0) > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.chargers || 0}</div>
-                    <div className="analytics-label">Chargers</div>
-                  </div>
-                </div>
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('smartMeters', analytics.smartMeters || 0)} style={{ cursor: (analytics.smartMeters || 0) > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.smartMeters || 0}</div>
-                    <div className="analytics-label">Smart Meters</div>
-                  </div>
-                </div>
-                <div className="analytics-card" onClick={() => handleAnalyticsClick('sparkies', analytics.connectedSparkies || 0)} style={{ cursor: (analytics.connectedSparkies || 0) > 0 ? 'pointer' : 'default' }}>
-                  <div className="analytics-content">
-                    <div className="analytics-value">{analytics.connectedSparkies || 0}</div>
-                    <div className="analytics-label">Sparky's</div>
-                  </div>
-                </div>
-              </div>
-              </>
-            ) : (
-              <div className="placeholder">No analytics data available</div>
-            )}
-          </div>
-        )}
+        {/* Group Analytics Section - Temporarily Removed */}
 
         {/* Steerable Inverters & Energy Section - Full Width */}
-        {selectedGroup && analytics && (analytics.steerableInverters || 0) > 0 && (
+        {selectedGroup && (steerableInvertersCount > 0 || steerableInvertersProgress) && (
           <div className="section section-full-width">
             <div className="section-header">
               <h2>Steerable Inverters & Energy</h2>
             </div>
+            {steerableInvertersProgress && (
+              <div className="analytics-loading">
+                <div className="analytics-progress-bar">
+                  <div 
+                    className="analytics-progress-fill" 
+                    style={{ width: `${steerableInvertersProgress?.progress || 0}%` }}
+                  ></div>
+                </div>
+                <div className="analytics-progress-text">
+                  {steerableInvertersProgress?.message || 'Loading steerable inverters...'}
+                  {steerableInvertersProgress?.current !== undefined && steerableInvertersProgress?.total !== undefined && (
+                    <span className="analytics-progress-count">
+                      {' '}({steerableInvertersProgress.current.toLocaleString()}/{steerableInvertersProgress.total.toLocaleString()})
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {steerableInvertersCount > 0 && (
             <div className="steerable-energy-grid">
               <div className="steerable-inverters-card-wrapper">
                 <div 
                   className="analytics-card"
-                  onClick={() => handleAnalyticsClick('steerableInverters', analytics.steerableInverters || 0)}
+                  onClick={() => handleAnalyticsClick('steerableInverters', steerableInvertersCount)}
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="analytics-content">
-                    <div className="analytics-value">{analytics.steerableInverters || 0}</div>
+                    <div className="analytics-value">{steerableInvertersCount}</div>
                     <div className="analytics-label">Steerable Inverters</div>
                   </div>
                 </div>
@@ -1591,6 +1609,7 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+            )}
           </div>
         )}
 
