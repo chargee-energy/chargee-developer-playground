@@ -379,7 +379,7 @@ const SparkyDetails = () => {
                     'deliveryForecast'
                   )}
                   {renderDataSection(
-                    'Return Forecast',
+                    'Export Forecast',
                     forecastData.returnForecast,
                     'returnForecast',
                     'returnForecast'

@@ -125,7 +125,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
     <div className="inverter-graph-container">
       <div className="graph-header">
         <div className="graph-title">
-          <h3>Real-time Generation & Production</h3>
+          <h3>Real-time Import & PV Production</h3>
         </div>
         <div className="graph-controls">
           <button
@@ -180,7 +180,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
               <Line
                 type="monotone"
                 dataKey="generation"
-                name="Generation (Consumption)"
+                name="Import (Consumption)"
                 stroke="#FF9800"
                 strokeWidth={2}
                 dot={false}
@@ -191,7 +191,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
               <Line
                 type="monotone"
                 dataKey="return"
-                name="Return (Export)"
+                name="Export"
                 stroke="#4CAF50"
                 strokeWidth={2}
                 dot={false}
@@ -202,7 +202,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
               <Line
                 type="monotone"
                 dataKey="productionRate"
-                name="Production Rate"
+                name="PV Production Rate"
                 stroke="#2196F3"
                 strokeWidth={2}
                 dot={false}

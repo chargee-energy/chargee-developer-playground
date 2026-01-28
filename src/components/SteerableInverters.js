@@ -26,6 +26,29 @@ const SteerableInverters = () => {
     setLoading(true);
     setError('');
     
+    // Check cache first
+    const cacheKey = `steerable_inverters_${group.uuid}`;
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        // Check if cache is less than 1 hour old
+        const cacheAge = Date.now() - parsed.timestamp;
+        const oneHour = 60 * 60 * 1000;
+        if (cacheAge < oneHour) {
+          console.log('[SteerableInverters] Using cached data');
+          setInverters(parsed.data);
+          setLoading(false);
+          return; // Use cached data, don't fetch
+        } else {
+          console.log('[SteerableInverters] Cache expired, fetching fresh data');
+        }
+      } catch (err) {
+        console.error('Error parsing cached steerable inverters:', err);
+        // Continue to fetch fresh data
+      }
+    }
+    
     try {
       // Fetch all addresses for the group
       const MAX_ADDRESSES = 1000;
@@ -124,6 +147,14 @@ const SteerableInverters = () => {
       });
       
       setInverters(sortedInverters);
+      
+      // Cache the results
+      const timestamp = Date.now();
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data: sortedInverters,
+        timestamp: timestamp
+      }));
+      console.log('[SteerableInverters] Cached data for group:', group.uuid);
     } catch (err) {
       console.error('Error fetching steerable inverters:', err);
       setError(err.message || 'Failed to fetch steerable inverters');
@@ -144,6 +175,23 @@ const SteerableInverters = () => {
         group: group
       }
     });
+  };
+
+  const handleViewAddress = (e, inverter) => {
+    e.stopPropagation();
+    navigate('/devices-details', {
+      state: {
+        address: inverter.address,
+        group: group
+      }
+    });
+  };
+
+  const handleRefresh = () => {
+    // Clear cache and refetch
+    const cacheKey = `steerable_inverters_${group.uuid}`;
+    localStorage.removeItem(cacheKey);
+    fetchSteerableInverters();
   };
 
   const formatTimeAgo = (dateString) => {
@@ -195,6 +243,14 @@ const SteerableInverters = () => {
             ← Back to Dashboard
           </button>
           <h1>Steerable Inverters</h1>
+          <button 
+            onClick={handleRefresh}
+            disabled={loading}
+            className="refresh-button"
+            title="Refresh data"
+          >
+            🔄 Refresh
+          </button>
         </div>
       </header>
 
@@ -229,7 +285,7 @@ const SteerableInverters = () => {
                     <>
                       <div className="detail-row main-stats">
                         <div className="detail-item production-rate">
-                          <span className="label">Production Rate</span>
+                          <span className="label">PV Production Rate</span>
                           <span className="value large">{inverter.lastProductionState.productionRate || 0} W</span>
                         </div>
                         <div className="detail-item producing-status">
@@ -258,10 +314,20 @@ const SteerableInverters = () => {
                   {!inverter.lastProductionState && (
                     <div className="detail-row">
                       <div className="detail-item">
-                        <span className="label">No production data available</span>
+                        <span className="label">No PV production data available</span>
                       </div>
                     </div>
                   )}
+                  
+                  <div className="inverter-actions">
+                    <button 
+                      className="view-address-button"
+                      onClick={(e) => handleViewAddress(e, inverter)}
+                      title="View Address"
+                    >
+                      🏠 View Address
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

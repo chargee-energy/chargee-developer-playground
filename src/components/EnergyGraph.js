@@ -108,7 +108,7 @@ const EnergyGraph = ({ sparkySerialNumber }) => {
             <span className="value">{formatPowerValue(data.delivered)}</span>
           </p>
           <p className="tooltip-returned">
-            <span className="label">Returned:</span>
+            <span className="label">Exported:</span>
             <span className="value">{formatPowerValue(data.returned)}</span>
           </p>
         </div>

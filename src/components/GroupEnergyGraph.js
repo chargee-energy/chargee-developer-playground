@@ -93,10 +93,10 @@ const GroupEnergyGraph = ({ groupEnergy }) => {
           <Line
             type="monotone"
             dataKey="production"
-            stroke="#00BFA5"
+            stroke="#1976D2"
             strokeWidth={2}
             dot={false}
-            name="Production"
+            name="PV Production"
             animationDuration={0}
           />
           <Line
@@ -105,7 +105,7 @@ const GroupEnergyGraph = ({ groupEnergy }) => {
             stroke="#4CAF50"
             strokeWidth={2}
             dot={false}
-            name="Return"
+            name="Export"
             animationDuration={0}
           />
           <Line

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { devicesAPI } from '../services/api';
 import ForecastGraph from './ForecastGraph';
+import InverterGraph from './InverterGraph';
+import ScheduleModal from './ScheduleModal';
 import './DevicesDetails.css';
 
 const DevicesDetails = () => {
@@ -35,12 +37,63 @@ const DevicesDetails = () => {
   const [loadingForecasts, setLoadingForecasts] = useState({});
   const [loadingProduction, setLoadingProduction] = useState({});
   const [showActualProduction, setShowActualProduction] = useState({});
+  
+  // Schedule management state per inverter
+  const [schedules, setSchedules] = useState({});
+  const [loadingSchedules, setLoadingSchedules] = useState({});
+  const [scheduleModalOpen, setScheduleModalOpen] = useState({});
+  const [editingSchedule, setEditingSchedule] = useState({});
+  
+  // Track if we're currently fetching to prevent duplicate calls
+  const isFetchingRef = useRef(false);
+  const lastFetchedRef = useRef({ groupUuid: null, addressUuid: null });
 
   useEffect(() => {
-    if (address && group) {
-      fetchDevices(group.uuid, address.uuid);
+    if (!address || !group) {
+      // Reset refs when address/group is cleared
+      lastFetchedRef.current = { groupUuid: null, addressUuid: null };
+      return;
     }
-  }, [address, group]);
+    
+    const groupUuid = group.uuid;
+    const addressUuid = address.uuid;
+    
+    // Check if we're already fetching for this exact address/group combination
+    if (isFetchingRef.current && 
+        lastFetchedRef.current.groupUuid === groupUuid && 
+        lastFetchedRef.current.addressUuid === addressUuid) {
+      console.log('[DevicesDetails] Fetch already in progress for this address/group, skipping...');
+      return;
+    }
+    
+    // Check if we've already successfully fetched for this address/group
+    if (lastFetchedRef.current.groupUuid === groupUuid && 
+        lastFetchedRef.current.addressUuid === addressUuid &&
+        !isFetchingRef.current) {
+      console.log('[DevicesDetails] Already fetched for this address/group, skipping...');
+      return;
+    }
+    
+    console.log('[DevicesDetails] Fetching devices for:', { groupUuid, addressUuid });
+    isFetchingRef.current = true;
+    lastFetchedRef.current = { groupUuid, addressUuid };
+    
+    fetchDevices(groupUuid, addressUuid).finally(() => {
+      isFetchingRef.current = false;
+    });
+  }, [address?.uuid, group?.uuid]);
+
+  // Fetch schedules for steerable inverters when devices are loaded
+  useEffect(() => {
+    if (devices.solarInverters.length > 0 && address) {
+      devices.solarInverters.forEach(inverter => {
+        if (inverter.info?.isSteerable === true) {
+          fetchSchedules(inverter.identifier);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [devices.solarInverters, address]);
 
   const fetchDevices = async (groupUuid, addressUuid) => {
     setLoading(prev => ({ ...prev, devices: true }));
@@ -179,6 +232,89 @@ const DevicesDetails = () => {
       setProductionData(prev => ({ ...prev, [inverterUuid]: null }));
     } finally {
       setLoadingProduction(prev => ({ ...prev, [inverterUuid]: false }));
+    }
+  };
+
+  // Schedule management functions
+  const fetchSchedules = async (inverterUuid) => {
+    if (!address || !inverterUuid) return;
+    
+    setLoadingSchedules(prev => ({ ...prev, [inverterUuid]: true }));
+    try {
+      const data = await devicesAPI.getSolarInverterSchedules(address.uuid, inverterUuid);
+      const scheduleList = Array.isArray(data) ? data : (data?.results || []);
+      setSchedules(prev => ({ ...prev, [inverterUuid]: scheduleList }));
+    } catch (err) {
+      console.error('Error fetching schedules:', err);
+      setSchedules(prev => ({ ...prev, [inverterUuid]: [] }));
+    } finally {
+      setLoadingSchedules(prev => ({ ...prev, [inverterUuid]: false }));
+    }
+  };
+
+  const handleCreateSchedule = (inverterUuid) => {
+    setEditingSchedule(prev => ({ ...prev, [inverterUuid]: null }));
+    setScheduleModalOpen(prev => ({ ...prev, [inverterUuid]: true }));
+  };
+
+  const handleEditSchedule = (inverterUuid, schedule) => {
+    setEditingSchedule(prev => ({ ...prev, [inverterUuid]: schedule }));
+    setScheduleModalOpen(prev => ({ ...prev, [inverterUuid]: true }));
+  };
+
+  const handleSaveSchedule = async (inverterUuid, scheduleData) => {
+    try {
+      const editing = editingSchedule[inverterUuid];
+      if (editing) {
+        // Update existing schedule
+        await devicesAPI.updateSolarInverterSchedule(
+          address.uuid,
+          inverterUuid,
+          editing.identifier || editing.uuid,
+          scheduleData
+        );
+      } else {
+        // Create new schedule
+        await devicesAPI.createSolarInverterSchedule(
+          address.uuid,
+          inverterUuid,
+          scheduleData
+        );
+      }
+      
+      setScheduleModalOpen(prev => ({ ...prev, [inverterUuid]: false }));
+      setEditingSchedule(prev => ({ ...prev, [inverterUuid]: null }));
+      fetchSchedules(inverterUuid); // Refresh schedules list
+    } catch (err) {
+      console.error('Error saving schedule:', err);
+      setError(err.message || 'Failed to save schedule');
+    }
+  };
+
+  const handleDeleteSchedule = async (inverterUuid, schedule) => {
+    if (!window.confirm('Are you sure you want to delete this schedule?')) {
+      return;
+    }
+    
+    try {
+      await devicesAPI.deleteSolarInverterSchedule(
+        address.uuid,
+        inverterUuid,
+        schedule.identifier || schedule.uuid
+      );
+      fetchSchedules(inverterUuid); // Refresh schedules list
+    } catch (err) {
+      console.error('Error deleting schedule:', err);
+      setError(err.message || 'Failed to delete schedule');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch {
+      return dateString;
     }
   };
 
@@ -350,8 +486,8 @@ const DevicesDetails = () => {
                       <div key={inverter.identifier} className="device-card solar-card">
                         <div className="device-header">
                           <div>
-                            <span className="device-brand">{inverter.brand}</span>
-                            <span className="device-model">{inverter.model}</span>
+                            <span className="device-brand">{inverter.info?.brand || inverter.brand}</span>
+                            <span className="device-model">{inverter.info?.model || inverter.model}</span>
                           </div>
                           <button 
                             className="json-button"
@@ -367,15 +503,15 @@ const DevicesDetails = () => {
                         <div className="device-details">
                           <div className="detail-item">
                             <span className="label">Site:</span>
-                            <span className="value">{inverter.siteName}</span>
+                            <span className="value">{inverter.info?.siteName || inverter.siteName || 'N/A'}</span>
                           </div>
                           <div className="detail-item">
                             <span className="label">Status:</span>
-                            <span className="value">{inverter.isReachable ? 'Online' : 'Offline'}</span>
+                            <span className="value">{inverter.info?.isReachable !== undefined ? (inverter.info.isReachable ? 'Online' : 'Offline') : (inverter.isReachable ? 'Online' : 'Offline')}</span>
                           </div>
                           {inverter.lastProductionState && (
                             <div className="detail-item">
-                              <span className="label">Production:</span>
+                              <span className="label">PV Production:</span>
                               <span className="value">{inverter.lastProductionState.productionRate}W</span>
                             </div>
                           )}
@@ -387,7 +523,7 @@ const DevicesDetails = () => {
                 
                 {/* Production Forecast Section - Separate */}
                 <div className="device-category forecast-category">
-                  <h3>☀️ Production Forecasts</h3>
+                  <h3>☀️ PV Production Forecasts</h3>
                   <div className="forecast-list">
                     {devices.solarInverters.map((inverter) => {
                       const inverterUuid = inverter.identifier;
@@ -402,10 +538,10 @@ const DevicesDetails = () => {
                         <div key={inverter.identifier} className="forecast-item">
                           <div className="forecast-item-header">
                             <div className="forecast-inverter-info">
-                              <span className="forecast-inverter-brand">{inverter.brand}</span>
-                              <span className="forecast-inverter-model">{inverter.model}</span>
-                              {inverter.siteName && (
-                                <span className="forecast-inverter-site"> - {inverter.siteName}</span>
+                              <span className="forecast-inverter-brand">{inverter.info?.brand || inverter.brand}</span>
+                              <span className="forecast-inverter-model">{inverter.info?.model || inverter.model}</span>
+                              {(inverter.info?.siteName || inverter.siteName) && (
+                                <span className="forecast-inverter-site"> - {inverter.info?.siteName || inverter.siteName}</span>
                               )}
                             </div>
                             <div className="forecast-controls">
@@ -427,7 +563,7 @@ const DevicesDetails = () => {
                                   className="forecast-toggle-checkbox"
                                   disabled={!production || isLoadingProduction}
                                 />
-                                <span>Show actual production</span>
+                                <span>Show actual PV production</span>
                               </label>
                               <button
                                 onClick={() => {
@@ -443,7 +579,7 @@ const DevicesDetails = () => {
                           </div>
                           
                           {(isLoadingForecast || isLoadingProduction) && (
-                            <div className="forecast-loading">Loading production data...</div>
+                            <div className="forecast-loading">Loading PV production data...</div>
                           )}
                           
                           {forecast && !isLoadingForecast && (
@@ -471,6 +607,136 @@ const DevicesDetails = () => {
                   </div>
                 </div>
               </>
+            )}
+
+            {/* Steerable Inverters - Separate Device Category */}
+            {deviceErrors.solarInverters && (
+              <div className="device-error-message">
+                ⚠️ {deviceErrors.solarInverters}
+              </div>
+            )}
+            {devices.solarInverters.filter(inv => inv.info?.isSteerable === true).length > 0 && (
+              <div className="device-category steerable-inverters-category">
+                <h3>⚡ Steerable Inverters ({devices.solarInverters.filter(inv => inv.info?.isSteerable === true).length})</h3>
+                <div className="steerable-inverters-list">
+                      {devices.solarInverters
+                        .filter(inverter => inverter.info?.isSteerable === true)
+                        .map((inverter) => {
+                          const inverterUuid = inverter.identifier;
+                          const inverterSchedules = schedules[inverterUuid] || [];
+                          const isLoadingSchedule = loadingSchedules[inverterUuid];
+                          
+                          return (
+                            <div key={inverter.identifier} className="steerable-inverter-item">
+                              <div className="steerable-inverter-header">
+                                <div className="steerable-inverter-info">
+                                  <h4>{inverter.info?.brand || inverter.brand} {inverter.info?.model || inverter.model}</h4>
+                                  {(inverter.info?.siteName || inverter.siteName) && (
+                                    <span className="steerable-inverter-site">{inverter.info?.siteName || inverter.siteName}</span>
+                                  )}
+                                  {inverter.lastProductionState && (
+                                    <span className="steerable-inverter-production">
+                                      PV Production: {inverter.lastProductionState.productionRate}W
+                                    </span>
+                                  )}
+                                </div>
+                                <button
+                                  className="button-primary"
+                                  onClick={() => handleCreateSchedule(inverterUuid)}
+                                >
+                                  + Add Schedule
+                                </button>
+                              </div>
+                              
+                              {/* Real-time Graph */}
+                              <div className="steerable-inverter-graph">
+                                <h5>Real-time Import & PV Production</h5>
+                                <InverterGraph
+                                  addressUuid={address.uuid}
+                                  solarInverterUuid={inverterUuid}
+                                  sparkySerialNumber={address.sparky?.serialNumber}
+                                />
+                              </div>
+                              
+                              {/* Schedules List */}
+                              <div className="steerable-inverter-schedules">
+                                <h5>Schedules</h5>
+                                {isLoadingSchedule ? (
+                                  <div className="loading">Loading schedules...</div>
+                                ) : inverterSchedules.length === 0 ? (
+                                  <div className="empty-state">
+                                    <p>No schedules found.</p>
+                                  </div>
+                                ) : (
+                                  <div className="schedules-table-wrapper">
+                                    <table className="schedules-table">
+                                      <thead>
+                                        <tr>
+                                          <th>Time</th>
+                                          <th>Type</th>
+                                          <th>Value</th>
+                                          <th>Actions</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {inverterSchedules.map((schedule) => (
+                                          <tr key={schedule.identifier || schedule.uuid}>
+                                            <td>{formatDate(schedule.time)}</td>
+                                            <td>
+                                              {schedule.zeroExport ? (
+                                                <span className="schedule-type zero-export">Zero Export</span>
+                                              ) : (
+                                                <span className="schedule-type power-limit">Power Limit</span>
+                                              )}
+                                            </td>
+                                            <td>
+                                              {schedule.zeroExport ? (
+                                                <span className="schedule-value">Auto Balance</span>
+                                              ) : (
+                                                <span className="schedule-value">{schedule.powerlimit || 0}%</span>
+                                              )}
+                                            </td>
+                                            <td>
+                                              <div className="action-buttons">
+                                                <button
+                                                  className="button-edit"
+                                                  onClick={() => handleEditSchedule(inverterUuid, schedule)}
+                                                  title="Edit schedule"
+                                                >
+                                                  ✏️ Edit
+                                                </button>
+                                                <button
+                                                  className="button-delete"
+                                                  onClick={() => handleDeleteSchedule(inverterUuid, schedule)}
+                                                  title="Delete schedule"
+                                                >
+                                                  🗑️ Delete
+                                                </button>
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Schedule Modal */}
+                              <ScheduleModal
+                                isOpen={scheduleModalOpen[inverterUuid] || false}
+                                onClose={() => {
+                                  setScheduleModalOpen(prev => ({ ...prev, [inverterUuid]: false }));
+                                  setEditingSchedule(prev => ({ ...prev, [inverterUuid]: null }));
+                                }}
+                                onSave={(scheduleData) => handleSaveSchedule(inverterUuid, scheduleData)}
+                                schedule={editingSchedule[inverterUuid]}
+                              />
+                            </div>
+                          );
+                        })}
+                </div>
+              </div>
             )}
 
             {/* Smart Meters */}

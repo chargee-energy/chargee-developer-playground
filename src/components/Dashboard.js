@@ -107,7 +107,7 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup, selectedAddress]);
 
-  // Fetch group energy data every second
+  // Fetch group energy data every 5 seconds
   useEffect(() => {
     if (!selectedGroup) {
       setGroupEnergy(null);
@@ -127,8 +127,8 @@ const Dashboard = () => {
     // Fetch immediately
     fetchGroupEnergy();
 
-    // Then fetch every second
-    const interval = setInterval(fetchGroupEnergy, 1000);
+    // Then fetch every 5 seconds
+    const interval = setInterval(fetchGroupEnergy, 5000);
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1307,12 +1307,12 @@ const Dashboard = () => {
                                         <span className="label">Status:</span>
                                         <span className="value">{inverter.isReachable ? 'Online' : 'Offline'}</span>
                                       </div>
-                                      {inverter.lastProductionState && (
-                                        <div className="detail-item">
-                                          <span className="label">Production:</span>
-                                          <span className="value">{inverter.lastProductionState.productionRate}W</span>
-                                        </div>
-                                      )}
+                          {inverter.lastProductionState && (
+                            <div className="detail-item">
+                              <span className="label">PV Production:</span>
+                              <span className="value">{inverter.lastProductionState.productionRate}W</span>
+                            </div>
+                          )}
                                     </div>
                                   </div>
                                 ))}
@@ -1530,11 +1530,11 @@ const Dashboard = () => {
 
         {/* Group Analytics Section - Temporarily Removed */}
 
-        {/* Steerable Inverters & Energy Section - Full Width */}
+        {/* Steerable Inverters overview Section - Full Width */}
         {selectedGroup && (steerableInvertersCount > 0 || steerableInvertersProgress) && (
           <div className="section section-full-width">
             <div className="section-header">
-              <h2>Steerable Inverters & Energy</h2>
+              <h2>Steerable Inverters overview</h2>
             </div>
             {steerableInvertersProgress && (
               <div className="analytics-loading">
@@ -1582,18 +1582,18 @@ const Dashboard = () => {
               <div className="group-energy-card">
                 <div className="group-energy-content">
                   <div className="group-energy-header">
-                    <h3>Total Generation</h3>
+                    <h3>Insight steerable inverters portfolio</h3>
                     <span className="energy-update-indicator">Live</span>
                   </div>
                   {groupEnergy ? (
                     <>
                       <div className="energy-values">
                         <div className="energy-item">
-                          <span className="energy-label">Production</span>
+                          <span className="energy-label">PV Production</span>
                           <span className="energy-value production">{groupEnergy.production?.toFixed(1) || '0.0'} W</span>
                         </div>
                         <div className="energy-item">
-                          <span className="energy-label">Return</span>
+                          <span className="energy-label">Export</span>
                           <span className="energy-value return">{groupEnergy.return?.toFixed(1) || '0.0'} W</span>
                         </div>
                         <div className="energy-item">
@@ -1935,7 +1935,7 @@ const Dashboard = () => {
                 )}
                           {device.lastProductionState?.productionRate !== undefined && (
                             <div className="device-modal-item-detail">
-                              <span className="label">Production:</span>
+                              <span className="label">PV Production:</span>
                               <span className="value">{device.lastProductionState.productionRate}W</span>
                             </div>
                           )}

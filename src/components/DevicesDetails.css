@@ -235,6 +235,13 @@
   color: #303F9F;
 }
 
+/* Steerable Inverters Category */
+.device-category.steerable-inverters-category h3 {
+  background: linear-gradient(135deg, rgba(103, 58, 183, 0.15) 0%, rgba(103, 58, 183, 0.08) 100%);
+  border-left-color: #673AB7;
+  color: #512DA8;
+}
+
 .device-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -687,3 +694,230 @@
   margin-top: var(--chargee-space-md);
 }
 
+/* Steerable Inverters List */
+.steerable-inverters-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chargee-space-xl);
+}
+
+.steerable-inverter-item {
+  background: var(--chargee-white);
+  border: 2px solid var(--chargee-gray-200);
+  border-radius: var(--chargee-radius-lg);
+  padding: var(--chargee-space-lg);
+  box-shadow: var(--chargee-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.steerable-inverter-item:hover {
+  box-shadow: var(--chargee-shadow-md);
+  border-color: var(--chargee-gray-300);
+}
+
+.steerable-inverter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--chargee-space-lg);
+  padding-bottom: var(--chargee-space-md);
+  border-bottom: 1px solid var(--chargee-gray-200);
+  flex-wrap: wrap;
+  gap: var(--chargee-space-md);
+}
+
+.steerable-inverter-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chargee-space-xs);
+  flex: 1;
+}
+
+.steerable-inverter-info h4 {
+  margin: 0;
+  color: var(--chargee-gray-900);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.steerable-inverter-site {
+  font-size: 14px;
+  color: var(--chargee-gray-600);
+}
+
+.steerable-inverter-production {
+  font-size: 14px;
+  color: var(--chargee-gray-700);
+  font-weight: 500;
+}
+
+.steerable-inverter-graph {
+  margin-bottom: var(--chargee-space-lg);
+  padding-bottom: var(--chargee-space-lg);
+  border-bottom: 1px solid var(--chargee-gray-200);
+}
+
+.steerable-inverter-graph h5 {
+  margin: 0 0 var(--chargee-space-md) 0;
+  color: var(--chargee-gray-900);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.steerable-inverter-schedules h5 {
+  margin: 0 0 var(--chargee-space-md) 0;
+  color: var(--chargee-gray-900);
+  font-size: 16px;
+  font-weight: 600;
+}/* Button Styles for Steerable Inverters */
+.button-primary {
+  padding: var(--chargee-space-sm) var(--chargee-space-lg);
+  background: var(--chargee-green);
+  color: var(--chargee-white);
+  border: none;
+  border-radius: var(--chargee-radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--chargee-shadow-sm);
+  white-space: nowrap;
+}
+
+.button-primary:hover {
+  background: var(--chargee-green-dark);
+  box-shadow: var(--chargee-shadow-md);
+  transform: translateY(-1px);
+}
+
+.button-primary:active {
+  transform: translateY(0);
+}
+
+/* Schedules Table Styles */
+.schedules-table-wrapper {
+  overflow-x: auto;
+  margin-top: var(--chargee-space-md);
+}
+
+.schedules-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--chargee-white);
+  border-radius: var(--chargee-radius-md);
+  overflow: hidden;
+}
+
+.schedules-table thead {
+  background: var(--chargee-gray-50);
+}
+
+.schedules-table th {
+  padding: var(--chargee-space-md);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--chargee-gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--chargee-gray-200);
+}
+
+.schedules-table td {
+  padding: var(--chargee-space-md);
+  font-size: 14px;
+  color: var(--chargee-gray-900);
+  border-bottom: 1px solid var(--chargee-gray-200);
+}
+
+.schedules-table tbody tr:hover {
+  background: var(--chargee-gray-50);
+}
+
+.schedule-type {
+  display: inline-block;
+  padding: var(--chargee-space-xs) var(--chargee-space-sm);
+  border-radius: var(--chargee-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.schedule-type.zero-export {
+  background: rgba(76, 175, 80, 0.1);
+  color: #388E3C;
+}
+
+.schedule-type.power-limit {
+  background: rgba(33, 150, 243, 0.1);
+  color: #1976D2;
+}
+
+.schedule-value {
+  font-weight: 600;
+  color: var(--chargee-gray-900);
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--chargee-space-xs);
+}
+
+.button-edit,
+.button-delete {
+  padding: var(--chargee-space-xs) var(--chargee-space-sm);
+  border: 1px solid var(--chargee-gray-300);
+  border-radius: var(--chargee-radius-md);
+  background: var(--chargee-white);
+  color: var(--chargee-gray-700);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button-edit:hover {
+  background: rgba(33, 150, 243, 0.1);
+  border-color: #2196F3;
+  color: #1976D2;
+}
+
+.button-delete:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: #F44336;
+  color: #D32F2F;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--chargee-space-lg);
+  color: var(--chargee-gray-500);
+  font-style: italic;
+}
+
+.loading {
+  text-align: center;
+  padding: var(--chargee-space-lg);
+  color: var(--chargee-gray-600);
+}
+
+@media (max-width: 768px) {
+  .steerable-inverter-header {
+    flex-direction: column;
+  }
+  
+  .steerable-inverter-info {
+    width: 100%;
+  }
+  
+  .button-primary {
+    width: 100%;
+  }
+  
+  .schedules-table {
+    font-size: 12px;
+  }
+  
+  .schedules-table th,
+  .schedules-table td {
+    padding: var(--chargee-space-sm);
+  }
+}

@@ -192,10 +192,10 @@ const InverterDetail = () => {
         {/* Current Production State */}
         {inverter.lastProductionState && (
           <div className="production-state-section">
-            <h2>Current Production State</h2>
+            <h2>Current PV Production State</h2>
             <div className="info-grid">
               <div className="info-item">
-                <label>Production Rate:</label>
+                <label>PV Production Rate:</label>
                 <span>{inverter.lastProductionState.productionRate || 0} W</span>
               </div>
               <div className="info-item">
@@ -205,7 +205,7 @@ const InverterDetail = () => {
                 </span>
               </div>
               <div className="info-item">
-                <label>Total Lifetime Production:</label>
+                <label>Total Lifetime PV Production:</label>
                 <span>{(inverter.lastProductionState.totalLifetimeProduction || 0).toLocaleString()} Wh</span>
               </div>
               <div className="info-item">
@@ -218,7 +218,7 @@ const InverterDetail = () => {
 
         {/* Real-time Graph */}
         <div className="graph-section">
-          <h2>Real-time Generation & Production</h2>
+          <h2>Real-time Import & PV Production</h2>
           <InverterGraph
             addressUuid={address.uuid}
             solarInverterUuid={inverter.identifier}

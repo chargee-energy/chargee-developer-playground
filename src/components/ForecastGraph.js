@@ -493,7 +493,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
   return (
     <div className="forecast-graph-container">
       <div className="forecast-graph-header">
-        <h3>{hasProduction ? 'Production Forecast' : 'Smart Meter Forecast'}</h3>
+        <h3>{hasProduction ? 'PV Production Forecast' : 'Smart Meter Forecast'}</h3>
         {date && <span className="forecast-date">Date: {date}</span>}
       </div>
       
@@ -529,36 +529,36 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
               />
             )}
             
-            {/* Return Forecast Bar - represents full hour */}
+            {/* Export Forecast Bar - represents full hour */}
             {hasReturn && (
               <Bar
                 dataKey="return"
                 fill="#4CAF50"
                 fillOpacity={0.7}
-                name="Return Forecast (Wh/hour)"
+                name="Export Forecast (Wh/hour)"
                 radius={[0, 0, 0, 0]}
               />
             )}
             
-            {/* Production Forecast Bar - represents full hour */}
+            {/* PV Production Forecast Bar - represents full hour */}
             {hasProduction && (
               <Bar
                 dataKey="production"
                 fill="#FFC107"
                 fillOpacity={0.7}
-                name="Production Forecast (Wh/hour)"
+                name="PV Production Forecast (Wh/hour)"
                 radius={[0, 0, 0, 0]}
               />
             )}
             
-            {/* Actual Production Line - Dotted */}
+            {/* Actual PV Production Line - Dotted */}
             {hasActualProduction && (
               <Line
                 type="monotone"
                 dataKey="actualProduction"
                 stroke="#FF6F00"
                 strokeWidth={2}
-                name="Actual Production (Wh/hour)"
+                name="Actual PV Production (Wh/hour)"
                 strokeDasharray="5 5"
                 dot={{ fill: '#FF6F00', r: 3 }}
                 activeDot={{ r: 5 }}
@@ -578,7 +578,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
               />
             )}
             
-            {/* Actual Return from 15min data - Line */}
+            {/* Actual Export from 15min data - Line */}
             {hasActual && (
               <Line
                 type="monotone"
@@ -586,7 +586,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
                 stroke="#2E7D32"
                 strokeWidth={2}
                 dot={{ fill: '#2E7D32', r: 3 }}
-                name="Actual Return (Wh/hour)"
+                name="Actual Export (Wh/hour)"
                 strokeDasharray="5 5"
               />
             )}
@@ -602,7 +602,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
         </div>
         <div className="legend-item">
           <div className="legend-color" style={{ backgroundColor: '#4CAF50' }}></div>
-          <span className="legend-label">Return Forecast</span>
+          <span className="legend-label">Export Forecast</span>
         </div>
         {hasActual && (
           <>
@@ -614,7 +614,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
             <div className="legend-item">
               <div className="legend-color" style={{ backgroundColor: '#2E7D32', borderStyle: 'none' }}></div>
               <div className="legend-line" style={{ borderColor: '#2E7D32' }}></div>
-              <span className="legend-label">Actual Return</span>
+              <span className="legend-label">Actual Export</span>
             </div>
           </>
         )}
@@ -630,7 +630,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
           <span className="info-value">{deliveryData.length}</span>
         </div>
         <div className="info-item">
-          <span className="info-label">Return Points</span>
+          <span className="info-label">Export Points</span>
           <span className="info-value">{returnData.length}</span>
         </div>
         {hasActual && (
