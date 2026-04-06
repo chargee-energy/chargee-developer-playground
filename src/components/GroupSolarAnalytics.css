@@ -1,0 +1,171 @@
+.group-solar-analytics-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--chargee-space-lg);
+  margin-bottom: var(--chargee-space-md);
+  padding: var(--chargee-space-md);
+  background: var(--chargee-white);
+  border: 1px solid var(--chargee-gray-200);
+  border-radius: var(--chargee-radius-md);
+  box-shadow: var(--chargee-shadow-sm);
+}
+
+.group-solar-analytics-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.group-solar-analytics-filter-field-grow {
+  flex: 1;
+  min-width: min(100%, 320px);
+}
+
+.group-solar-analytics-filter-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--chargee-gray-700);
+}
+
+.group-solar-analytics-select,
+.group-solar-analytics-number {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--chargee-gray-300);
+  border-radius: var(--chargee-radius-md);
+  font-size: 13px;
+  color: var(--chargee-gray-900);
+  background: var(--chargee-white);
+}
+
+.group-solar-analytics-select {
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.group-solar-analytics-number {
+  width: 96px;
+}
+
+.group-solar-analytics-number:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--chargee-gray-100);
+}
+
+.group-solar-analytics-report-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--chargee-space-sm);
+  align-items: center;
+}
+
+.group-solar-analytics-report-row .group-solar-analytics-select {
+  flex: 1;
+  min-width: 180px;
+}
+
+.group-solar-analytics-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--chargee-space-md);
+  margin-bottom: var(--chargee-space-lg);
+}
+
+.group-solar-analytics-toolbar .count {
+  font-weight: 600;
+  margin: 0;
+}
+
+.group-solar-analytics-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--chargee-space-sm);
+  align-items: center;
+}
+
+.group-solar-analytics-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--chargee-white);
+  border: 1px solid var(--chargee-gray-200);
+  border-radius: var(--chargee-radius-md);
+  box-shadow: var(--chargee-shadow-sm);
+}
+
+.group-solar-analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.group-solar-analytics-table th,
+.group-solar-analytics-table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--chargee-gray-200);
+}
+
+.group-solar-analytics-table th {
+  background: var(--chargee-gray-100);
+  color: var(--chargee-gray-800);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.group-solar-analytics-table tbody tr:hover {
+  background: var(--chargee-gray-50);
+}
+
+.group-solar-analytics-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.group-solar-analytics-table .cell-actions {
+  white-space: nowrap;
+}
+
+.group-solar-analytics-table .cell-actions .view-address-button {
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+
+.group-solar-analytics-table .status-producing {
+  color: var(--chargee-green-dark, #2e7d32);
+  font-weight: 500;
+}
+
+.group-solar-analytics-table .status-not-producing {
+  color: var(--chargee-gray-600);
+}
+
+.group-solar-analytics-export-button {
+  padding: var(--chargee-space-sm) var(--chargee-space-md);
+  background: var(--chargee-white);
+  border: 1px solid var(--chargee-gray-300);
+  border-radius: var(--chargee-radius-md);
+  color: var(--chargee-gray-800);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-solar-analytics-export-button:hover:not(:disabled) {
+  background: var(--chargee-gray-50);
+  border-color: var(--chargee-gray-400);
+}
+
+.group-solar-analytics-export-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

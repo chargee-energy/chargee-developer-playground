@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard';
 import SparkyDetails from './components/SparkyDetails';
 import DevicesDetails from './components/DevicesDetails';
 import SteerableInverters from './components/SteerableInverters';
+import GroupSolarAnalytics from './components/GroupSolarAnalytics';
 import InverterDetail from './components/InverterDetail';
 import './App.css';
 
@@ -48,6 +49,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <SteerableInverters />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/group-solar-analytics" 
+                element={
+                  <ProtectedRoute>
+                    <GroupSolarAnalytics />
                   </ProtectedRoute>
                 } 
               />

@@ -1507,6 +1507,17 @@ const Dashboard = () => {
         <div className="section section-full-width">
           <div className="section-header">
             <h2>Groups</h2>
+            {selectedGroup && (
+              <button
+                type="button"
+                className="devices-button"
+                onClick={() =>
+                  navigate('/group-solar-analytics', { state: { group: selectedGroup } })
+                }
+              >
+                Analytics
+              </button>
+            )}
           </div>
             {loading.groups ? (
               <div className="loading">Loading groups...</div>
