@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import ChargeeLogo from './ChargeeLogo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -58,6 +59,7 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
+          <ChargeeLogo size="medium" variant="full" className="login-logo" />
           <h1>Chargee Developer Playground</h1>
           <p>Sign in to your account</p>
         </div>

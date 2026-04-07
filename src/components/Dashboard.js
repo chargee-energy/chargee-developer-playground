@@ -3,8 +3,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { groupsAPI, addressesAPI, devicesAPI, sparkyAPI } from '../services/api';
 import ChargeeLogo from './ChargeeLogo';
-import GroupEnergyGraph from './GroupEnergyGraph';
-import ScheduleModal from './ScheduleModal';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -41,12 +39,6 @@ const Dashboard = () => {
   const [deviceModalData, setDeviceModalData] = useState(null);
   const [deviceModalLoading, setDeviceModalLoading] = useState(false);
   const [deviceModalSearch, setDeviceModalSearch] = useState('');
-  const [groupEnergy, setGroupEnergy] = useState(null);
-  const [bulkScheduleModalOpen, setBulkScheduleModalOpen] = useState(false);
-  const [steerableInverters, setSteerableInverters] = useState([]);
-  const [steerableInvertersCount, setSteerableInvertersCount] = useState(0);
-  const [steerableInvertersProgress, setSteerableInvertersProgress] = useState(null);
-  const [bulkScheduleLoading, setBulkScheduleLoading] = useState(false);
 
   // Fetch groups on mount
   useEffect(() => {
@@ -106,63 +98,6 @@ const Dashboard = () => {
     setSearchParams(params, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup, selectedAddress]);
-
-  // Fetch group energy data every 5 seconds
-  useEffect(() => {
-    if (!selectedGroup) {
-      setGroupEnergy(null);
-      return;
-    }
-
-    const fetchGroupEnergy = async () => {
-      try {
-        const data = await groupsAPI.getGroupEnergyLatest(selectedGroup.uuid);
-        setGroupEnergy(data);
-      } catch (err) {
-        console.error('Error fetching group energy:', err);
-        // Don't set error state, just log it to avoid disrupting the UI
-      }
-    };
-
-    // Fetch immediately
-    fetchGroupEnergy();
-
-    // Then fetch every 5 seconds
-    const interval = setInterval(fetchGroupEnergy, 5000);
-
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroup]);
-
-  // Fetch steerable inverters count when group is selected
-  useEffect(() => {
-    if (!selectedGroup) {
-      setSteerableInvertersCount(0);
-      setSteerableInvertersProgress(null);
-      return;
-    }
-
-    const fetchSteerableCount = async () => {
-      try {
-        setSteerableInvertersProgress({ stage: 'initializing', progress: 0, message: 'Initializing...' });
-        const inverters = await fetchAllSteerableInverters((progress) => {
-          setSteerableInvertersProgress(progress);
-        });
-        setSteerableInvertersCount(inverters.length);
-        setSteerableInverters(inverters);
-        setSteerableInvertersProgress({ stage: 'complete', progress: 100, message: 'Complete!' });
-        // Clear progress after a short delay
-        setTimeout(() => setSteerableInvertersProgress(null), 500);
-      } catch (err) {
-        console.error('Error fetching steerable inverters count:', err);
-        setSteerableInvertersCount(0);
-        setSteerableInvertersProgress(null);
-      }
-    };
-
-    fetchSteerableCount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroup]);
 
   const fetchGroups = async () => {
     setLoading(prev => ({ ...prev, groups: true }));
@@ -340,17 +275,7 @@ const Dashboard = () => {
 
   const handleAnalyticsClick = async (deviceType, count) => {
     if (!selectedGroup || count === 0) return;
-    
-    // Navigate to steerable inverters route instead of opening modal
-    if (deviceType === 'steerableInverters') {
-      navigate('/steerable-inverters', {
-        state: {
-          group: selectedGroup
-        }
-      });
-      return;
-    }
-    
+
     setDeviceModalOpen(true);
     setDeviceModalLoading(true);
     setDeviceModalData({ type: deviceType, devices: [], count });
@@ -483,191 +408,6 @@ const Dashboard = () => {
       return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     } else {
       return 'just now';
-    }
-  };
-
-  const fetchAllSteerableInverters = async (onProgress) => {
-    if (!selectedGroup) return [];
-
-    const startTime = Date.now();
-
-    try {
-      // Fetch all addresses for the group (API doesn't support pagination)
-      if (onProgress) {
-        onProgress({ stage: 'fetching_addresses', progress: 10, message: 'Fetching addresses...' });
-      }
-      const addressData = await addressesAPI.getAddresses(selectedGroup.uuid);
-      const allAddresses = addressData?.results || [];
-      console.log(`[fetchAllSteerableInverters] Fetched ${allAddresses.length} addresses`);
-
-      if (allAddresses.length === 0) {
-        if (onProgress) {
-          onProgress({ stage: 'complete', progress: 100, message: 'No addresses found' });
-        }
-        return [];
-      }
-
-      // Fetch solar inverters from all addresses
-      const deviceBatchSize = 50;
-      const deviceBatches = Math.ceil(allAddresses.length / deviceBatchSize);
-      const allSteerableInverters = [];
-      const inverterKeySet = new Set(); // Track unique inverters by identifier + addressUuid
-      
-      const extractResults = (data) => Array.isArray(data) ? data : (data?.results || []);
-
-      if (onProgress) {
-        onProgress({ 
-          stage: 'fetching_inverters', 
-          progress: 20, 
-          message: `Fetching inverters (0/${allAddresses.length})...`,
-          current: 0,
-          total: allAddresses.length
-        });
-      }
-
-      for (let i = 0; i < deviceBatches; i++) {
-        const batchStart = i * deviceBatchSize;
-        const batchEnd = Math.min(batchStart + deviceBatchSize, allAddresses.length);
-        const addressBatch = allAddresses.slice(batchStart, batchEnd);
-
-        const inverterFetches = addressBatch.map(address => 
-          devicesAPI.getSolarInverters(address.uuid).catch(() => null)
-        );
-
-        const batchResults = await Promise.allSettled(inverterFetches);
-
-        batchResults.forEach((result, index) => {
-          if (result.status === 'fulfilled' && result.value) {
-            try {
-              const data = result.value;
-              const inverters = extractResults(data);
-              
-              // Filter for steerable inverters with lastProductionState and add address info
-              inverters.forEach(inverter => {
-                if (inverter.info?.isSteerable === true && inverter.lastProductionState) {
-                  const addressUuid = addressBatch[index].uuid;
-                  const inverterKey = `${inverter.identifier || inverter.uuid}-${addressUuid}`;
-                  
-                  // Only add if we haven't seen this inverter+address combination before
-                  if (!inverterKeySet.has(inverterKey)) {
-                    inverterKeySet.add(inverterKey);
-                    allSteerableInverters.push({
-                      ...inverter,
-                      addressUuid: addressUuid,
-                      address: addressBatch[index]
-                    });
-                  }
-                }
-              });
-            } catch (err) {
-              console.error('Error processing inverter data:', err);
-            }
-          }
-        });
-
-        // Update progress
-        if (onProgress) {
-          const processed = Math.min(batchEnd, allAddresses.length);
-          const progress = 20 + (processed / allAddresses.length) * 75;
-          const elapsed = (Date.now() - startTime) / 1000;
-          const rate = processed / elapsed;
-          const remaining = allAddresses.length - processed;
-          const estimatedSeconds = rate > 0 ? Math.round(remaining / rate) : 0;
-          const estimatedTime = estimatedSeconds > 60
-            ? `${Math.round(estimatedSeconds / 60)}m ${estimatedSeconds % 60}s`
-            : `${estimatedSeconds}s`;
-
-          onProgress({
-            stage: 'fetching_inverters',
-            progress: Math.min(95, progress),
-            message: `Fetching inverters (${processed}/${allAddresses.length})${estimatedSeconds > 0 ? ` - Est. ${estimatedTime} remaining` : ''}...`,
-            current: processed,
-            total: allAddresses.length
-          });
-        }
-      }
-
-      return allSteerableInverters;
-    } catch (err) {
-      console.error('Error fetching steerable inverters:', err);
-      if (onProgress) {
-        onProgress(null);
-      }
-      return [];
-    }
-  };
-
-  const handleOpenBulkScheduleModal = async () => {
-    setBulkScheduleModalOpen(true);
-    // Use cached inverters if available, otherwise fetch (without progress reporting)
-    if (steerableInverters.length > 0) {
-      // Already have inverters, use them
-      return;
-    }
-    // Fetch steerable inverters when opening modal (no progress reporting for modal)
-    const inverters = await fetchAllSteerableInverters(null);
-    setSteerableInverters(inverters);
-  };
-
-  const handleBulkScheduleSave = async (scheduleData) => {
-    if (steerableInverters.length === 0) {
-      setError('No steerable inverters found');
-      return;
-    }
-
-    setBulkScheduleLoading(true);
-    setError('');
-
-    try {
-      // Send schedule to all inverters in parallel batches
-      const batchSize = 10;
-      const batches = Math.ceil(steerableInverters.length / batchSize);
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (let i = 0; i < batches; i++) {
-        const batchStart = i * batchSize;
-        const batchEnd = Math.min(batchStart + batchSize, steerableInverters.length);
-        const batch = steerableInverters.slice(batchStart, batchEnd);
-
-        const schedulePromises = batch.map(inverter => 
-          devicesAPI.createSolarInverterSchedule(
-            inverter.addressUuid,
-            inverter.identifier || inverter.uuid,
-            scheduleData
-          ).then(() => ({ success: true, inverter }))
-          .catch(err => ({ success: false, inverter, error: err }))
-        );
-
-        const results = await Promise.allSettled(schedulePromises);
-        
-        results.forEach(result => {
-          if (result.status === 'fulfilled') {
-            if (result.value.success) {
-              successCount++;
-            } else {
-              errorCount++;
-              console.error(`Error creating schedule for inverter ${result.value.inverter.identifier}:`, result.value.error);
-            }
-          } else {
-            errorCount++;
-          }
-        });
-      }
-
-      if (errorCount > 0) {
-        setError(`Schedule created for ${successCount} inverters, but ${errorCount} failed.`);
-      } else {
-        setError('');
-        alert(`Schedule successfully created for all ${successCount} steerable inverters!`);
-      }
-
-      setBulkScheduleModalOpen(false);
-    } catch (err) {
-      console.error('Error creating bulk schedule:', err);
-      setError(err.message || 'Failed to create schedules');
-    } finally {
-      setBulkScheduleLoading(false);
     }
   };
 
@@ -1515,7 +1255,7 @@ const Dashboard = () => {
                   navigate('/group-solar-analytics', { state: { group: selectedGroup } })
                 }
               >
-                Analytics
+                Solar Analytics
               </button>
             )}
           </div>
@@ -1538,91 +1278,6 @@ const Dashboard = () => {
               <div className="placeholder">No groups found</div>
             )}
           </div>
-
-        {/* Group Analytics Section - Temporarily Removed */}
-
-        {/* Steerable Inverters overview Section - Full Width */}
-        {selectedGroup && (steerableInvertersCount > 0 || steerableInvertersProgress) && (
-          <div className="section section-full-width">
-            <div className="section-header">
-              <h2>Steerable Inverters overview</h2>
-            </div>
-            {steerableInvertersProgress && (
-              <div className="analytics-loading">
-                <div className="analytics-progress-bar">
-                  <div 
-                    className="analytics-progress-fill" 
-                    style={{ width: `${steerableInvertersProgress?.progress || 0}%` }}
-                  ></div>
-                </div>
-                <div className="analytics-progress-text">
-                  {steerableInvertersProgress?.message || 'Loading steerable inverters...'}
-                  {steerableInvertersProgress?.current !== undefined && steerableInvertersProgress?.total !== undefined && (
-                    <span className="analytics-progress-count">
-                      {' '}({steerableInvertersProgress.current.toLocaleString()}/{steerableInvertersProgress.total.toLocaleString()})
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-            {steerableInvertersCount > 0 && (
-            <div className="steerable-energy-grid">
-              <div className="steerable-inverters-card-wrapper">
-                <div 
-                  className="analytics-card"
-                  onClick={() => handleAnalyticsClick('steerableInverters', steerableInvertersCount)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="analytics-content">
-                    <div className="analytics-value">{steerableInvertersCount}</div>
-                    <div className="analytics-label">Steerable Inverters</div>
-                  </div>
-                </div>
-                <button 
-                  className="bulk-schedule-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenBulkScheduleModal();
-                  }}
-                  disabled={bulkScheduleLoading}
-                >
-                  {bulkScheduleLoading ? 'Loading...' : 'Schedule All'}
-                </button>
-              </div>
-              
-              <div className="group-energy-card">
-                <div className="group-energy-content">
-                  <div className="group-energy-header">
-                    <h3>Insight steerable inverters portfolio</h3>
-                    <span className="energy-update-indicator">Live</span>
-                  </div>
-                  {groupEnergy ? (
-                    <>
-                      <div className="energy-values">
-                        <div className="energy-item">
-                          <span className="energy-label">PV Production</span>
-                          <span className="energy-value production">{groupEnergy.production?.toFixed(1) || '0.0'} W</span>
-                        </div>
-                        <div className="energy-item">
-                          <span className="energy-label">Export</span>
-                          <span className="energy-value return">{groupEnergy.return?.toFixed(1) || '0.0'} W</span>
-                        </div>
-                        <div className="energy-item">
-                          <span className="energy-label">Delivery</span>
-                          <span className="energy-value delivery">{groupEnergy.delivery?.toFixed(1) || '0.0'} W</span>
-                        </div>
-                      </div>
-                      <GroupEnergyGraph groupEnergy={groupEnergy} />
-                    </>
-                  ) : (
-                    <div className="energy-loading">Loading energy data...</div>
-                  )}
-                </div>
-              </div>
-            </div>
-            )}
-          </div>
-        )}
 
         {/* Addresses Section - Full Width */}
         <div className="section section-full-width">
@@ -2007,18 +1662,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Bulk Schedule Modal */}
-      <ScheduleModal
-        isOpen={bulkScheduleModalOpen}
-        onClose={() => {
-          setBulkScheduleModalOpen(false);
-          setSteerableInverters([]);
-        }}
-        onSave={handleBulkScheduleSave}
-        schedule={null}
-        bulkMode={true}
-        inverterCount={steerableInverters.length}
-      />
     </div>
   );
 };

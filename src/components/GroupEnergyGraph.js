@@ -93,7 +93,7 @@ const GroupEnergyGraph = ({ groupEnergy }) => {
           <Line
             type="monotone"
             dataKey="production"
-            stroke="#1976D2"
+            stroke="#1570EF"
             strokeWidth={2}
             dot={false}
             name="PV Production"
@@ -102,7 +102,7 @@ const GroupEnergyGraph = ({ groupEnergy }) => {
           <Line
             type="monotone"
             dataKey="return"
-            stroke="#4CAF50"
+            stroke="#16B364"
             strokeWidth={2}
             dot={false}
             name="Export"
@@ -111,7 +111,7 @@ const GroupEnergyGraph = ({ groupEnergy }) => {
           <Line
             type="monotone"
             dataKey="delivery"
-            stroke="#FF9800"
+            stroke="#FF8500"
             strokeWidth={2}
             dot={false}
             name="Delivery"

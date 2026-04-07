@@ -522,7 +522,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
             {hasDelivery && (
               <Bar
                 dataKey="delivery"
-                fill="#FF9800"
+                fill="#FF8500"
                 fillOpacity={0.7}
                 name="Delivery Forecast (Wh/hour)"
                 radius={[0, 0, 0, 0]}
@@ -533,7 +533,7 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
             {hasReturn && (
               <Bar
                 dataKey="return"
-                fill="#4CAF50"
+                fill="#16B364"
                 fillOpacity={0.7}
                 name="Export Forecast (Wh/hour)"
                 radius={[0, 0, 0, 0]}
@@ -597,11 +597,11 @@ const ForecastGraph = ({ deliveryForecast, returnForecast, productionForecast, p
       
       <div className="forecast-graph-legend">
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#FF9800' }}></div>
+          <div className="legend-color" style={{ backgroundColor: '#FF8500' }}></div>
           <span className="legend-label">Delivery Forecast</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#4CAF50' }}></div>
+          <div className="legend-color" style={{ backgroundColor: '#16B364' }}></div>
           <span className="legend-label">Export Forecast</span>
         </div>
         {hasActual && (

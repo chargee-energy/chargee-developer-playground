@@ -181,7 +181,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
                 type="monotone"
                 dataKey="generation"
                 name="Import (Consumption)"
-                stroke="#FF9800"
+                stroke="#FF8500"
                 strokeWidth={2}
                 dot={false}
                 animationDuration={0}
@@ -192,7 +192,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
                 type="monotone"
                 dataKey="return"
                 name="Export"
-                stroke="#4CAF50"
+                stroke="#16B364"
                 strokeWidth={2}
                 dot={false}
                 animationDuration={0}
@@ -203,7 +203,7 @@ const InverterGraph = ({ addressUuid, solarInverterUuid, sparkySerialNumber }) =
                 type="monotone"
                 dataKey="productionRate"
                 name="PV Production Rate"
-                stroke="#2196F3"
+                stroke="#1570EF"
                 strokeWidth={2}
                 dot={false}
                 animationDuration={0}

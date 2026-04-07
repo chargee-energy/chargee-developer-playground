@@ -54,12 +54,12 @@
 }
 
 .error-banner {
-  background: rgba(244, 67, 54, 0.1);
+  background: rgba(255, 31, 0, 0.1);
   color: var(--chargee-error);
   padding: var(--chargee-space-md);
   border-radius: var(--chargee-radius-md);
   margin-bottom: var(--chargee-space-lg);
-  border: 1px solid rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(255, 31, 0, 0.2);
   text-align: center;
 }
 
@@ -189,7 +189,7 @@
 .date-input:focus {
   outline: none;
   border-color: var(--chargee-green);
-  box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1);
+  box-shadow: 0 0 0 3px rgba(22, 179, 100, 0.12);
 }
 
 
@@ -254,7 +254,7 @@
 .date-input:focus {
   outline: none;
   border-color: var(--chargee-green);
-  box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1), 0 2px 8px rgba(0, 191, 165, 0.15);
+  box-shadow: 0 0 0 3px rgba(22, 179, 100, 0.12), 0 2px 8px rgba(22, 179, 100, 0.18);
 }
 
 .select-wrapper {
@@ -326,7 +326,7 @@
 .smart-meter-select:focus {
   outline: none;
   border-color: var(--chargee-green);
-  box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1), 0 2px 8px rgba(0, 191, 165, 0.15);
+  box-shadow: 0 0 0 3px rgba(22, 179, 100, 0.12), 0 2px 8px rgba(22, 179, 100, 0.18);
 }
 
 .smart-meter-select option {
@@ -368,7 +368,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+  box-shadow: 0 2px 4px rgba(98, 69, 222, 0.2);
   white-space: nowrap;
   height: 42px;
   box-sizing: border-box;
@@ -377,12 +377,12 @@
 .refresh-button:hover:not(:disabled) {
   background: var(--chargee-blue-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 4px 8px rgba(98, 69, 222, 0.28);
 }
 
 .refresh-button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+  box-shadow: 0 2px 4px rgba(98, 69, 222, 0.2);
 }
 
 .button-icon {
@@ -409,7 +409,7 @@
 
 .toggle-15min:hover {
   border-color: var(--chargee-green);
-  box-shadow: 0 2px 6px rgba(0, 191, 165, 0.15);
+  box-shadow: 0 2px 6px rgba(22, 179, 100, 0.18);
 }
 
 .toggle-input {
@@ -531,9 +531,9 @@
   text-align: center;
   color: var(--chargee-error);
   padding: var(--chargee-space-xl);
-  background: rgba(244, 67, 54, 0.1);
+  background: rgba(255, 31, 0, 0.1);
   border-radius: var(--chargee-radius-md);
-  border: 1px solid rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(255, 31, 0, 0.2);
 }
 
 .error-state h2 {

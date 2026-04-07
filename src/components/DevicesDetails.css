@@ -54,12 +54,12 @@
 }
 
 .error-banner {
-  background: rgba(244, 67, 54, 0.1);
+  background: rgba(255, 31, 0, 0.1);
   color: var(--chargee-error);
   padding: var(--chargee-space-md);
   border-radius: var(--chargee-radius-md);
   margin-bottom: var(--chargee-space-lg);
-  border: 1px solid rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(255, 31, 0, 0.2);
   text-align: center;
 }
 
@@ -144,12 +144,12 @@
 }
 
 .device-error-message {
-  background: rgba(244, 67, 54, 0.1);
+  background: rgba(255, 31, 0, 0.1);
   color: var(--chargee-error);
   padding: var(--chargee-space-sm) var(--chargee-space-md);
   border-radius: var(--chargee-radius-md);
   margin-bottom: var(--chargee-space-md);
-  border: 1px solid rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(255, 31, 0, 0.2);
   font-size: 14px;
 }
 
@@ -189,14 +189,14 @@
 /* Vehicle Category */
 .device-category:has(.vehicle-card) h3 {
   background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
-  border-left-color: #2196F3;
-  color: #1976D2;
+  border-left-color: var(--chargee-info);
+  color: var(--chargee-blue);
 }
 
 /* Charger Category */
 .device-category:has(.charger-card) h3 {
   background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-  border-left-color: #4CAF50;
+  border-left-color: var(--chargee-success);
   color: #388E3C;
 }
 
@@ -217,14 +217,14 @@
 /* HVAC Category */
 .device-category:has(.hvac-card) h3 {
   background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(0, 188, 212, 0.05) 100%);
-  border-left-color: #00BCD4;
-  color: #0097A7;
+  border-left-color: var(--chargee-info);
+  color: var(--chargee-info);
 }
 
 /* Battery Category */
 .device-category:has(.battery-card) h3 {
   background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
-  border-left-color: #FF9800;
+  border-left-color: var(--chargee-warning);
   color: #F57C00;
 }
 
@@ -281,29 +281,29 @@
 
 /* Vehicle Card */
 .vehicle-card {
-  border-left-color: #2196F3;
+  border-left-color: var(--chargee-info);
 }
 
 .vehicle-card::before {
-  background: #2196F3;
+  background: var(--chargee-info);
 }
 
 .vehicle-card:hover {
-  border-color: #2196F3;
+  border-color: var(--chargee-info);
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
 }
 
 /* Charger Card */
 .charger-card {
-  border-left-color: #4CAF50;
+  border-left-color: var(--chargee-success);
 }
 
 .charger-card::before {
-  background: #4CAF50;
+  background: var(--chargee-success);
 }
 
 .charger-card:hover {
-  border-color: #4CAF50;
+  border-color: var(--chargee-success);
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
 }
 
@@ -337,29 +337,29 @@
 
 /* HVAC Card */
 .hvac-card {
-  border-left-color: #00BCD4;
+  border-left-color: var(--chargee-info);
 }
 
 .hvac-card::before {
-  background: #00BCD4;
+  background: var(--chargee-info);
 }
 
 .hvac-card:hover {
-  border-color: #00BCD4;
+  border-color: var(--chargee-info);
   box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2);
 }
 
 /* Battery Card */
 .battery-card {
-  border-left-color: #FF9800;
+  border-left-color: var(--chargee-warning);
 }
 
 .battery-card::before {
-  background: #FF9800;
+  background: var(--chargee-warning);
 }
 
 .battery-card:hover {
-  border-color: #FF9800;
+  border-color: var(--chargee-warning);
   box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
 }
 
@@ -647,7 +647,7 @@
 .forecast-date-input:focus {
   outline: none;
   border-color: var(--chargee-green);
-  box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.1);
+  box-shadow: 0 0 0 3px rgba(22, 179, 100, 0.12);
 }
 
 .refresh-forecast-button {
@@ -849,7 +849,7 @@
 
 .schedule-type.power-limit {
   background: rgba(33, 150, 243, 0.1);
-  color: #1976D2;
+  color: var(--chargee-blue);
 }
 
 .schedule-value {
@@ -876,13 +876,13 @@
 
 .button-edit:hover {
   background: rgba(33, 150, 243, 0.1);
-  border-color: #2196F3;
-  color: #1976D2;
+  border-color: var(--chargee-info);
+  color: var(--chargee-blue);
 }
 
 .button-delete:hover {
-  background: rgba(244, 67, 54, 0.1);
-  border-color: #F44336;
+  background: rgba(255, 31, 0, 0.1);
+  border-color: var(--chargee-error);
   color: #D32F2F;
 }
 

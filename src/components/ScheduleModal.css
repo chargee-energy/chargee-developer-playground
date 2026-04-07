@@ -184,10 +184,10 @@
 }
 
 .bulk-schedule-info {
-  background: rgba(0, 191, 165, 0.08);
+  background: rgba(22, 179, 100, 0.1);
   padding: var(--chargee-space-md);
   border-radius: var(--chargee-radius-md);
-  border: 1px solid rgba(0, 191, 165, 0.2);
+  border: 1px solid rgba(22, 179, 100, 0.22);
 }
 
 .bulk-schedule-info p {

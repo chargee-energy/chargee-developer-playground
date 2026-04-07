@@ -64,7 +64,7 @@
 .control-button.start:hover {
   background: var(--chargee-green-dark);
   border-color: var(--chargee-green-dark);
-  box-shadow: 0 2px 8px rgba(0, 191, 165, 0.3);
+  box-shadow: 0 2px 8px rgba(22, 179, 100, 0.25);
 }
 
 .control-button.stop {
@@ -76,7 +76,7 @@
 .control-button.stop:hover {
   background: #d32f2f;
   border-color: #d32f2f;
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 31, 0, 0.28);
 }
 
 .control-button.clear {
@@ -98,12 +98,12 @@
 }
 
 .graph-error {
-  background: rgba(244, 67, 54, 0.1);
+  background: rgba(255, 31, 0, 0.1);
   color: var(--chargee-error);
   padding: var(--chargee-space-md);
   border-radius: var(--chargee-radius-md);
   margin-bottom: var(--chargee-space-md);
-  border: 1px solid rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(255, 31, 0, 0.2);
   text-align: center;
 }
 

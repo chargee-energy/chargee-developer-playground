@@ -94,7 +94,7 @@ const EnergyGraph = ({ sparkySerialNumber }) => {
       const data = payload[0].payload;
       const isExport = data.power < 0;
       const powerType = isExport ? 'Export to Grid' : 'Consumption from Grid';
-      const powerColor = isExport ? '#4CAF50' : '#FF9800';
+      const powerColor = isExport ? '#16B364' : '#FF8500';
       
       return (
         <div className="custom-tooltip">
@@ -127,7 +127,7 @@ const EnergyGraph = ({ sparkySerialNumber }) => {
             <span 
               className="power-value" 
               style={{ 
-                color: currentPower >= 0 ? '#FF9800' : '#4CAF50',
+                color: currentPower >= 0 ? '#FF8500' : '#16B364',
                 fontWeight: 'bold'
               }}
             >
@@ -188,9 +188,9 @@ const EnergyGraph = ({ sparkySerialNumber }) => {
               <Area
                 type="monotone"
                 dataKey={(entry) => entry.power < 0 ? entry.power : 0}
-                fill="#4CAF50"
+                fill="#16B364"
                 fillOpacity={0.3}
-                stroke="#4CAF50"
+                stroke="#16B364"
                 strokeWidth={2}
                 animationDuration={0}
               />
@@ -199,9 +199,9 @@ const EnergyGraph = ({ sparkySerialNumber }) => {
               <Area
                 type="monotone"
                 dataKey={(entry) => entry.power > 0 ? entry.power : 0}
-                fill="#FF9800"
+                fill="#FF8500"
                 fillOpacity={0.3}
-                stroke="#FF9800"
+                stroke="#FF8500"
                 strokeWidth={2}
                 animationDuration={0}
               />
@@ -239,11 +239,11 @@ const EnergyGraph = ({ sparkySerialNumber }) => {
       
       <div className="graph-legend">
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#4CAF50' }}></div>
+          <div className="legend-color" style={{ backgroundColor: '#16B364' }}></div>
           <span className="legend-label">Export to Grid (Negative Values)</span>
         </div>
         <div className="legend-item">
-          <div className="legend-color" style={{ backgroundColor: '#FF9800' }}></div>
+          <div className="legend-color" style={{ backgroundColor: '#FF8500' }}></div>
           <span className="legend-label">Consumption from Grid (Positive Values)</span>
         </div>
       </div>

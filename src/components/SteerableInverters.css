@@ -1,11 +1,13 @@
 .steerable-inverters {
   min-height: 100vh;
-  background-color: var(--chargee-gray-100);
+  background: transparent;
 }
 
 .steerable-header {
-  background: var(--chargee-white);
-  border-bottom: 1px solid var(--chargee-gray-200);
+  background: rgba(245, 244, 242, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(29, 21, 67, 0.08);
   box-shadow: var(--chargee-shadow-sm);
   position: sticky;
   top: 0;
@@ -237,7 +239,7 @@
 .view-address-button:hover {
   background: var(--chargee-blue-dark);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.25);
+  box-shadow: 0 2px 4px rgba(98, 69, 222, 0.22);
 }
 
 .view-address-button:active {
