@@ -81,7 +81,7 @@ const DevicesDetails = () => {
     fetchDevices(groupUuid, addressUuid).finally(() => {
       isFetchingRef.current = false;
     });
-  }, [address?.uuid, group?.uuid]);
+  }, [address, group]);
 
   // Fetch schedules for steerable inverters when devices are loaded
   useEffect(() => {
@@ -318,6 +318,32 @@ const DevicesDetails = () => {
     }
   };
 
+  const formatTimeAgo = (dateString) => {
+    if (!dateString) return '—';
+    let d;
+    try {
+      d = new Date(dateString);
+      if (Number.isNaN(d.getTime())) return '—';
+    } catch {
+      return '—';
+    }
+    const diffMs = Date.now() - d.getTime();
+    if (diffMs < 0) return 'just now';
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const totalHours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+    if (days > 0) {
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    }
+    if (totalHours > 0) {
+      return `${totalHours} ${totalHours === 1 ? 'hour' : 'hours'} ago`;
+    }
+    if (totalMinutes > 0) {
+      return `${totalMinutes} ${totalMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+    return 'just now';
+  };
+
   if (!address || !group) {
     return (
       <div className="devices-details">
@@ -502,19 +528,23 @@ const DevicesDetails = () => {
                         </div>
                         <div className="device-details">
                           <div className="detail-item">
-                            <span className="label">Site:</span>
-                            <span className="value">{inverter.info?.siteName || inverter.siteName || 'N/A'}</span>
+                            <span className="label">Steerable:</span>
+                            <span className="value">
+                              {inverter.info?.isSteerable === true
+                                ? 'Yes'
+                                : inverter.info?.isSteerable === false
+                                  ? 'No'
+                                  : '—'}
+                            </span>
                           </div>
                           <div className="detail-item">
                             <span className="label">Status:</span>
-                            <span className="value">{inverter.info?.isReachable !== undefined ? (inverter.info.isReachable ? 'Online' : 'Offline') : (inverter.isReachable ? 'Online' : 'Offline')}</span>
+                            <span className="value">
+                              {inverter.lastProductionState
+                                ? `${inverter.lastProductionState.productionRate ?? '—'} W · last report ${formatTimeAgo(inverter.lastProductionState.time)}`
+                                : '—'}
+                            </span>
                           </div>
-                          {inverter.lastProductionState && (
-                            <div className="detail-item">
-                              <span className="label">PV Production:</span>
-                              <span className="value">{inverter.lastProductionState.productionRate}W</span>
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
@@ -536,13 +566,10 @@ const DevicesDetails = () => {
                       
                       return (
                         <div key={inverter.identifier} className="forecast-item">
-                          <div className="forecast-item-header">
+                            <div className="forecast-item-header">
                             <div className="forecast-inverter-info">
                               <span className="forecast-inverter-brand">{inverter.info?.brand || inverter.brand}</span>
                               <span className="forecast-inverter-model">{inverter.info?.model || inverter.model}</span>
-                              {(inverter.info?.siteName || inverter.siteName) && (
-                                <span className="forecast-inverter-site"> - {inverter.info?.siteName || inverter.siteName}</span>
-                              )}
                             </div>
                             <div className="forecast-controls">
                               <div className="forecast-date-picker">
@@ -631,12 +658,10 @@ const DevicesDetails = () => {
                               <div className="steerable-inverter-header">
                                 <div className="steerable-inverter-info">
                                   <h4>{inverter.info?.brand || inverter.brand} {inverter.info?.model || inverter.model}</h4>
-                                  {(inverter.info?.siteName || inverter.siteName) && (
-                                    <span className="steerable-inverter-site">{inverter.info?.siteName || inverter.siteName}</span>
-                                  )}
                                   {inverter.lastProductionState && (
                                     <span className="steerable-inverter-production">
-                                      PV Production: {inverter.lastProductionState.productionRate}W
+                                      {inverter.lastProductionState.productionRate ?? '—'} W · last report{' '}
+                                      {formatTimeAgo(inverter.lastProductionState.time)}
                                     </span>
                                   )}
                                 </div>
