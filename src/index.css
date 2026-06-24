@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-beige bg-body-gradient text-dark-blue font-figtree;
+    margin: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-semibold text-dark-blue;
+  }
+}
+
+@layer components {
+  /* Signature Chargee CTA: dark-blue, hovers to purple. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-20 bg-dark-blue
+      px-5 h-12 text-sm font-semibold text-beige shadow-btn-shadow
+      transition-all duration-300 hover:bg-dark-purple focus:outline-none
+      focus-visible:ring-2 focus-visible:ring-dark-purple focus-visible:ring-offset-2
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-20 border border-beige-2
+      bg-white px-5 h-12 text-sm font-semibold text-dark-blue
+      transition-all duration-300 hover:bg-beige focus:outline-none
+      focus-visible:ring-2 focus-visible:ring-dark-purple focus-visible:ring-offset-2
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Small variant for inline / toolbar actions. */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-3 h-9 text-13
+      font-semibold text-text-gray transition-colors hover:bg-gray-100 hover:text-ink
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-dark-purple
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* White surface card with the template's soft shadow. */
+  .card {
+    @apply rounded-20 border border-beige-2 bg-white shadow-card;
+  }
+
+  /* Editorial squircle tile (color-blockable surface). */
+  .tile {
+    @apply rounded-30px p-6 sm:p-7;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-beige-2 bg-white px-3.5 h-11 text-sm text-dark-blue
+      placeholder:text-gray-400 focus:border-dark-purple focus:ring-dark-purple;
+  }
+
+  .label {
+    @apply mb-1.5 block text-13 font-semibold text-dark-blue;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-light-purple-3 px-2.5 py-1
+      text-11 font-bold uppercase tracking-wide text-dark-purple;
+  }
+}
+
+@layer utilities {
+  .display {
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+
+  .reveal {
+    opacity: 0;
+    animation: reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .sun-glow {
+    background:
+      radial-gradient(60% 70% at 85% -10%, rgba(255, 214, 2, 0.18) 0%, rgba(255, 214, 2, 0) 60%),
+      radial-gradient(55% 60% at 100% 0%, rgba(255, 133, 0, 0.16) 0%, rgba(255, 133, 0, 0) 55%);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+  }
+}

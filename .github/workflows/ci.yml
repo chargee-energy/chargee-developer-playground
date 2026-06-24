@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Regenerate the client from the committed spec and fail if it drifts
+      # from what's checked in — keeps the typed client honest.
+      - name: Generate API client
+        run: npm run api:generate
+      - name: Check generated client is up to date
+        run: git diff --exit-code src/api/generated src/api/endpoints.generated.ts
+
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build

@@ -1,0 +1,6646 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v2/auth/login": {
+      "post": {
+        "operationId": "AuthController_login_v2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The logged in user and tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtWithUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Password is incorrect"
+          }
+        },
+        "summary": "Login using your credentials",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v2/auth/me": {
+      "get": {
+        "operationId": "AuthController_me_v2",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The logged in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token expired"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the current logged in user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v2/auth/refresh": {
+      "post": {
+        "description": "Send your refresh token in the request body (refreshToken). Use the refreshToken from the login response, not the accessToken. The refresh token is not sent in the Authorization header.",
+        "operationId": "AuthController_refreshTokens_v2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The logged in user and the new tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JwtWithUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token"
+          }
+        },
+        "summary": "Get new tokens using the refresh token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v2/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout_v2",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User logged out successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Logout the current user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v2/groups": {
+      "get": {
+        "description": "Retrieves all groups that the current user is assigned to through UserGroup relationships.",
+        "operationId": "GroupController_getGroups_v2",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of groups to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of groups to skip (offset)",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedUserGroupDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get groups assigned to the authenticated user",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
+    "/api/v2/groups/{group_uuid}/addresses": {
+      "get": {
+        "description": "Retrieves all addresses that are registered to the provided group UUID in Amber. Admin users can access any group, regular users can only access groups they are assigned to.",
+        "operationId": "GroupController_getGroupSparkies_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of addresses to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of addresses to jump before returning results",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedGroupAddressDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid group UUID"
+          },
+          "403": {
+            "description": "Access denied - User does not have access to this group"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get addresses assigned to a specific group",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
+    "/api/v2/groups/{group_uuid}/flex/aggregation": {
+      "get": {
+        "description": "Returns a paginated list of aggregated readings for the group over a time range, based on Redis-backed interval data.",
+        "operationId": "GroupFlexAggregationController_listAggregates_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": false,
+            "in": "query",
+            "description": "ISO 8601 start time",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000+00:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": false,
+            "in": "query",
+            "description": "ISO 8601 end time",
+            "schema": {
+              "example": "2026-01-01T23:59:59.000+00:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of records",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of records to skip (offset)",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedFlexAggregateDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get aggregated solar inverter production and flex metrics for a group",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
+    "/api/v2/groups/{group_uuid}/flex/aggregates/latest": {
+      "get": {
+        "description": "Returns the most recent aggregated reading for the group from Redis-backed interval data.",
+        "operationId": "GroupFlexAggregationController_latestAggregate_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest aggregated flex metrics for the group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlexAggregateDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest aggregated solar inverter production and flex metrics for a group",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
+    "/api/v2/groups/{group_uuid}/flex/schedules": {
+      "post": {
+        "description": "Create or overwrite a flex schedule for a group at a given time.",
+        "operationId": "GroupFlexScheduleController_add_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Exactly one of groupGridTargetKw, addressGridTargetW, or solarInverterCapacityPercentage must be provided together with time.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupFlexScheduleDto"
+              },
+              "examples": {
+                "groupGridTargetKw": {
+                  "summary": "Limit group by kW",
+                  "value": {
+                    "groupGridTargetKw": 100,
+                    "time": "2026-03-24T13:59:49.050+00:00"
+                  }
+                },
+                "addressGridTargetW": {
+                  "summary": "Address-level grid target in watts",
+                  "value": {
+                    "addressGridTargetW": 5000,
+                    "time": "2026-03-24T13:59:49.050+00:00"
+                  }
+                },
+                "solarInverterCapacityPercentage": {
+                  "summary": "Limit by solar inverter capacity percentage",
+                  "value": {
+                    "solarInverterCapacityPercentage": 100,
+                    "time": "2026-03-24T13:59:49.050+00:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Flex schedule created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupFlexScheduleDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create flex schedule for a group",
+        "tags": [
+          "Groups"
+        ]
+      },
+      "get": {
+        "description": "Retrieves a list of flex schedules for a given group UUID.",
+        "operationId": "GroupFlexScheduleController_list_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter schedules by active status",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of schedules to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of schedules to skip (offset)",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedGroupFlexScheduleDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List flex schedules for a group",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
+    "/api/v2/groups/{group_uuid}/flex/schedules/{schedule_uuid}": {
+      "get": {
+        "description": "Get a specific flex schedule by group UUID and schedule UUID. The schedule must belong to the given group.",
+        "operationId": "GroupFlexScheduleController_findByUuid_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the flex schedule",
+            "schema": {
+              "example": "d16163a7-1714-424f-b5a4-62346846df3b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flex schedule retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupFlexScheduleDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flex schedule not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a flex schedule for a group",
+        "tags": [
+          "Groups"
+        ]
+      },
+      "delete": {
+        "description": "Deletes all future flex schedules for the given group, starting after the current active schedule. The schedule_uuid is used to ensure the schedule exists and belongs to the group; the deletion always operates on all future schedules as defined by the underlying service.",
+        "operationId": "GroupFlexScheduleController_delete_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the group",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of a flex schedule belonging to the group (used for validation)",
+            "schema": {
+              "example": "d16163a7-1714-424f-b5a4-62346846df3b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Future flex schedules deleted successfully (idempotent, no content is returned)"
+          },
+          "404": {
+            "description": "Flex schedule not found for this group"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete future flex schedules for a group",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/electricity/15min": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getElectricity15minForSN_v2",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "The requested date",
+            "schema": {
+              "example": "2026-01-01"
+            }
+          },
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found electricity records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Electricity15min"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the electricity records from sparky for the specific date range",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/gas/15min": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getGas15minForSN_v2",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "The requested date",
+            "schema": {
+              "example": "2026-01-01"
+            }
+          },
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found gas records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Gas15min"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the gas records from sparky for the specific date range",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/total/15min": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getElectricityAndGas15minForSN_v2",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "The requested date",
+            "schema": {
+              "example": "2026-01-01"
+            }
+          },
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found electricity and gas records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Total15min"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the electricity and gas records from sparky for the specific date range",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/electricity/latest": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getElectricityLatestForSN_v2",
+        "parameters": [
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found electricity record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityRecord"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest electricity record from sparky for the specific serial number",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/electricity/latest-p1": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getLatestP1_v2",
+        "parameters": [
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The latest dsmr electricity record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DsmrRecord"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest electricity p1 dsmr record from sparky for the specific serial number",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/electricity/first": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getElectricityFirstForSN_v2",
+        "parameters": [
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The found electricity record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityRecord"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the first electricity record from sparky for the specific serial number",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}/access": {
+      "get": {
+        "deprecated": true,
+        "operationId": "SparkyController_getAccessForSN_v2",
+        "parameters": [
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "True when you have access to the data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check if you have right to access the data from te sparky with the specific serial number",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/{serial_number}": {
+      "get": {
+        "operationId": "SparkyController_getSparkyDetails_v2",
+        "parameters": [
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Sparky",
+            "schema": {
+              "example": "00B0D063C226",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The sparky details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SparkyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get sparky details by serial number",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/sparkies/box-code": {
+      "post": {
+        "operationId": "SparkyController_getSparkyDetailsByBoxCode_v2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SparkyBoxCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The sparky details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SparkyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get sparky details by box code",
+        "tags": [
+          "Sparky"
+        ]
+      }
+    },
+    "/api/v2/flints/{serial_number}": {
+      "get": {
+        "operationId": "FlintController_getFlintDetails_v2",
+        "parameters": [
+          {
+            "name": "serial_number",
+            "required": true,
+            "in": "path",
+            "description": "The serialnumber of the Flint",
+            "schema": {
+              "example": "10061C9938BC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The flint details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlintDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get flint details by serial number",
+        "tags": [
+          "Flint"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/electricity/p4/15min": {
+      "get": {
+        "operationId": "EnergyController_elec15min_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Date in yyyy-MM-dd format in Europe/Amsterdam timezone",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Elec15MinDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Electricity 15min readings for a day",
+        "tags": [
+          "Energy"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/electricity/p4/1day": {
+      "get": {
+        "operationId": "EnergyController_elec1day_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Date in yyyy-MM-dd format in Europe/Amsterdam timezone",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Elec1DayDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Electricity daily readings for month containing date",
+        "tags": [
+          "Energy"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/electricity/p4/1month": {
+      "get": {
+        "operationId": "EnergyController_elec1month_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Date in yyyy-MM-dd format in Europe/Amsterdam timezone",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Elec1MonthDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Electricity monthly readings for year containing date",
+        "tags": [
+          "Energy"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/gas/p4/15min": {
+      "get": {
+        "operationId": "EnergyController_gas15min_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Date in yyyy-MM-dd format in Europe/Amsterdam timezone",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Gas15MinDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gas 15min readings for a day",
+        "tags": [
+          "Energy"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/gas/p4/1day": {
+      "get": {
+        "operationId": "EnergyController_gas1day_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Date in yyyy-MM-dd format in Europe/Amsterdam timezone",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Gas1DayDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gas daily readings for month containing date",
+        "tags": [
+          "Energy"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/gas/p4/1month": {
+      "get": {
+        "operationId": "EnergyController_gas1month_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Date in yyyy-MM-dd format in Europe/Amsterdam timezone",
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Gas1MonthDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gas monthly readings for year containing date",
+        "tags": [
+          "Energy"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/vehicles": {
+      "get": {
+        "description": "Returns a paginated list of vehicles linked to the given address.",
+        "operationId": "VehicleController_getVehiclesForAddress_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedVehicleDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all vehicles for an address",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/chargers": {
+      "get": {
+        "description": "Returns a paginated list of EV chargers linked to the given address.",
+        "operationId": "ChargerController_getChargersForAddress_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedChargerDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all chargers for an address",
+        "tags": [
+          "Chargers"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/chargers/{charger_uuid}/energy/consumption": {
+      "get": {
+        "operationId": "ChargerController_listProductionEnergy_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "charger_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Charger UUID",
+            "schema": {
+              "example": "916e35d2-c296-4dfd-8ef3-9808d6c39f04",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": false,
+            "in": "query",
+            "description": "ISO 8601 start time",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000+00:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": false,
+            "in": "query",
+            "description": "ISO 8601 end time",
+            "schema": {
+              "example": "2026-01-01T00:00:00.000+00:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of records",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedChargerProductionReadingDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List live consumption readings from charger",
+        "tags": [
+          "Chargers"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters": {
+      "get": {
+        "operationId": "SolarInvertersController_list_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSolarInverterDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all solar inverters for an address",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}": {
+      "get": {
+        "operationId": "SolarInvertersController_findOne_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The UUID of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The UUID of the solar inverter",
+            "schema": {
+              "example": "812e2b8a-2326-43ae-9cb7-bb8e15cbbb45",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Solar inverter retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolarInverterDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Solar inverter not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a solar inverter by UUID",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/energy/production": {
+      "get": {
+        "operationId": "SolarInvertersController_getProductionEnergy_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "916e35d2-c296-4dfd-8ef3-9808d6c39f04",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": false,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": false,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of records",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSolarInverterProductionReadingDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List live production readings from solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/energy/production/latest": {
+      "get": {
+        "description": "Get the latest live production reading from a solar inverter. Returns a single reading, not a list.",
+        "operationId": "SolarInvertersController_getLatestProductionEnergy_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the solar inverter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The latest production reading",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolarInverterProductionReadingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest production reading for a solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/schedules": {
+      "post": {
+        "description": "Create a schedule for a solar inverter",
+        "operationId": "SolarInverterScheduleController_add_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "9fa8ab02-185b-4311-aefd-c8a0055595cd",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScheduleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create solar inverter schedule",
+        "tags": [
+          "Solar Inverters"
+        ]
+      },
+      "get": {
+        "description": "Retrieves a list of schedules for a given solar inverter UUID. Filter by isActive to get only active or inactive schedules. Use limit and offset for pagination.",
+        "operationId": "SolarInverterScheduleController_list_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "36488825-0618-4d6d-91c2-b97f8519d9f3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by active status. When omitted, returns only active schedules.",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of schedules to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of schedules to skip before returning results",
+            "schema": {
+              "minimum": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedScheduleDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No schedules found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List schedules for solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/schedules/{schedule_uuid}": {
+      "get": {
+        "description": "Get a schedule by address UUID, solar inverter UUID, and schedule UUID",
+        "operationId": "SolarInverterScheduleController_findByUuid_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "9fa8ab02-185b-4311-aefd-c8a0055595cd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Schedule UUID",
+            "schema": {
+              "example": "d16163a7-1714-424f-b5a4-62346846df3b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a schedule",
+        "tags": [
+          "Solar Inverters"
+        ]
+      },
+      "delete": {
+        "description": "Delete a schedule by address UUID, solar inverter UUID, and schedule UUID",
+        "operationId": "SolarInverterScheduleController_delete_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "9fa8ab02-185b-4311-aefd-c8a0055595cd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Schedule UUID",
+            "schema": {
+              "example": "d16163a7-1714-424f-b5a4-62346846df3b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Schedule deleted successfully"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a schedule",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/flex/schedules": {
+      "get": {
+        "description": "Retrieves flex schedule intervals for a solar inverter. Optionally filter by time range.",
+        "operationId": "SolarInverterFlexScheduleController_list_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "9fa8ab02-185b-4311-aefd-c8a0055595cd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": false,
+            "in": "query",
+            "description": "Start of the time range (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": false,
+            "in": "query",
+            "description": "End of the time range (ISO 8601 with offset, e.g. 2026-01-02T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-02T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter schedules by active status",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of schedules to return",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of schedules to skip (offset)",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSolarInverterFlexScheduleDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List flex schedules for a solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/flex/schedules/{schedule_uuid}": {
+      "get": {
+        "description": "Get a specific flex schedule interval by schedule UUID.",
+        "operationId": "SolarInverterFlexScheduleController_findByUuid_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Address UUID",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "Solar inverter UUID",
+            "schema": {
+              "example": "9fa8ab02-185b-4311-aefd-c8a0055595cd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "schedule_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the flex schedule",
+            "schema": {
+              "example": "d16163a7-1714-424f-b5a4-62346846df3b",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flex schedule retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolarInverterFlexScheduleDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flex schedule not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a flex schedule for a solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/production-forecast": {
+      "get": {
+        "description": "Returns production forecast intervals for the solar inverter on the given date. ",
+        "operationId": "SolarInverterForecastController_getProductionForecastForSolarInverter_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the solar inverter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "The date to fetch the forecast for (YYYY-MM-DD). Returns empty results when no forecast exists for this date.",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSolarInverterProductionForecastDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the production forecast for a date of a solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/interval/production": {
+      "get": {
+        "description": "Get aggregated production intervals in Wh for a solar inverter.",
+        "operationId": "SolarInverterAggregationController_getProductionIntervals_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "solar_inverter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the solar inverter",
+            "schema": {
+              "example": "9fa8ab02-185b-4311-aefd-c8a0055595cd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resolution",
+            "required": true,
+            "in": "query",
+            "description": "The resolution of the data to be returned",
+            "schema": {
+              "example": "hourly",
+              "type": "string",
+              "enum": [
+                "quarter_hourly",
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+              ]
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": true,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": true,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedProductionIntervalResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get production interval aggregation for a solar inverter",
+        "tags": [
+          "Solar Inverters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters": {
+      "get": {
+        "description": "Returns a paginated list of smart meters (electricity and gas) for the given address.",
+        "operationId": "SmartMetersController_getSmartMetersForAddress_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSmartMeterDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all smart meters for an address",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}": {
+      "get": {
+        "description": "Returns the detailed info (electricity & gas EANs, meter numbers, timestamps) for the given smart meter.",
+        "operationId": "SmartMetersController_getSmartMeter_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The smart meter details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartMeterDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/energy/electricity": {
+      "get": {
+        "description": "Get electricity readings from a smart meter with optional time range filtering",
+        "operationId": "SmartMetersController_getElectricityReadings_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": false,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": false,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of records",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSmartMeterEnergyReadingDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get electricity readings for a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/energy/electricity/latest": {
+      "get": {
+        "description": "Get the latest electricity reading from a smart meter. Returns a single reading, not a list.",
+        "operationId": "SmartMetersController_getLatestElectricityReading_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The latest electricity reading",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartMeterEnergyReadingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest electricity reading for a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/energy/gas": {
+      "get": {
+        "description": "Get gas readings from a smart meter with optional time range filtering",
+        "operationId": "SmartMetersController_getGasReadings_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": false,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": false,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max number of records",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "example": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSmartMeterGasReadingDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get gas readings for a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/energy/gas/latest": {
+      "get": {
+        "description": "Get the latest gas reading from a smart meter. Returns a single reading, not a list.",
+        "operationId": "SmartMetersController_getLatestGasReading_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The latest gas reading",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartMeterGasReadingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the latest gas reading for a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/interval/electricity": {
+      "get": {
+        "description": "Get aggregated electricity intervals (delivered and returned) in Wh for a smart meter. Based on P1 data only.",
+        "operationId": "SmartMetersAggregationController_getElectricityIntervals_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resolution",
+            "required": true,
+            "in": "query",
+            "description": "The resolution of the data to be returned",
+            "schema": {
+              "example": "hourly",
+              "type": "string",
+              "enum": [
+                "quarter_hourly",
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+              ]
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": true,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": true,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedWhIntervalResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get electricity interval aggregation for a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/interval/gas": {
+      "get": {
+        "description": "Get aggregated gas intervals (delivery only) in dm3 for a smart meter. Based on P1 data only.",
+        "operationId": "SmartMetersAggregationController_getGasIntervals_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resolution",
+            "required": true,
+            "in": "query",
+            "description": "The resolution of the data to be returned",
+            "schema": {
+              "example": "hourly",
+              "type": "string",
+              "enum": [
+                "quarter_hourly",
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+              ]
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": true,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": true,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "example": "2026-01-01T00:00:00+01:00",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedGasIntervalResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get gas interval aggregation for a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/delivery-forecast": {
+      "get": {
+        "description": "Returns delivery (consumption) forecast intervals for the smart meter on the given local date.",
+        "operationId": "SmartMetersForecastController_getDeliveryForecastForSmartMeter_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Local-date to fetch (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSmartMeterDeliveryForecastDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the delivery forecast for a date of a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/return-forecast": {
+      "get": {
+        "description": "Get the return forecast for a date of a smart meter",
+        "operationId": "SmartMetersForecastController_getReturnForecastForSmartMeter_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "smart_meter_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the smart meter",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Local-date to fetch (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedSmartMeterReturnForecastDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the return forecast for a date of a smart meter",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/smart-meters/electricity/ean": {
+      "get": {
+        "description": "Looks up the smart meter associated with the given electricity EAN.",
+        "operationId": "SmartMetersEanController_findByElectricityEan_v2",
+        "parameters": [
+          {
+            "name": "ean",
+            "required": true,
+            "in": "query",
+            "description": "Electricity EAN. URL-encode this query parameter when it contains reserved URL characters.",
+            "schema": {
+              "example": "871687940007565340",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Smart meter retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartMeterDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find a smart meter by electricity EAN",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/smart-meters/gas/ean": {
+      "get": {
+        "description": "Looks up the smart meter associated with the given gas EAN.",
+        "operationId": "SmartMetersEanController_findByGasEan_v2",
+        "parameters": [
+          {
+            "name": "ean",
+            "required": true,
+            "in": "query",
+            "description": "Gas EAN. URL-encode this query parameter when it contains reserved URL characters.",
+            "schema": {
+              "example": "871687940007565341",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Smart meter retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartMeterDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find a smart meter by gas EAN",
+        "tags": [
+          "Smart Meters"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/hvacs": {
+      "get": {
+        "description": "Returns a paginated list of HVAC devices linked to the given address.",
+        "operationId": "HvacController_getHvacsForAddress_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedHvacDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all HVACs for an address",
+        "tags": [
+          "HVACs"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/batteries": {
+      "get": {
+        "description": "Returns a paginated list of batteries (e.g. home storage) linked to the given address.",
+        "operationId": "BatteryController_getBatteriesForAddress_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedBatteryDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all batteries for an address",
+        "tags": [
+          "Batteries"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/batteries/{battery_uuid}": {
+      "get": {
+        "description": "Returns the details of a single battery linked to the given address.",
+        "operationId": "BatteryController_getBattery_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "battery_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the battery",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440008",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The battery details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatteryDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Battery not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a battery",
+        "tags": [
+          "Batteries"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/grid-connections": {
+      "get": {
+        "description": "Returns a paginated list of grid connections (phase capacity, type) for the given address.",
+        "operationId": "GridConnectionController_getGridConnectionsForAddress_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedGridConnectionDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all grid connections for an address",
+        "tags": [
+          "Grid Connections"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Chargee Ampere",
+    "description": "API v2",
+    "version": "2.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "JwtWithUserDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier of the user"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin",
+              "extendeduser"
+            ],
+            "default": "user",
+            "description": "The role of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "The email of the user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time this resource was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time this resource was updated.",
+            "nullable": true
+          },
+          "loginAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time the user last logged in.",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time this resource was deleted.",
+            "nullable": true
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "uuid",
+          "role",
+          "email",
+          "createdAt",
+          "updatedAt",
+          "loginAt",
+          "deletedAt",
+          "accessToken",
+          "refreshToken",
+          "expiresAt"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier of the user"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin",
+              "extendeduser"
+            ],
+            "default": "user",
+            "description": "The role of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "The email of the user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time this resource was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time this resource was updated.",
+            "nullable": true
+          },
+          "loginAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time the user last logged in.",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "The time this resource was deleted.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "uuid",
+          "role",
+          "email",
+          "createdAt",
+          "updatedAt",
+          "loginAt",
+          "deletedAt"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token from the login response. Sent only in the request body (not in the Authorization header).",
+            "example": "1234567890abcdef"
+          }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "type": "object"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "UserGroupDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The UUID of the group",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "key": {
+            "type": "string",
+            "description": "The unique key of the group",
+            "example": "production-east"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name of the group",
+            "example": "Production East Region"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the group was created",
+            "example": "2026-01-01T00:00:00.000Z",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the group was last updated",
+            "example": "2026-01-01T00:00:00.000Z",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "description": "When the group was deleted (if applicable)",
+            "example": "2026-01-01T00:00:00.000Z",
+            "format": "date-time",
+            "nullable": true
+          },
+          "assignedAt": {
+            "type": "string",
+            "description": "When the group was assigned to the user",
+            "example": "2026-01-01T00:00:00.000Z",
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the group assignment is active",
+            "example": true
+          }
+        },
+        "required": [
+          "uuid",
+          "key",
+          "name",
+          "createdAt",
+          "updatedAt",
+          "deletedAt",
+          "assignedAt",
+          "isActive"
+        ]
+      },
+      "PaginatedMeta": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "example": 1,
+            "description": "Total count of results"
+          },
+          "limit": {
+            "type": "number",
+            "example": 100,
+            "description": "Number of items returned in this response."
+          },
+          "offset": {
+            "type": "number",
+            "example": 0,
+            "description": "Results skipped before returning"
+          }
+        },
+        "required": [
+          "total",
+          "limit"
+        ]
+      },
+      "PaginatedUserGroupDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserGroupDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "GroupSparkyDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The UUID of the sparky",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the sparky",
+            "example": "00B0D063C226"
+          },
+          "boxCode": {
+            "type": "string",
+            "description": "The box code of the sparky",
+            "example": "1234567890",
+            "nullable": true
+          }
+        },
+        "required": [
+          "uuid",
+          "serialNumber",
+          "boxCode"
+        ]
+      },
+      "GroupFlintDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The UUID of the flint",
+            "example": "123e4567-e89b-12d3-a456-426614174002"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the flint",
+            "example": "FLINT123456"
+          }
+        },
+        "required": [
+          "uuid",
+          "serialNumber"
+        ]
+      },
+      "GroupAddressDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The UUID of the address",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "sparky": {
+            "description": "The sparky associated with the address",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GroupSparkyDto"
+              }
+            ]
+          },
+          "flint": {
+            "description": "The flint associated with the address",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GroupFlintDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the device was added to the group",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "When the group-to-device relation was last updated",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "uuid",
+          "sparky",
+          "flint",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedGroupAddressDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupAddressDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "FlexAggregateDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "Timestamp of the aggregated reading",
+            "nullable": true
+          },
+          "return": {
+            "type": "number",
+            "description": "Aggregated grid return power for the group",
+            "example": 1200
+          },
+          "delivery": {
+            "type": "number",
+            "description": "Aggregated grid delivery power for the group",
+            "example": 3500
+          },
+          "steerablePowerZeroExport": {
+            "type": "number",
+            "description": "Available steerable power to maintain zero export (in watts) for the group",
+            "example": 500
+          },
+          "chargerConsumption": {
+            "type": "number",
+            "description": "Total charger consumption power for the group",
+            "example": 1500
+          },
+          "solarProduction": {
+            "type": "number",
+            "description": "Total solar inverter production power for the group",
+            "example": 2500
+          },
+          "smartMeterCount": {
+            "type": "number",
+            "description": "Number of smart meters contributing to this aggregate",
+            "example": 10
+          },
+          "solarInverterCount": {
+            "type": "number",
+            "description": "Number of solar inverters contributing to this aggregate",
+            "example": 8
+          },
+          "chargerCount": {
+            "type": "number",
+            "description": "Number of chargers contributing to this aggregate",
+            "example": 6
+          }
+        },
+        "required": [
+          "time",
+          "return",
+          "delivery",
+          "steerablePowerZeroExport",
+          "chargerConsumption",
+          "solarProduction",
+          "smartMeterCount",
+          "solarInverterCount",
+          "chargerCount"
+        ]
+      },
+      "PaginatedFlexAggregateDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlexAggregateDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "DateTime": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateGroupFlexScheduleDto": {
+        "type": "object",
+        "properties": {
+          "groupGridTargetKw": {
+            "type": "object",
+            "description": "Group grid target in kilowatts. Mutually exclusive with addressGridTargetW and solarInverterCapacityPercentage.",
+            "example": 100,
+            "nullable": true
+          },
+          "addressGridTargetW": {
+            "type": "object",
+            "description": "Address-level grid target in watts. Mutually exclusive with groupGridTargetKw and solarInverterCapacityPercentage.",
+            "example": 5000,
+            "nullable": true
+          },
+          "solarInverterCapacityPercentage": {
+            "type": "object",
+            "description": "Solar inverter capacity percentage (0 to 100).",
+            "example": 100,
+            "minimum": 0,
+            "maximum": 100
+          },
+          "time": {
+            "description": "Schedule execution time (ISO 8601).",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          }
+        },
+        "required": [
+          "time"
+        ]
+      },
+      "GroupFlexScheduleDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "UUID of the flex schedule",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "groupGridTargetKw": {
+            "type": "object",
+            "description": "Group grid target in kilowatts. Null means solar inverters operate at 100% (no limitation).",
+            "example": 100,
+            "nullable": true
+          },
+          "addressGridTargetW": {
+            "type": "number",
+            "description": "Address-level grid target in watts. Present when schedule was created with addressGridTargetW.",
+            "example": 5000
+          },
+          "solarInverterCapacityPercentage": {
+            "type": "number",
+            "description": "Solar inverter capacity percentage (0 to 100). Present when schedule was created with solarInverterCapacityPercentage.",
+            "example": 100,
+            "nullable": true
+          },
+          "time": {
+            "description": "Schedule execution time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "Schedule creation time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "updatedAt": {
+            "description": "Schedule update time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "deletedAt": {
+            "type": "object",
+            "description": "Schedule deletion time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "nullable": true
+          }
+        },
+        "required": [
+          "uuid",
+          "time",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedGroupFlexScheduleDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupFlexScheduleDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "Electricity15min": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "ISO 8601 (with timezone) start time of result"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "ISO 8601 (with timezone) end time of result"
+          },
+          "delivery_peak": {
+            "type": "number",
+            "example": "1.401",
+            "description": "Actual peak energy delivered in kWh in these 15 minutes"
+          },
+          "delivery_off_peak": {
+            "type": "number",
+            "example": "1.020",
+            "description": "Actual off-peak energy delivered in kWh in these 15 minutes"
+          },
+          "delivery": {
+            "type": "number",
+            "example": "2.421",
+            "description": "Actual energy delivered in kWh in these 15 minutes"
+          },
+          "return_peak": {
+            "type": "number",
+            "example": "1.401",
+            "description": "Actual peak energy returned in kWh in these 15 minutes"
+          },
+          "return_off_peak": {
+            "type": "number",
+            "example": "1.020",
+            "description": "Actual off-peak energy returned in kWh in these 15 minutes"
+          },
+          "return": {
+            "type": "number",
+            "example": "2.421",
+            "description": "Actual energy returned in kWh in these 15 minutes"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "delivery_peak",
+          "delivery_off_peak",
+          "delivery",
+          "return_peak",
+          "return_off_peak",
+          "return"
+        ]
+      },
+      "Gas15min": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "ISO 8601 (with timezone) start time of result"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-08-12T12:00:00.000Z",
+            "description": "ISO 8601 (with timezone) end time of result"
+          },
+          "delivery": {
+            "type": "number",
+            "example": "2.45",
+            "description": "Actual gas in m3 in these 15 minutes"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "delivery"
+        ]
+      },
+      "Total15minElectricity": {
+        "type": "object",
+        "properties": {
+          "delivery_peak": {
+            "type": "number",
+            "example": "1.401",
+            "description": "Actual peak energy delivered in kWh in these 15 minutes"
+          },
+          "delivery_off_peak": {
+            "type": "number",
+            "example": "1.020",
+            "description": "Actual off-peak energy delivered in kWh in these 15 minutes"
+          },
+          "delivery": {
+            "type": "number",
+            "example": "2.421",
+            "description": "Actual energy delivered in kWh in these 15 minutes"
+          },
+          "return_peak": {
+            "type": "number",
+            "example": "1.401",
+            "description": "Actual peak energy returned in kWh in these 15 minutes"
+          },
+          "return_off_peak": {
+            "type": "number",
+            "example": "1.020",
+            "description": "Actual off-peak energy returned in kWh in these 15 minutes"
+          },
+          "return": {
+            "type": "number",
+            "example": "2.421",
+            "description": "Actual energy returned in kWh in these 15 minutes"
+          }
+        },
+        "required": [
+          "delivery_peak",
+          "delivery_off_peak",
+          "delivery",
+          "return_peak",
+          "return_off_peak",
+          "return"
+        ]
+      },
+      "Total15minGas": {
+        "type": "object",
+        "properties": {
+          "delivery": {
+            "type": "number",
+            "example": "0.421",
+            "description": "Actual gas delivered in m3 in these 15 minutes"
+          }
+        },
+        "required": [
+          "delivery"
+        ]
+      },
+      "Total15min": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "ISO 8601 (with timezone) start time of result"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "ISO 8601 (with timezone) end time of result"
+          },
+          "electricity": {
+            "$ref": "#/components/schemas/Total15minElectricity"
+          },
+          "gas": {
+            "$ref": "#/components/schemas/Total15minGas"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "electricity",
+          "gas"
+        ]
+      },
+      "ElectricityRecord": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "example": "2023-01-01T12:15:00+02:00",
+            "description": "ISO 8601 (with timezone) start time of result"
+          },
+          "delivery1": {
+            "type": "number",
+            "example": "32500.401",
+            "description": "Delivered electricity in kWh on counter position 1"
+          },
+          "delivery2": {
+            "type": "number",
+            "example": "15000.020",
+            "description": "Delivered electricity in kWh on counter position 2"
+          },
+          "return1": {
+            "type": "number",
+            "example": "7013.401",
+            "description": "Returned electricity in kWh on counter position 1"
+          },
+          "return2": {
+            "type": "number",
+            "example": "16510.020",
+            "description": "Returned electricity in kWh on counter position 2"
+          },
+          "activeCounter": {
+            "type": "string",
+            "example": "2",
+            "description": "Active counter in meter at this time"
+          }
+        },
+        "required": [
+          "date",
+          "delivery1",
+          "delivery2",
+          "return1",
+          "return2",
+          "activeCounter"
+        ]
+      },
+      "DsmrRecord": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string"
+          },
+          "uptime": {
+            "type": "string"
+          },
+          "hwid": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "rssi": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "smart_meter_type": {
+            "type": "string"
+          },
+          "message_datetime": {
+            "type": "string"
+          },
+          "p1_version": {
+            "type": "string"
+          },
+          "meter_number_elec": {
+            "type": "string"
+          },
+          "gas_meter_number": {
+            "type": "string"
+          },
+          "gas_meter_reading_datetime": {
+            "type": "string"
+          },
+          "tariff_indicator_elec": {
+            "type": "string"
+          },
+          "power_returned": {
+            "type": "string"
+          },
+          "power_delivered": {
+            "type": "string"
+          },
+          "active_power_delivery_l1": {
+            "type": "string"
+          },
+          "active_power_delivery_l2": {
+            "type": "string"
+          },
+          "active_power_delivery_l3": {
+            "type": "string"
+          },
+          "active_power_return_l1": {
+            "type": "string"
+          },
+          "active_power_return_l2": {
+            "type": "string"
+          },
+          "active_power_return_l3": {
+            "type": "string"
+          },
+          "meter_reading_delivery_1": {
+            "type": "string"
+          },
+          "meter_reading_delivery_2": {
+            "type": "string"
+          },
+          "meter_reading_return_1": {
+            "type": "string"
+          },
+          "meter_reading_return_2": {
+            "type": "string"
+          },
+          "gas_meter_reading": {
+            "type": "string"
+          },
+          "voltage_l1": {
+            "type": "string"
+          },
+          "voltage_l2": {
+            "type": "string"
+          },
+          "voltage_l3": {
+            "type": "string"
+          },
+          "current_l1": {
+            "type": "string"
+          },
+          "current_l2": {
+            "type": "string"
+          },
+          "current_l3": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "time",
+          "uptime",
+          "hwid",
+          "ip",
+          "rssi",
+          "version",
+          "smart_meter_type",
+          "message_datetime",
+          "p1_version",
+          "meter_number_elec",
+          "gas_meter_number",
+          "gas_meter_reading_datetime",
+          "tariff_indicator_elec",
+          "power_returned",
+          "power_delivered",
+          "active_power_delivery_l1",
+          "active_power_delivery_l2",
+          "active_power_delivery_l3",
+          "active_power_return_l1",
+          "active_power_return_l2",
+          "active_power_return_l3",
+          "meter_reading_delivery_1",
+          "meter_reading_delivery_2",
+          "meter_reading_return_1",
+          "meter_reading_return_2",
+          "gas_meter_reading",
+          "voltage_l1",
+          "voltage_l2",
+          "voltage_l3",
+          "current_l1",
+          "current_l2",
+          "current_l3"
+        ]
+      },
+      "SparkyDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier of the sparky",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the sparky",
+            "example": "00B0D063C226"
+          },
+          "addressUuid": {
+            "type": "string",
+            "description": "The unique identifier of the address this sparky is connected to",
+            "example": "35f300d6-03e5-441d-b430-ec476cee48fb"
+          },
+          "connectedAt": {
+            "description": "When the sparky was connected to the address",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "disconnectedAt": {
+            "description": "When the sparky was disconnected from the address (null if still connected)",
+            "example": "2026-01-01T00:00:00.000Z",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "When the sparky was created",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "updatedAt": {
+            "description": "When the sparky was last updated",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          }
+        },
+        "required": [
+          "uuid",
+          "serialNumber",
+          "addressUuid",
+          "connectedAt",
+          "disconnectedAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SparkyBoxCodeDto": {
+        "type": "object",
+        "properties": {
+          "boxCode": {
+            "type": "string",
+            "description": "The box code to search for",
+            "example": "V3-1002548"
+          }
+        },
+        "required": [
+          "boxCode"
+        ]
+      },
+      "FlintDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "The unique identifier of the flint",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "The serial number of the flint",
+            "example": "00B0D063C226"
+          },
+          "addressUuid": {
+            "type": "string",
+            "description": "The unique identifier of the address this flint is connected to",
+            "example": "35f300d6-03e5-441d-b430-ec476cee48fb"
+          },
+          "connectedAt": {
+            "description": "When the flint was connected to the address",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "disconnectedAt": {
+            "description": "When the flint was disconnected from the address (null if still connected)",
+            "example": "2026-01-01T00:00:00.000Z",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "When the flint was created",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "updatedAt": {
+            "description": "When the flint was last updated",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          }
+        },
+        "required": [
+          "uuid",
+          "serialNumber",
+          "addressUuid",
+          "connectedAt",
+          "disconnectedAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Elec15MinDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "description": "ISO 8601 time of the 15-minute interval start",
+            "example": "2026-01-01T00:00:00+01:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "Electricity meter number",
+            "example": "E123456789"
+          },
+          "delivery": {
+            "type": "number",
+            "description": "Energy delivered in kWh during the interval",
+            "example": 1.234
+          },
+          "return": {
+            "type": "number",
+            "description": "Energy returned in kWh during the interval",
+            "example": 0.456
+          }
+        },
+        "required": [
+          "time",
+          "meterNumber",
+          "delivery",
+          "return"
+        ]
+      },
+      "Elec1DayDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "description": "ISO 8601 date representing the day",
+            "example": "2026-01-01",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "Electricity meter number",
+            "example": "E123456789"
+          },
+          "delivery1": {
+            "type": "number",
+            "description": "Cumulative peak tariff delivered energy (kWh) for the day",
+            "example": 12.345
+          },
+          "delivery2": {
+            "type": "number",
+            "description": "Cumulative off-peak delivered energy (kWh) for the day",
+            "example": 23.456
+          },
+          "return1": {
+            "type": "number",
+            "description": "Cumulative peak tariff returned energy (kWh) for the day",
+            "example": 1.234
+          },
+          "return2": {
+            "type": "number",
+            "description": "Cumulative off-peak returned energy (kWh) for the day",
+            "example": 2.345
+          }
+        },
+        "required": [
+          "date",
+          "meterNumber",
+          "delivery1",
+          "delivery2",
+          "return1",
+          "return2"
+        ]
+      },
+      "Elec1MonthDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "description": "ISO 8601 date representing the month (first day of month)",
+            "example": "2026-01-01",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "Electricity meter number",
+            "example": "E123456789"
+          },
+          "delivery1": {
+            "type": "number",
+            "description": "Cumulative peak tariff delivered energy (kWh) for the month",
+            "example": 345.678
+          },
+          "delivery2": {
+            "type": "number",
+            "description": "Cumulative off-peak delivered energy (kWh) for the month",
+            "example": 456.789
+          },
+          "return1": {
+            "type": "number",
+            "description": "Cumulative peak tariff returned energy (kWh) for the month",
+            "example": 12.34
+          },
+          "return2": {
+            "type": "number",
+            "description": "Cumulative off-peak returned energy (kWh) for the month",
+            "example": 23.45
+          }
+        },
+        "required": [
+          "date",
+          "meterNumber",
+          "delivery1",
+          "delivery2",
+          "return1",
+          "return2"
+        ]
+      },
+      "Gas15MinDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "description": "ISO 8601 time of the 15-minute interval start",
+            "example": "2026-01-01T00:00:00+01:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "Gas meter number",
+            "example": "G123456789"
+          },
+          "delivery": {
+            "type": "number",
+            "description": "Gas delivered in m³ during the interval",
+            "example": 0.012
+          }
+        },
+        "required": [
+          "time",
+          "meterNumber",
+          "delivery"
+        ]
+      },
+      "Gas1DayDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "description": "ISO 8601 date representing the day",
+            "example": "2026-01-01",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "Gas meter number",
+            "example": "G123456789"
+          },
+          "delivery": {
+            "type": "number",
+            "description": "Cumulative delivered gas (m³) for the day",
+            "example": 3.21
+          }
+        },
+        "required": [
+          "date",
+          "meterNumber",
+          "delivery"
+        ]
+      },
+      "Gas1MonthDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "description": "ISO 8601 date representing the month (first day of month)",
+            "example": "2026-01-01",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "Gas meter number",
+            "example": "G123456789"
+          },
+          "delivery": {
+            "type": "number",
+            "description": "Cumulative delivered gas (m³) for the month",
+            "example": 78.9
+          }
+        },
+        "required": [
+          "date",
+          "meterNumber",
+          "delivery"
+        ]
+      },
+      "VehicleInfoDto": {
+        "type": "object",
+        "properties": {
+          "brand": {
+            "type": "string",
+            "example": "Tesla",
+            "description": "The brand of the vehicle"
+          },
+          "model": {
+            "type": "string",
+            "example": "Model S",
+            "description": "The model of the vehicle"
+          },
+          "year": {
+            "type": "number",
+            "example": "2026",
+            "description": "The year of the vehicle"
+          },
+          "lastSeen": {
+            "type": "object",
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the last update (ISO 8601).",
+            "nullable": true
+          }
+        },
+        "required": [
+          "brand",
+          "model",
+          "year",
+          "lastSeen"
+        ]
+      },
+      "LocationDto": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "example": "00.000000",
+            "description": "The latitude of the vehicle location"
+          },
+          "lng": {
+            "type": "number",
+            "example": "00.000000",
+            "description": "The longitude of the vehicle location"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ]
+      },
+      "VehicleLocationDto": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/LocationDto"
+          },
+          "time": {
+            "type": "object",
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the location update (ISO 8601).",
+            "nullable": true
+          }
+        },
+        "required": [
+          "location",
+          "time"
+        ]
+      },
+      "VehicleOdometerDto": {
+        "type": "object",
+        "properties": {
+          "km": {
+            "type": "number",
+            "example": "101",
+            "description": "The odometer reading in kilometers"
+          },
+          "time": {
+            "type": "object",
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the odometer update (ISO 8601).",
+            "nullable": true
+          }
+        },
+        "required": [
+          "km",
+          "time"
+        ]
+      },
+      "VehicleChargeDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "object",
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the charge state update (ISO 8601).",
+            "nullable": true
+          },
+          "isFullyCharged": {
+            "type": "object",
+            "example": "false",
+            "description": "Indicates if the vehicle is currently fully charged"
+          },
+          "isPluggedIn": {
+            "type": "object",
+            "example": "false",
+            "description": "Indicates if the vehicle is plugged in"
+          },
+          "isCharging": {
+            "type": "object",
+            "example": "false",
+            "description": "Indicates if the vehicle is charging"
+          },
+          "batteryLevel": {
+            "type": "object",
+            "example": "60",
+            "description": "The current battery level of the vehicle in percentage"
+          },
+          "range": {
+            "type": "object",
+            "example": "250",
+            "description": "The current range of the vehicle in kilometers"
+          },
+          "batteryCapacity": {
+            "type": "object",
+            "example": "95",
+            "description": "The total battery capacity of the vehicle in kilowatt-hours"
+          },
+          "chargeLimit": {
+            "type": "object",
+            "example": "80",
+            "description": "The charge limit of the vehicle in percentage"
+          },
+          "maxCurrent": {
+            "type": "object",
+            "example": "13",
+            "description": "The maximum current the vehicle can draw from the charger in amperes"
+          },
+          "powerDeliveryState": {
+            "type": "number",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              -1
+            ],
+            "example": 3,
+            "description": "The maximum current the vehicle can draw from the charger in amperes"
+          }
+        },
+        "required": [
+          "time",
+          "isFullyCharged",
+          "isPluggedIn",
+          "isCharging",
+          "batteryLevel",
+          "range",
+          "batteryCapacity",
+          "chargeLimit",
+          "maxCurrent",
+          "powerDeliveryState"
+        ]
+      },
+      "VehicleDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the vehicle",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          },
+          "vin": {
+            "type": "string",
+            "description": "The vin of the vehicle",
+            "example": "1HGBH41JXMN109186"
+          },
+          "info": {
+            "$ref": "#/components/schemas/VehicleInfoDto"
+          },
+          "lastLocation": {
+            "$ref": "#/components/schemas/VehicleLocationDto"
+          },
+          "lastOdometer": {
+            "$ref": "#/components/schemas/VehicleOdometerDto"
+          },
+          "lastChargeState": {
+            "$ref": "#/components/schemas/VehicleChargeDto"
+          },
+          "createdAt": {
+            "type": "object",
+            "description": "The timestamp this resource was created.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "object",
+            "description": "The timestamp this resource was updated.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "deletedAt": {
+            "type": "object",
+            "description": "The timestamp this resource was deleted.",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "identifier",
+          "vin",
+          "info",
+          "lastLocation",
+          "lastOdometer",
+          "lastChargeState",
+          "createdAt",
+          "updatedAt",
+          "deletedAt"
+        ]
+      },
+      "PaginatedVehicleDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "ChargerChargeStateDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "object",
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the charge state update"
+          },
+          "isPluggedIn": {
+            "type": "object",
+            "example": "false",
+            "description": "Indicates if the charger is plugged in"
+          },
+          "isCharging": {
+            "type": "object",
+            "example": "false",
+            "description": "Indicates if the charger is charging"
+          },
+          "chargeRate": {
+            "type": "object",
+            "example": "11",
+            "description": "The charge rate the charger can draw from the net in amperes"
+          },
+          "maxCurrent": {
+            "type": "object",
+            "example": "13",
+            "description": "The maximum current the charger can draw from the net in amperes"
+          },
+          "powerDeliveryState": {
+            "type": "number",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              -1
+            ],
+            "example": 3,
+            "description": "The current state of the charger"
+          }
+        },
+        "required": [
+          "time",
+          "isPluggedIn",
+          "isCharging",
+          "chargeRate",
+          "maxCurrent",
+          "powerDeliveryState"
+        ]
+      },
+      "ChargerDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the charger",
+            "example": "550e8400-e29b-41d4-a716-446655440007"
+          },
+          "brand": {
+            "type": "string",
+            "description": "The brand of the charger",
+            "example": "Tesla"
+          },
+          "model": {
+            "type": "string",
+            "description": "The model of the charger",
+            "example": "Wall Connector Gen 3"
+          },
+          "year": {
+            "type": "number",
+            "description": "The year of the charger",
+            "example": "2026"
+          },
+          "isSteerable": {
+            "type": "boolean",
+            "description": "Whether the charger supports smart charging / steering",
+            "example": true
+          },
+          "liveDataSupported": {
+            "type": "boolean",
+            "description": "Whether the charger supports live data streaming",
+            "example": true
+          },
+          "lastChargeState": {
+            "$ref": "#/components/schemas/ChargerChargeStateDto"
+          },
+          "createdAt": {
+            "type": "object",
+            "description": "The timestamp this resource was created.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "object",
+            "description": "The timestamp this resource was updated.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "deletedAt": {
+            "type": "object",
+            "description": "The timestamp this resource was deleted.",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "identifier",
+          "brand",
+          "model",
+          "year",
+          "lastChargeState",
+          "createdAt",
+          "updatedAt",
+          "deletedAt"
+        ]
+      },
+      "PaginatedChargerDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargerDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "ChargerProductionReadingDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "Timestamp of the reading"
+          },
+          "power": {
+            "type": "number",
+            "description": "Instantaneous AC power output in watts",
+            "example": 1000
+          },
+          "energyTotal": {
+            "type": "number",
+            "description": "Total lifetime energy produced (as provided by device)",
+            "example": 1000
+          },
+          "current": {
+            "type": "object",
+            "description": "Phase currents in amperes (if available)",
+            "example": {
+              "phaseOne": 10,
+              "phaseTwo": 10,
+              "phaseThree": 10
+            }
+          },
+          "voltage": {
+            "type": "object",
+            "description": "Phase voltages in volts (if available)",
+            "example": {
+              "phaseOne": 230,
+              "phaseTwo": 230,
+              "phaseThree": 230
+            }
+          }
+        },
+        "required": [
+          "time",
+          "power"
+        ]
+      },
+      "PaginatedChargerProductionReadingDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargerProductionReadingDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SolarInverterInfoDto": {
+        "type": "object",
+        "properties": {
+          "brand": {
+            "type": "string",
+            "description": "Brand name",
+            "example": "brand"
+          },
+          "model": {
+            "type": "object",
+            "description": "Model name",
+            "example": "model",
+            "nullable": true
+          },
+          "isSteerable": {
+            "type": "object",
+            "description": "Whether the inverter is steerable",
+            "example": true,
+            "nullable": true
+          },
+          "liveDataSupported": {
+            "type": "boolean",
+            "description": "Indicates if the inverter supports solar live updates",
+            "example": true
+          },
+          "curtailmentOptions": {
+            "description": "Available curtailment options",
+            "example": [
+              "manual"
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "brand",
+          "liveDataSupported"
+        ]
+      },
+      "SolarInverterProductionStateDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "Timestamp of the production state",
+            "nullable": true
+          },
+          "isProducing": {
+            "type": "boolean",
+            "example": false,
+            "description": "Indicates if the solar inverter is producing"
+          },
+          "productionRate": {
+            "type": "number",
+            "example": 13,
+            "description": "The current production rate of the solar inverter in Wh"
+          },
+          "totalLifetimeProduction": {
+            "type": "number",
+            "example": 1489300,
+            "description": "The total lifetime production of the solar inverter in Wh"
+          }
+        },
+        "required": [
+          "time",
+          "isProducing",
+          "productionRate",
+          "totalLifetimeProduction"
+        ]
+      },
+      "SolarInverterDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "Solar inverter identifier",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "info": {
+            "description": "Solar inverter information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SolarInverterInfoDto"
+              }
+            ]
+          },
+          "lastProductionState": {
+            "description": "Last production state",
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SolarInverterProductionStateDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "Created at timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "Updated at timestamp",
+            "nullable": true
+          }
+        },
+        "required": [
+          "identifier",
+          "info",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedSolarInverterDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SolarInverterDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SolarInverterProductionReadingDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "Timestamp of the reading"
+          },
+          "power": {
+            "type": "number",
+            "description": "Instantaneous AC power output in watts",
+            "example": 1000
+          },
+          "energyTotal": {
+            "type": "number",
+            "description": "Total lifetime energy produced (as provided by device)",
+            "example": 1000
+          },
+          "current": {
+            "type": "object",
+            "description": "Phase currents in amperes (if available)",
+            "example": {
+              "phaseOne": 10,
+              "phaseTwo": 10,
+              "phaseThree": 10
+            }
+          },
+          "voltage": {
+            "type": "object",
+            "description": "Phase voltages in volts (if available)",
+            "example": {
+              "phaseOne": 230,
+              "phaseTwo": 230,
+              "phaseThree": 230
+            }
+          }
+        },
+        "required": [
+          "time",
+          "power"
+        ]
+      },
+      "PaginatedSolarInverterProductionReadingDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SolarInverterProductionReadingDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "CreateScheduleDto": {
+        "type": "object",
+        "properties": {
+          "powerlimit": {
+            "type": "object",
+            "description": "Power limit percentage (0-100). Mutually exclusive with zeroExport",
+            "example": 100
+          },
+          "zeroExport": {
+            "type": "object",
+            "description": "Enable zero export. Mutually exclusive with powerlimit",
+            "example": false
+          },
+          "time": {
+            "description": "Schedule execution time (ISO 8601)",
+            "example": "2026-01-01T00:00:00.000+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          }
+        },
+        "required": [
+          "time"
+        ]
+      },
+      "ScheduleDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "powerlimit": {
+            "type": "object",
+            "example": 100,
+            "nullable": true
+          },
+          "zeroExport": {
+            "type": "boolean",
+            "example": false
+          },
+          "time": {
+            "example": "2026-01-01T00:00:00.000+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          }
+        },
+        "required": [
+          "uuid",
+          "zeroExport",
+          "time"
+        ]
+      },
+      "PaginatedScheduleDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SolarInverterFlexScheduleDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "UUID of the flex schedule",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "groupUuid": {
+            "type": "string",
+            "description": "UUID of the group this schedule belongs to",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "groupGridTargetKw": {
+            "type": "object",
+            "description": "Group grid target in kilowatts. Null means solar inverters operate at 100% (no limitation).",
+            "example": 100,
+            "nullable": true
+          },
+          "addressGridTargetW": {
+            "type": "number",
+            "description": "Address-level grid target in watts. Present when schedule was created with addressGridTargetW.",
+            "example": 5000
+          },
+          "solarInverterCapacityPercentage": {
+            "type": "number",
+            "description": "Solar inverter capacity percentage (0 to 100). Present when schedule was created with solarInverterCapacityPercentage.",
+            "example": 100,
+            "nullable": true
+          },
+          "time": {
+            "description": "Schedule execution time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "createdAt": {
+            "description": "Schedule creation time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "object",
+            "description": "Schedule update time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "object",
+            "description": "Schedule deletion time (ISO 8601)",
+            "example": "2026-03-24T13:59:49.050+00:00",
+            "nullable": true
+          }
+        },
+        "required": [
+          "uuid",
+          "groupUuid",
+          "time",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedSolarInverterFlexScheduleDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SolarInverterFlexScheduleDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SolarInverterProductionForecastIntervalsDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of interval"
+          },
+          "whSum": {
+            "type": "number",
+            "example": 1000,
+            "description": "The Wh sum of the interval in Wh"
+          }
+        },
+        "required": [
+          "start",
+          "whSum"
+        ]
+      },
+      "SolarInverterProductionForecastDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the solar inverter production forecast",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "solarInverterIdentifier": {
+            "type": "string",
+            "description": "The uuid of the solar inverter",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "intervals": {
+            "description": "The intervals of the solar inverter production forecast",
+            "nullable": true,
+            "example": [
+              {
+                "start": "2025-01-01T00:00:00.000Z",
+                "whSum": 1000
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SolarInverterProductionForecastIntervalsDto"
+            }
+          },
+          "processedTime": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the processed time of the solar inverter production forecast"
+          },
+          "modelVersion": {
+            "type": "string",
+            "example": "93001b87-0716-5819-94ca-e3a9eae50df4",
+            "description": "The version of model used to make the solar inverter production forecast"
+          },
+          "forecastType": {
+            "type": "string",
+            "example": "hourly",
+            "description": "The type of forecast"
+          },
+          "forecastQuality": {
+            "type": "number",
+            "example": 95,
+            "description": "The quality score of the forecast (0-100)"
+          },
+          "forecastTags": {
+            "example": [
+              "high_confidence",
+              "validated"
+            ],
+            "description": "Tags associated with the forecast",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forecastDuration": {
+            "type": "number",
+            "example": 168,
+            "description": "The duration of the forecast in hours"
+          },
+          "forecastTime": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp when the forecast was generated"
+          }
+        },
+        "required": [
+          "identifier",
+          "solarInverterIdentifier",
+          "intervals",
+          "processedTime",
+          "modelVersion",
+          "forecastTags"
+        ]
+      },
+      "PaginatedSolarInverterProductionForecastDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SolarInverterProductionForecastDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "ProductionInterval": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "UTC time of result"
+          },
+          "production": {
+            "type": "number",
+            "example": 242,
+            "description": "Wh value"
+          }
+        },
+        "required": [
+          "time",
+          "production"
+        ]
+      },
+      "PaginatedProductionIntervalResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductionInterval"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SmartMeterDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the smart meter",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "addressUuid": {
+            "type": "string",
+            "description": "The uuid of the address this smart meter belongs to",
+            "example": "35f300d6-03e5-441d-b430-ec476cee48fb"
+          },
+          "smartMeterType": {
+            "type": "string",
+            "description": "The type of the smart meter",
+            "example": "SMETS2"
+          },
+          "meterNumber": {
+            "type": "string",
+            "description": "The meter number of the smart meter",
+            "example": "1234567890123"
+          },
+          "gasMeterNumber": {
+            "type": "string",
+            "description": "The gas meter number of the smart meter",
+            "example": "9876543210987"
+          },
+          "eanElectricity": {
+            "type": "string",
+            "description": "The electricity EAN of the smart meter",
+            "example": "871234567890123456",
+            "nullable": true
+          },
+          "eanGas": {
+            "type": "string",
+            "description": "The gas EAN of the smart meter",
+            "example": "871234567890123457",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2024-01-01T00:00:00.000+00:00",
+            "description": "Created at timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000+00:00",
+            "description": "Updated at timestamp",
+            "nullable": true
+          }
+        },
+        "required": [
+          "identifier",
+          "addressUuid",
+          "smartMeterType",
+          "meterNumber",
+          "gasMeterNumber",
+          "eanElectricity",
+          "eanGas",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedSmartMeterDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "PhasePowerDto": {
+        "type": "object",
+        "properties": {
+          "net": {
+            "type": "number",
+            "description": "Net power",
+            "example": 1000.5
+          },
+          "delivering": {
+            "type": "number",
+            "description": "Delivering power",
+            "example": 1500
+          },
+          "returning": {
+            "type": "number",
+            "description": "Returning power",
+            "example": 500
+          }
+        }
+      },
+      "ActivePowerDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Total active power",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhasePowerDto"
+              }
+            ]
+          },
+          "phaseOne": {
+            "description": "Phase one active power",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhasePowerDto"
+              }
+            ]
+          },
+          "phaseTwo": {
+            "description": "Phase two active power",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhasePowerDto"
+              }
+            ]
+          },
+          "phaseThree": {
+            "description": "Phase three active power",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhasePowerDto"
+              }
+            ]
+          }
+        }
+      },
+      "CurrentDto": {
+        "type": "object",
+        "properties": {
+          "phaseOne": {
+            "type": "number",
+            "description": "Phase one current",
+            "example": 10.5
+          },
+          "phaseTwo": {
+            "type": "number",
+            "description": "Phase two current",
+            "example": 10.5
+          },
+          "phaseThree": {
+            "type": "number",
+            "description": "Phase three current",
+            "example": 10.5
+          }
+        }
+      },
+      "VoltageDto": {
+        "type": "object",
+        "properties": {
+          "phaseOne": {
+            "type": "number",
+            "description": "Phase one voltage",
+            "example": 230
+          },
+          "phaseTwo": {
+            "type": "number",
+            "description": "Phase two voltage",
+            "example": 230
+          },
+          "phaseThree": {
+            "type": "number",
+            "description": "Phase three voltage",
+            "example": 230
+          }
+        }
+      },
+      "SmartMeterEnergyReadingDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "description": "Timestamp of the reading",
+            "example": "2026-01-01T00:00:00.000+00:00",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "activePower": {
+            "description": "Active power measurements",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActivePowerDto"
+              }
+            ]
+          },
+          "current": {
+            "description": "Current measurements",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CurrentDto"
+              }
+            ]
+          },
+          "currentCalculated": {
+            "description": "Calculated current measurements",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CurrentDto"
+              }
+            ]
+          },
+          "voltage": {
+            "description": "Voltage measurements",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VoltageDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "time",
+          "activePower",
+          "current",
+          "currentCalculated",
+          "voltage"
+        ]
+      },
+      "PaginatedSmartMeterEnergyReadingDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterEnergyReadingDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SmartMeterGasReadingDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "description": "Timestamp of the reading",
+            "example": "2026-01-01T00:00:00.000Z",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "p1Version": {
+            "type": "string",
+            "description": "P1 version",
+            "example": "5.0"
+          },
+          "delivery": {
+            "type": "number",
+            "description": "Gas delivery in dm³",
+            "example": 1234.56
+          }
+        },
+        "required": [
+          "time",
+          "p1Version",
+          "delivery"
+        ]
+      },
+      "PaginatedSmartMeterGasReadingDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterGasReadingDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "WhInterval": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "UTC time of result"
+          },
+          "delivery": {
+            "type": "number",
+            "example": 242,
+            "description": "Wh value"
+          },
+          "return": {
+            "type": "number",
+            "example": 100,
+            "description": "Wh value"
+          }
+        },
+        "required": [
+          "time",
+          "delivery",
+          "return"
+        ]
+      },
+      "PaginatedWhIntervalResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WhInterval"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "GasInterval": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "example": "2026-01-01T12:00:00.000Z",
+            "description": "UTC time of result"
+          },
+          "delivery": {
+            "type": "number",
+            "example": 242,
+            "description": "dm3 value"
+          }
+        },
+        "required": [
+          "time",
+          "delivery"
+        ]
+      },
+      "PaginatedGasIntervalResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GasInterval"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SmartMeterDeliveryForecastIntervalsDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-01-01T00:00:00.000Z",
+            "description": "The timestamp of interval"
+          },
+          "whSum": {
+            "type": "number",
+            "example": 1000,
+            "description": "The Wh sum of the interval in Wh"
+          }
+        },
+        "required": [
+          "start",
+          "whSum"
+        ]
+      },
+      "SmartMeterDeliveryForecastDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the smart meter delivery forecast",
+            "example": "770e8400-e29b-41d4-a716-446655440003"
+          },
+          "smartMeterIdentifier": {
+            "type": "string",
+            "description": "The uuid of the smart meter",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "intervals": {
+            "description": "The intervals of the smart meter delivery forecast",
+            "example": [
+              {
+                "start": "2025-01-01T00:00:00.000Z",
+                "whSum": 1000
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterDeliveryForecastIntervalsDto"
+            }
+          },
+          "processedTime": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the processed time of the smart meter delivery forecast"
+          },
+          "modelVersion": {
+            "type": "string",
+            "example": "v3",
+            "description": "The version of model used to make the smart meter delivery forecast"
+          },
+          "forecastType": {
+            "type": "string",
+            "example": "hourly",
+            "description": "The type of forecast"
+          },
+          "forecastQuality": {
+            "type": "number",
+            "example": 95,
+            "description": "The quality score of the forecast (0-100)"
+          },
+          "forecastTags": {
+            "example": [
+              "high_confidence",
+              "validated"
+            ],
+            "description": "Tags associated with the forecast",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forecastDuration": {
+            "type": "number",
+            "example": 168,
+            "description": "The duration of the forecast in hours"
+          },
+          "forecastTime": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp when the forecast was generated"
+          }
+        },
+        "required": [
+          "identifier",
+          "smartMeterIdentifier",
+          "intervals",
+          "processedTime",
+          "modelVersion",
+          "forecastTags"
+        ]
+      },
+      "PaginatedSmartMeterDeliveryForecastDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterDeliveryForecastDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "SmartMeterReturnForecastIntervalsDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2025-01-01T00:00:00.000Z",
+            "description": "The timestamp of interval"
+          },
+          "whSum": {
+            "type": "number",
+            "example": 1000,
+            "description": "The Wh sum of the interval in Wh"
+          }
+        },
+        "required": [
+          "start",
+          "whSum"
+        ]
+      },
+      "SmartMeterReturnForecastDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the smart meter return forecast",
+            "example": "660e8400-e29b-41d4-a716-446655440002"
+          },
+          "smartMeterIdentifier": {
+            "type": "string",
+            "description": "The uuid of the smart meter",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "intervals": {
+            "description": "The intervals of the smart meter return forecast",
+            "nullable": true,
+            "example": [
+              {
+                "start": "2025-01-01T00:00:00.000Z",
+                "whSum": 1000
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterReturnForecastIntervalsDto"
+            }
+          },
+          "processedTime": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the processed time of the smart meter return forecast"
+          },
+          "modelVersion": {
+            "type": "string",
+            "example": "v3",
+            "description": "The version of model used to make the smart meter return forecast"
+          },
+          "forecastType": {
+            "type": "string",
+            "example": "hourly",
+            "description": "The type of forecast"
+          },
+          "forecastQuality": {
+            "type": "number",
+            "example": 95,
+            "description": "The quality score of the forecast (0-100)"
+          },
+          "forecastTags": {
+            "example": [
+              "high_confidence",
+              "validated"
+            ],
+            "description": "Tags associated with the forecast",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forecastDuration": {
+            "type": "number",
+            "example": 168,
+            "description": "The duration of the forecast in hours"
+          },
+          "forecastTime": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp when the forecast was generated"
+          }
+        },
+        "required": [
+          "identifier",
+          "smartMeterIdentifier",
+          "intervals",
+          "processedTime",
+          "modelVersion",
+          "forecastTags"
+        ]
+      },
+      "PaginatedSmartMeterReturnForecastDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SmartMeterReturnForecastDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "HvacTemperatureStateDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the HVAC state update in milliseconds",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DateTime"
+              }
+            ]
+          },
+          "currentTemperature": {
+            "type": "object",
+            "example": "11",
+            "description": "The current temperature from the hvac in celsius"
+          },
+          "isActive": {
+            "type": "object",
+            "example": "false",
+            "description": "Indicates if the hvac is active"
+          }
+        },
+        "required": [
+          "time",
+          "currentTemperature",
+          "isActive"
+        ]
+      },
+      "HvacDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the hvac",
+            "example": "550e8400-e29b-41d4-a716-446655440004"
+          },
+          "brand": {
+            "type": "string",
+            "description": "The brand of the hvac",
+            "example": "Daikin"
+          },
+          "model": {
+            "type": "string",
+            "description": "The model of the hvac",
+            "example": "FTXM25R"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The display name of the hvac",
+            "example": "Living room"
+          },
+          "groupName": {
+            "type": "string",
+            "description": "The group name of the hvac",
+            "example": "Home"
+          },
+          "category": {
+            "type": "string",
+            "description": "The category of the hvac",
+            "example": "HEATING"
+          },
+          "lastTemperatureState": {
+            "$ref": "#/components/schemas/HvacTemperatureStateDto"
+          },
+          "createdAt": {
+            "type": "object",
+            "description": "The timestamp this resource was created.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "object",
+            "description": "The timestamp this resource was updated.",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "identifier",
+          "brand",
+          "model",
+          "displayName",
+          "groupName",
+          "category",
+          "lastTemperatureState",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedHvacDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HvacDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "BatteryChargeStateDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "object",
+            "example": "2026-01-01T00:00:00.000Z",
+            "description": "The timestamp of the charge state update (ISO 8601).",
+            "nullable": true
+          },
+          "status": {
+            "type": "object",
+            "example": "1",
+            "description": "The current status of the battery [UNKNOWN = 0, IDLE = 1, CHARGING = 2, DISCHARGING = 3, FAULT = 4,UNRECOGNIZED = -1]"
+          },
+          "batteryCapacity": {
+            "type": "object",
+            "example": "10000",
+            "description": "The total capacity of the battery in watts"
+          },
+          "batteryLevel": {
+            "type": "object",
+            "example": "100",
+            "description": "The current battery level from the battery in percentage"
+          },
+          "chargeRate": {
+            "type": "object",
+            "example": "1000",
+            "description": "The charge rate of the battery in watts"
+          }
+        },
+        "required": [
+          "time",
+          "status",
+          "batteryCapacity",
+          "batteryLevel",
+          "chargeRate"
+        ]
+      },
+      "BatteryDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the battery",
+            "example": "550e8400-e29b-41d4-a716-446655440008"
+          },
+          "brand": {
+            "type": "string",
+            "description": "The brand of the battery",
+            "example": "Tesla"
+          },
+          "model": {
+            "type": "string",
+            "description": "The model of the battery",
+            "example": "Powerwall 2"
+          },
+          "siteName": {
+            "type": "string",
+            "description": "The site name of the battery",
+            "example": "Home Battery"
+          },
+          "lastChargeState": {
+            "$ref": "#/components/schemas/BatteryChargeStateDto"
+          },
+          "installationDate": {
+            "type": "object",
+            "description": "The timestamp this battert was installed.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "createdAt": {
+            "type": "object",
+            "description": "The timestamp this resource was created.",
+            "example": "2026-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "object",
+            "description": "The timestamp this resource was updated.",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "identifier",
+          "brand",
+          "model",
+          "siteName",
+          "lastChargeState",
+          "installationDate",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedBatteryDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatteryDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "PhaseCapacityDto": {
+        "type": "object",
+        "properties": {
+          "capacity": {
+            "type": "number",
+            "description": "The capacity of the phase in amps",
+            "example": "25"
+          }
+        },
+        "required": [
+          "capacity"
+        ]
+      },
+      "GridConnectionDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the grid connection",
+            "example": "550e8400-e29b-41d4-a716-446655440005"
+          },
+          "addressIdentifier": {
+            "type": "string",
+            "description": "The uuid of the address",
+            "example": "660e8400-e29b-41d4-a716-446655440006"
+          },
+          "type": {
+            "type": "number",
+            "description": "The type of the grid connection [UNKNOWN = 0, SINGLE_PHASE = 1, THREE_PHASE = 2, UNRECOGNIZED = -1]",
+            "example": "1"
+          },
+          "phaseOneCapacity": {
+            "nullable": true,
+            "description": "The capacity of phase one in amps",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhaseCapacityDto"
+              }
+            ]
+          },
+          "phaseTwoCapacity": {
+            "nullable": true,
+            "description": "The capacity of phase two in amps",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhaseCapacityDto"
+              }
+            ]
+          },
+          "phaseThreeCapacity": {
+            "nullable": true,
+            "description": "The capacity of phase three in amps",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhaseCapacityDto"
+              }
+            ]
+          },
+          "installationDate": {
+            "type": "object",
+            "description": "The timestamp this grid connection was installed.",
+            "example": "2026-01-01T00:00:00.000Z",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "object",
+            "description": "The timestamp this grid connection was ended.",
+            "example": "2026-01-01T00:00:00.000Z",
+            "nullable": true
+          }
+        },
+        "required": [
+          "identifier",
+          "addressIdentifier",
+          "type",
+          "phaseOneCapacity",
+          "phaseTwoCapacity",
+          "phaseThreeCapacity",
+          "installationDate",
+          "endDate"
+        ]
+      },
+      "PaginatedGridConnectionDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GridConnectionDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      }
+    }
+  }
+}

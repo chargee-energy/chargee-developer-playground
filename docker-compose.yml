@@ -1,0 +1,9 @@
+services:
+  playground:
+    build:
+      context: .
+      args:
+        VITE_AMPERE_API_URL: ${VITE_AMPERE_API_URL:-https://ampere.prod.thunder.chargee.io}
+        VITE_AMPERE_DOCS_URL: ${VITE_AMPERE_DOCS_URL:-https://ampere.prod.thunder.chargee.io/api/v2}
+    ports:
+      - "3600:80"
