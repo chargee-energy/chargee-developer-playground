@@ -8,13 +8,29 @@ function asString(value: DateLike): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value)
 }
 
+const TZ_RE = /(?:Z|[+-]\d{2}:?\d{2})$/
+
 // Parse an API timestamp. Strings that carry a zone (Z / ±hh:mm) are converted
 // to the viewer's local timezone by date-fns; zone-less strings are taken
-// at face value (they are already local). The local day is selected at query
-// time via localDayRangeUTC — we do NOT re-shift timestamps here.
+// at face value (they are already local).
 function parseInstant(s: string): Date {
   return parseISO(s)
 }
+
+// For endpoints that return UTC times without a zone designator: treat a
+// zone-less datetime as UTC (append Z) so it renders in the viewer's local
+// timezone. Date-only and already-zoned strings are left as-is.
+function parseUtcInstant(s: string): Date {
+  return parseISO(!s.includes('T') || TZ_RE.test(s) ? s : `${s}Z`)
+}
+
+// For data already in the provider's timezone (e.g. P4): drop any zone
+// designator and show the wall-clock exactly as written — no conversion.
+function parseRawInstant(s: string): Date {
+  return parseISO(s.replace(TZ_RE, ''))
+}
+
+export type TimeMode = 'local' | 'utc' | 'raw'
 
 export function fmtDate(value?: DateLike, pattern = 'd MMM yyyy'): string {
   const s = asString(value)
@@ -44,14 +60,17 @@ export function fmtTime(value?: DateLike): string {
 /**
  * X-axis labels for a time series: shows time-only within a day, but prefixes
  * the date on the first point of each new day — so a 48h range shows 2 dates.
+ * `mode`: 'local' converts to the viewer's timezone, 'utc' treats zone-less
+ * times as UTC then converts, 'raw' shows the wall-clock as written (no shift).
  */
-export function timeAxisLabels(values: DateLike[]): string[] {
+export function timeAxisLabels(values: DateLike[], mode: TimeMode = 'local'): string[] {
+  const parse = mode === 'utc' ? parseUtcInstant : mode === 'raw' ? parseRawInstant : parseInstant
   let prevDay = ''
   return values.map((v) => {
     const s = asString(v)
     if (!s) return '—'
     try {
-      const d = parseInstant(s)
+      const d = parse(s)
       const day = format(d, 'yyyy-MM-dd')
       const label = day !== prevDay ? format(d, 'd MMM HH:mm') : format(d, 'HH:mm')
       prevDay = day

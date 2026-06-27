@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { DataState } from '@/components/common/DataState'
 import { InsightCards } from '@/components/common/InsightCards'
 import { RefreshButton } from '@/components/common/RefreshButton'
+import { ExportCsvButton } from '@/components/common/ExportCsvButton'
 import { AutoChart } from './AutoChart'
 import { ForecastView } from './ForecastView'
 import { Section, DateInput } from './parts'
 import { useResolutionRange } from './useResolutionRange'
 import { todayISO } from '@/utils/format'
+import { GAS_COLOR } from '@/utils/records'
 import {
   useSmartMetersControllerGetLatestElectricityReadingV2,
   useSmartMetersControllerGetLatestGasReadingV2,
@@ -60,15 +62,31 @@ export function SmartMeterTelemetry({ addressUuid, identifier }: { addressUuid: 
         </DataState>
       </Section>
 
-      <Section title={`${t('telemetry.elecRange')} · Wh`} action={intervalControls}>
+      <Section
+        title={`${t('telemetry.elecRange')} · kWh`}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            {intervalControls}
+            <ExportCsvButton rows={(elec.data?.results ?? []) as any[]} filename={`electricity-${identifier}.csv`} />
+          </div>
+        }
+      >
         <DataState isLoading={elec.isLoading} error={elec.error} isEmpty={(elec.data?.results?.length ?? 0) === 0} emptyMessage={t('telemetry.noReadings')} onRetry={() => elec.refetch()}>
-          <AutoChart rows={(elec.data?.results ?? []) as any[]} unit="Wh" showTable={false} brush />
+          <AutoChart rows={(elec.data?.results ?? []) as any[]} unit="kWh" scale={0.001} decimals={3} timeMode="utc" showTable={false} brush />
         </DataState>
       </Section>
 
-      <Section title={`${t('telemetry.gasRange')} · dm³`} action={intervalControls}>
+      <Section
+        title={`${t('telemetry.gasRange')} · m³`}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            {intervalControls}
+            <ExportCsvButton rows={(gas.data?.results ?? []) as any[]} filename={`gas-${identifier}.csv`} />
+          </div>
+        }
+      >
         <DataState isLoading={gas.isLoading} error={gas.error} isEmpty={(gas.data?.results?.length ?? 0) === 0} emptyMessage={t('telemetry.noReadings')} onRetry={() => gas.refetch()}>
-          <AutoChart rows={(gas.data?.results ?? []) as any[]} unit="dm³" showTable={false} brush />
+          <AutoChart rows={(gas.data?.results ?? []) as any[]} unit="m³" color={GAS_COLOR} scale={0.001} decimals={3} timeMode="utc" showTable={false} brush />
         </DataState>
       </Section>
 

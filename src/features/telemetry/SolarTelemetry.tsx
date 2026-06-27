@@ -53,7 +53,7 @@ export function SolarTelemetry({
   }
 
   const rows = intervals.data?.results ?? []
-  const labels = timeAxisLabels(rows.map((r) => r.time))
+  const labels = timeAxisLabels(rows.map((r) => r.time), 'utc')
   const data = rows.map((r, i) => ({ time: labels[i], production: r.production }))
 
   return (

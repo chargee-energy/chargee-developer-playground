@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataState } from '@/components/common/DataState'
 import { AutoChart } from './AutoChart'
+import { ExportCsvButton } from '@/components/common/ExportCsvButton'
 import { Section, DateInput } from './parts'
 import { todayISO } from '@/utils/format'
+import { GAS_COLOR } from '@/utils/records'
 import { cn } from '@/utils/cn'
 import {
   useEnergyControllerElec15minV2,
@@ -76,6 +78,7 @@ export function AddressEnergyTelemetry({ addressUuid }: { addressUuid: string })
             />
             <Toggle value={resolution} options={RESOLUTIONS} labels={resolutionLabels} onChange={setResolution} />
             <DateInput value={date} onChange={setDate} />
+            <ExportCsvButton rows={rows} filename={`address-energy-${type}-${date}.csv`} />
           </div>
         }
       >
@@ -86,7 +89,17 @@ export function AddressEnergyTelemetry({ addressUuid }: { addressUuid: string })
           emptyMessage={t('telemetry.noReadings')}
           onRetry={() => active.refetch()}
         >
-          <AutoChart rows={rows} unit={type === 'electricity' ? 'kWh' : 'm³'} />
+          {/* Rows are cumulative meter counters — chart the per-interval delta
+              (consumption); the table below keeps the raw counter values. P4
+              times are already in the provider's timezone, so show them as-is. */}
+          <AutoChart
+            rows={rows}
+            unit={type === 'electricity' ? 'kWh' : 'm³'}
+            color={type === 'gas' ? GAS_COLOR : undefined}
+            decimals={3}
+            delta
+            timeMode="raw"
+          />
         </DataState>
       </Section>
     </div>

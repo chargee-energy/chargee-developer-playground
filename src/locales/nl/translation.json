@@ -99,6 +99,7 @@
     "previous": "Vorige",
     "next": "Volgende",
     "refresh": "Vernieuwen",
+    "exportCsv": "Exporteer CSV",
     "asOf": "Op {{time}}",
     "back": "Terug",
     "continue": "Doorgaan",

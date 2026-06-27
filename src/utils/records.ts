@@ -44,6 +44,14 @@ export function flattenNumbers(obj: unknown, prefix = ''): Record<string, number
 /** Keys representing energy returned/exported to the grid (plotted below zero). */
 export const isReturnKey = (key: string) => /return/i.test(key)
 
+/** Keys representing energy delivered/consumed from the grid. */
+export const isDeliveryKey = (key: string) => /deliver/i.test(key)
+
+/** Chargee chart colours for grid flow. */
+export const DELIVERY_COLOR = '#FF8500' // orange
+export const RETURN_COLOR = '#16B364' // green
+export const GAS_COLOR = '#1570EF' // blue
+
 const TIME_KEYS = ['time', 'from', 'date', 'start', 'timestamp']
 
 /** Pick the most likely x-axis (time) key from a row. */

@@ -7,6 +7,7 @@ import { TimeSeriesChart } from './TimeSeriesChart'
 import { AutoChart } from './AutoChart'
 import { Section, DateInput } from './parts'
 import { fmtTime, todayISO } from '@/utils/format'
+import { GAS_COLOR } from '@/utils/records'
 import {
   useSparkyControllerGetLatestP1V2,
   useSparkyControllerGetElectricity15minForSNV2,
@@ -82,6 +83,7 @@ export function SparkyTelemetry({ serial }: { serial: string }) {
             data={(elec15.data ?? []).map((r) => ({ time: fmtTime(r.from), delivery: r.delivery, return: -r.return }))}
             xKey="time"
             unit="kWh"
+            decimals={3}
             series={[
               { key: 'delivery', name: t('telemetry.delivered'), color: '#FF8500' },
               { key: 'return', name: t('telemetry.returned'), color: '#16B364' },
@@ -96,7 +98,8 @@ export function SparkyTelemetry({ serial }: { serial: string }) {
             data={(gas15.data ?? []).map((r) => ({ time: fmtTime(r.from), gas: r.delivery }))}
             xKey="time"
             unit="m³"
-            series={[{ key: 'gas', name: t('telemetry.gas'), color: '#6245DE' }]}
+            decimals={3}
+            series={[{ key: 'gas', name: t('telemetry.gas'), color: GAS_COLOR }]}
           />
         </DataState>
       </Section>

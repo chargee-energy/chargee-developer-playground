@@ -99,6 +99,7 @@
     "previous": "Previous",
     "next": "Next",
     "refresh": "Refresh",
+    "exportCsv": "Export CSV",
     "asOf": "As of {{time}}",
     "back": "Back",
     "continue": "Continue",
