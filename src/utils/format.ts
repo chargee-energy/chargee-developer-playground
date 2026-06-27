@@ -8,11 +8,19 @@ function asString(value: DateLike): string {
   return typeof value === 'string' ? value : value == null ? '' : String(value)
 }
 
+// Parse an API timestamp. Strings that carry a zone (Z / ±hh:mm) are converted
+// to the viewer's local timezone by date-fns; zone-less strings are taken
+// at face value (they are already local). The local day is selected at query
+// time via localDayRangeUTC — we do NOT re-shift timestamps here.
+function parseInstant(s: string): Date {
+  return parseISO(s)
+}
+
 export function fmtDate(value?: DateLike, pattern = 'd MMM yyyy'): string {
   const s = asString(value)
   if (!s) return '—'
   try {
-    return format(parseISO(s), pattern)
+    return format(parseInstant(s), pattern)
   } catch {
     return s
   }
@@ -43,7 +51,7 @@ export function timeAxisLabels(values: DateLike[]): string[] {
     const s = asString(v)
     if (!s) return '—'
     try {
-      const d = parseISO(s)
+      const d = parseInstant(s)
       const day = format(d, 'yyyy-MM-dd')
       const label = day !== prevDay ? format(d, 'd MMM HH:mm') : format(d, 'HH:mm')
       prevDay = day
@@ -58,7 +66,7 @@ export function fmtAgo(value?: DateLike): string {
   const s = asString(value)
   if (!s) return '—'
   try {
-    return formatDistanceToNow(parseISO(s), { addSuffix: true })
+    return formatDistanceToNow(parseInstant(s), { addSuffix: true })
   } catch {
     return '—'
   }

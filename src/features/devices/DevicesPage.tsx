@@ -18,6 +18,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
 import { DataTable, type Column } from '@/components/common/DataTable'
+import { LiveBadge } from '@/components/common/LiveBadge'
 import { DeviceDetailDrawer, type DeviceDetail } from './DeviceDetailDrawer'
 import { useContextStore } from '@/store/context'
 import { useTelemetryStore } from '@/store/telemetry'
@@ -68,8 +69,32 @@ export function DevicesPage() {
     navigate('/telemetry')
   }
 
+  // A "Live" badge column for steerable assets that stream realtime data.
+  const liveCol = (isLive: (row: any) => boolean): Column<any> => ({
+    key: '__live',
+    header: '',
+    render: (row) => (isLive(row) ? <LiveBadge /> : null),
+  })
+  const solarSteerable = (r: any) => r.info?.isSteerable === true || r.info?.liveDataSupported === true
+  const chargerSteerable = (r: any) => r.isSteerable === true || r.liveDataSupported === true
+
   const tabs: TabModel[] = [
-    { key: 'solarInverters', icon: SunIcon, rows: solar.data?.results ?? [], isLoading: solar.isLoading, error: solar.error, onRetry: solar.refetch, telemetry: 'solar', idField: 'identifier' },
+    {
+      key: 'solarInverters',
+      icon: SunIcon,
+      rows: solar.data?.results ?? [],
+      isLoading: solar.isLoading,
+      error: solar.error,
+      onRetry: solar.refetch,
+      telemetry: 'solar',
+      idField: 'identifier',
+      cols: [
+        { key: 'identifier', header: 'identifier' },
+        { key: 'brand', header: 'brand', render: (r) => r.info?.brand ?? '—' },
+        { key: 'model', header: 'model', render: (r) => r.info?.model ?? '—' },
+        liveCol(solarSteerable),
+      ],
+    },
     {
       key: 'smartMeters',
       icon: BoltIcon,
@@ -100,14 +125,39 @@ export function DevicesPage() {
         { key: 'brand', header: 'brand' },
         { key: 'model', header: 'model' },
         { key: 'year', header: 'year' },
+        liveCol(chargerSteerable),
       ],
     },
     { key: 'batteries', icon: Battery50Icon, rows: batteries.data?.results ?? [], isLoading: batteries.isLoading, error: batteries.error, onRetry: batteries.refetch, idField: 'identifier' },
-    { key: 'vehicles', icon: TruckIcon, rows: vehicles.data?.results ?? [], isLoading: vehicles.isLoading, error: vehicles.error, onRetry: vehicles.refetch, idField: 'identifier' },
+    {
+      key: 'vehicles',
+      icon: TruckIcon,
+      rows: vehicles.data?.results ?? [],
+      isLoading: vehicles.isLoading,
+      error: vehicles.error,
+      onRetry: vehicles.refetch,
+      idField: 'identifier',
+      cols: [
+        { key: 'identifier', header: 'identifier' },
+        { key: 'brand', header: 'brand', render: (r) => r.info?.brand ?? '—' },
+        { key: 'model', header: 'model', render: (r) => r.info?.model ?? '—' },
+      ],
+    },
     { key: 'hvacs', icon: FireIcon, rows: hvacs.data?.results ?? [], isLoading: hvacs.isLoading, error: hvacs.error, onRetry: hvacs.refetch, idField: 'identifier' },
     { key: 'gridConnections', icon: Squares2X2Icon, rows: grid.data?.results ?? [], isLoading: grid.isLoading, error: grid.error, onRetry: grid.refetch, idField: 'identifier' },
     // Address-level connected units (from the selected address record).
-    { key: 'sparky', icon: SignalIcon, rows: addressRecord?.sparky ? [addressRecord.sparky] : [], telemetry: 'sparky', idField: 'serialNumber', emptyMessage: t('devices.emptySparky') },
+    {
+      key: 'sparky',
+      icon: SignalIcon,
+      rows: addressRecord?.sparky ? [addressRecord.sparky] : [],
+      telemetry: 'sparky',
+      idField: 'serialNumber',
+      emptyMessage: t('devices.emptySparky'),
+      cols: [
+        { key: 'serialNumber', header: 'serial' },
+        { key: 'boxCode', header: 'box code' },
+      ],
+    },
     { key: 'flint', icon: CpuChipIcon, rows: addressRecord?.flint ? [addressRecord.flint] : [], idField: 'serialNumber', emptyMessage: t('devices.emptyFlint') },
   ]
 

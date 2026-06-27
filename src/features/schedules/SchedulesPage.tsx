@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+import { TypeToConfirmDialog } from '@/components/common/TypeToConfirmDialog'
 import { ScheduleModal } from './ScheduleModal'
 import { useContextStore } from '@/store/context'
 import { fmtDateTime } from '@/utils/format'
@@ -18,8 +19,9 @@ import {
 
 export function SchedulesPage() {
   const { t } = useTranslation()
-  const { addressUuid } = useContextStore()
+  const { addressUuid, groupName } = useContextStore()
   const addr = addressUuid ?? ''
+  const [warnOpen, setWarnOpen] = useState(false)
   const [inverterId, setInverterId] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [toDelete, setToDelete] = useState<ScheduleDto | null>(null)
@@ -83,7 +85,7 @@ export function SchedulesPage() {
           <button
             className="btn-primary"
             disabled={!activeInverter}
-            onClick={() => setCreateOpen(true)}
+            onClick={() => setWarnOpen(true)}
           >
             <PlusIcon className="size-4" />
             {t('schedules.create')}
@@ -141,6 +143,17 @@ export function SchedulesPage() {
         </>
       )}
 
+      <TypeToConfirmDialog
+        open={warnOpen}
+        title={t('common.scheduleWarnTitle')}
+        body={t('common.scheduleWarnBody')}
+        confirmWord={groupName ?? ''}
+        onClose={() => setWarnOpen(false)}
+        onConfirm={() => {
+          setWarnOpen(false)
+          setCreateOpen(true)
+        }}
+      />
       <ScheduleModal
         open={createOpen}
         busy={addMutation.isPending}

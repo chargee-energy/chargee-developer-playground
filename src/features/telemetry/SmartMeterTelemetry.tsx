@@ -6,6 +6,7 @@ import { RefreshButton } from '@/components/common/RefreshButton'
 import { AutoChart } from './AutoChart'
 import { ForecastView } from './ForecastView'
 import { Section, DateInput } from './parts'
+import { localDayRangeUTC } from './range'
 import { todayISO } from '@/utils/format'
 import { cn } from '@/utils/cn'
 import {
@@ -32,7 +33,7 @@ export function SmartMeterTelemetry({ addressUuid, identifier }: { addressUuid: 
 
   // Raw readings are ~per-second (capped at 1000, no offset), so a full day
   // comes from the interval-aggregation endpoint instead.
-  const range = { resolution, fromDate: `${date}T00:00:00.000Z`, toDate: `${date}T23:59:59.999Z` }
+  const range = { resolution, ...localDayRangeUTC(date) }
   const elec = useSmartMetersAggregationControllerGetElectricityIntervalsV2(addressUuid, identifier, range)
   const gas = useSmartMetersAggregationControllerGetGasIntervalsV2(addressUuid, identifier, range)
 

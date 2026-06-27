@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+import { TypeToConfirmDialog } from '@/components/common/TypeToConfirmDialog'
 import { InsightCards } from '@/components/common/InsightCards'
 import { RefreshButton } from '@/components/common/RefreshButton'
 import { useContextStore } from '@/store/context'
@@ -19,11 +20,12 @@ import {
 
 export function FlexPage() {
   const { t } = useTranslation()
-  const { groupUuid } = useContextStore()
+  const { groupUuid, groupName } = useContextStore()
   const group = groupUuid ?? ''
   const enabled = { query: { enabled: !!groupUuid } }
 
   const [showCreate, setShowCreate] = useState(false)
+  const [warnOpen, setWarnOpen] = useState(false)
   const [targetKw, setTargetKw] = useState(0)
   const [time, setTime] = useState('')
   const [toDelete, setToDelete] = useState<GroupFlexScheduleDto | null>(null)
@@ -75,7 +77,7 @@ export function FlexPage() {
         subtitle={t('flex.subtitle')}
         primaryCall={{ method: 'GET', url: `/api/v2/groups/${group}/flex/aggregates/latest` }}
         action={
-          <button className="btn-primary" onClick={() => setShowCreate((v) => !v)}>
+          <button className="btn-primary" onClick={() => (showCreate ? setShowCreate(false) : setWarnOpen(true))}>
             <PlusIcon className="size-4" />
             {t('flex.create')}
           </button>
@@ -168,6 +170,17 @@ export function FlexPage() {
         busy={deleteMutation.isPending}
         onConfirm={handleDelete}
         onClose={() => setToDelete(null)}
+      />
+      <TypeToConfirmDialog
+        open={warnOpen}
+        title={t('common.scheduleWarnTitle')}
+        body={t('common.scheduleWarnBody')}
+        confirmWord={groupName ?? ''}
+        onClose={() => setWarnOpen(false)}
+        onConfirm={() => {
+          setWarnOpen(false)
+          setShowCreate(true)
+        }}
       />
     </div>
   )
