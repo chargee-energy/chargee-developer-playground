@@ -2,7 +2,7 @@ import Axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
 import { useInspectorStore, nextCallId, type ApiCall } from '@/store/inspector'
 
 // Origin only — generated paths already carry the /api/v2 prefix.
-const API_ORIGIN = import.meta.env.VITE_AMPERE_API_URL || 'https://ampere.prod.thunder.chargee.io'
+const API_ORIGIN = import.meta.env.VITE_AMPERE_API_URL || 'https://ampere.chargee.io'
 
 export const TOKEN_KEY = 'pg_access_token'
 export const REFRESH_KEY = 'pg_refresh_token'

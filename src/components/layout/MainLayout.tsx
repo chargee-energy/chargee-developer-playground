@@ -32,7 +32,7 @@ const navigation = [
   { key: 'console', href: '/console', icon: CommandLineIcon },
 ]
 
-const DOCS_URL = import.meta.env.VITE_AMPERE_DOCS_URL || 'https://ampere.prod.thunder.chargee.io/api/v2'
+const DOCS_URL = import.meta.env.VITE_AMPERE_DOCS_URL || 'https://ampere.chargee.io/api/v2'
 const DEVELOPER_DOCS_URL = 'https://docs.developer.chargee.io/'
 
 const resources = [

@@ -9,7 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const SPEC_URL =
   process.env.AMPERE_SPEC_URL ||
-  'https://ampere.prod.thunder.chargee.io/api/v2-json'
+  'https://ampere.chargee.io/api/v2-json'
 
 const OUT = resolve(__dirname, '..', 'openapi.json')
 

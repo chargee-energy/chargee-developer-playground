@@ -103,8 +103,8 @@ heroku buildpacks:set heroku/nodejs
 
 # Build-time config — Heroku exposes config vars to the build, so these are
 # compiled into the bundle. Set them BEFORE deploying.
-heroku config:set VITE_AMPERE_API_URL=https://ampere.prod.thunder.chargee.io
-heroku config:set VITE_AMPERE_DOCS_URL=https://ampere.prod.thunder.chargee.io/api/v2
+heroku config:set VITE_AMPERE_API_URL=https://ampere.chargee.io
+heroku config:set VITE_AMPERE_DOCS_URL=https://ampere.chargee.io/api/v2
 
 git push heroku main
 ```

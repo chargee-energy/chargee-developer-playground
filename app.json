@@ -7,11 +7,11 @@
   "env": {
     "VITE_AMPERE_API_URL": {
       "description": "Ampere API origin (no /api/v2 suffix). Compiled into the build.",
-      "value": "https://ampere.prod.thunder.chargee.io"
+      "value": "https://ampere.chargee.io"
     },
     "VITE_AMPERE_DOCS_URL": {
       "description": "Swagger UI base used for 'View in API docs' links.",
-      "value": "https://ampere.prod.thunder.chargee.io/api/v2"
+      "value": "https://ampere.chargee.io/api/v2"
     }
   },
   "buildpacks": [

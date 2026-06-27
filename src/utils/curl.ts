@@ -1,6 +1,6 @@
 import type { ApiCall } from '@/store/inspector'
 
-const API_ORIGIN = import.meta.env.VITE_AMPERE_API_URL || 'https://ampere.prod.thunder.chargee.io'
+const API_ORIGIN = import.meta.env.VITE_AMPERE_API_URL || 'https://ampere.chargee.io'
 
 /** Build a copy-pasteable cURL command for a captured request. */
 export function toCurl(call: ApiCall): string {

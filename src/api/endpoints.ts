@@ -3,7 +3,7 @@ import { API_ENDPOINTS, type ApiEndpoint } from './endpoints.generated'
 export type { ApiEndpoint }
 export { API_ENDPOINTS }
 
-const DOCS_BASE = import.meta.env.VITE_AMPERE_DOCS_URL || 'https://ampere.prod.thunder.chargee.io/api/v2'
+const DOCS_BASE = import.meta.env.VITE_AMPERE_DOCS_URL || 'https://ampere.chargee.io/api/v2'
 
 // Precompile a matcher per endpoint: turn /api/v2/groups/{group_uuid}/addresses
 // into a regex so we can map a concrete request URL back to its operation.

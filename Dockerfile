@@ -7,8 +7,8 @@ COPY . .
 
 # The API origin and docs URL are compiled into the bundle at build time.
 # Override per environment, e.g. --build-arg VITE_AMPERE_API_URL=https://...
-ARG VITE_AMPERE_API_URL=https://ampere.prod.thunder.chargee.io
-ARG VITE_AMPERE_DOCS_URL=https://ampere.prod.thunder.chargee.io/api/v2
+ARG VITE_AMPERE_API_URL=https://ampere.chargee.io
+ARG VITE_AMPERE_DOCS_URL=https://ampere.chargee.io/api/v2
 ENV VITE_AMPERE_API_URL=$VITE_AMPERE_API_URL
 ENV VITE_AMPERE_DOCS_URL=$VITE_AMPERE_DOCS_URL
 RUN npm run build
