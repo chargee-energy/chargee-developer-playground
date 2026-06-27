@@ -223,7 +223,7 @@ export function DevicesPage() {
       <p className="text-13 text-text-gray">{t('devices.detailsHint')}</p>
 
       <Tab.Group>
-        <Tab.List className="flex w-full gap-1.5">
+        <Tab.List className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 scrollbar-thin sm:mx-0 sm:w-full sm:overflow-visible sm:px-0 sm:pb-0">
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -232,7 +232,7 @@ export function DevicesPage() {
                   <button
                     title={t(`devices.${tab.key}`)}
                     className={cn(
-                      'flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-11 font-semibold transition-colors focus:outline-none',
+                      'flex shrink-0 items-center justify-center gap-1 rounded-full px-3 py-1.5 text-11 font-semibold transition-colors focus:outline-none sm:min-w-0 sm:flex-1 sm:px-2',
                       selected ? 'bg-dark-blue text-beige' : 'bg-white text-text-gray hover:bg-beige border border-beige-2',
                     )}
                   >

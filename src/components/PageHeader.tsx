@@ -52,12 +52,12 @@ export function PageHeader({
           <div className="mt-3 max-w-2xl text-base leading-160 text-text-gray">{subtitle}</div>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
         {action}
         {!hideInspector && (
-          <button onClick={() => setInspectorOpen(true)} className="btn-secondary">
+          <button onClick={() => setInspectorOpen(true)} className="btn-secondary px-3 sm:px-5" title={t('common.viewRaw')}>
             <CodeBracketIcon className="size-4" />
-            {t('common.viewRaw')}
+            <span className="hidden sm:inline">{t('common.viewRaw')}</span>
           </button>
         )}
       </div>

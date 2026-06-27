@@ -74,7 +74,7 @@ export function ContextBar() {
               <ChevronLeftIcon className="size-4" />
             </button>
             <select
-              className="h-7 w-[36rem] max-w-[80vw] border-0 bg-transparent px-1 font-mono text-13 font-normal leading-none text-dark-blue focus:ring-0"
+              className="h-7 w-44 max-w-[55vw] border-0 bg-transparent px-1 font-mono text-13 font-normal leading-none text-dark-blue focus:ring-0 sm:w-[36rem] sm:max-w-[80vw]"
               value={addressUuid ?? ''}
               onChange={(e) => {
                 const a = addresses.find((x) => x.uuid === e.target.value)

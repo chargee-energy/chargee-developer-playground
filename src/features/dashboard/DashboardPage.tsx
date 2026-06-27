@@ -9,7 +9,9 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="card p-5">
       <p className="text-11 font-bold uppercase tracking-wide text-text-gray">{label}</p>
-      <p className="mt-1 text-28 font-extrabold text-dark-blue">{value}</p>
+      <p className="mt-1 break-words text-lg font-extrabold leading-tight text-dark-blue sm:text-28 sm:leading-none">
+        {value}
+      </p>
     </div>
   )
 }
@@ -38,7 +40,7 @@ export function DashboardPage() {
         primaryCall={{ method: 'GET', url: '/api/v2/groups' }}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label={t('dashboard.groups')} value={groupCount} />
         <Stat label={t('dashboard.addresses')} value={groupUuid ? addressCount : '—'} />
         <Stat label={t('dashboard.selectedGroup')} value={groupName ?? '—'} />

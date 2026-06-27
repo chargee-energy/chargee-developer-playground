@@ -80,9 +80,9 @@ export function ApiInspector({ open, onClose, primary }: ApiInspectorProps) {
                       </button>
                     </div>
 
-                    <div className="flex min-h-0 flex-1">
+                    <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
                       {/* Recent calls list */}
-                      <aside className="w-56 shrink-0 overflow-y-auto border-r border-beige-2 scrollbar-thin">
+                      <aside className="max-h-40 w-full shrink-0 overflow-y-auto border-b border-beige-2 scrollbar-thin sm:max-h-none sm:w-56 sm:border-b-0 sm:border-r">
                         <div className="flex items-center justify-between px-3 py-2">
                           <span className="text-11 font-bold uppercase tracking-wide text-text-gray">
                             {t('inspector.recentCalls')}
