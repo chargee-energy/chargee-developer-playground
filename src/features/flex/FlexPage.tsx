@@ -4,7 +4,6 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
-import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { TypeToConfirmDialog } from '@/components/common/TypeToConfirmDialog'
 import { InsightCards } from '@/components/common/InsightCards'
 import { RefreshButton } from '@/components/common/RefreshButton'
@@ -161,11 +160,12 @@ export function FlexPage() {
         </DataState>
       </div>
 
-      <ConfirmDialog
+      <TypeToConfirmDialog
         open={!!toDelete}
         destructive
         title={t('common.delete')}
-        message={t('flex.deleteConfirm')}
+        body={`${t('flex.deleteConfirm')} ${t('common.scheduleWarnBody')}`}
+        confirmWord={groupName ?? ''}
         confirmLabel={t('common.delete')}
         busy={deleteMutation.isPending}
         onConfirm={handleDelete}

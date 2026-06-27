@@ -10,6 +10,8 @@ interface TypeToConfirmDialogProps {
   /** The exact word the user must type to enable confirmation (e.g. group name). */
   confirmWord: string
   confirmLabel?: string
+  destructive?: boolean
+  busy?: boolean
   onConfirm: () => void
   onClose: () => void
 }
@@ -21,6 +23,8 @@ export function TypeToConfirmDialog({
   body,
   confirmWord,
   confirmLabel,
+  destructive,
+  busy,
   onConfirm,
   onClose,
 }: TypeToConfirmDialogProps) {
@@ -59,8 +63,10 @@ export function TypeToConfirmDialog({
           >
             <Dialog.Panel className="card w-full max-w-md p-6">
               <div className="flex items-start gap-4">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-orange/10">
-                  <ExclamationTriangleIcon className="size-5 text-orange" />
+                <span
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-full ${destructive ? 'bg-red/10' : 'bg-orange/10'}`}
+                >
+                  <ExclamationTriangleIcon className={`size-5 ${destructive ? 'text-red' : 'text-orange'}`} />
                 </span>
                 <div className="min-w-0">
                   <Dialog.Title className="text-lg font-bold text-dark-blue">{title}</Dialog.Title>
@@ -88,10 +94,15 @@ export function TypeToConfirmDialog({
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
-                <button className="btn-secondary" onClick={onClose}>
+                <button className="btn-secondary" onClick={onClose} disabled={busy}>
                   {t('common.cancel')}
                 </button>
-                <button className="btn-primary" onClick={onConfirm} disabled={!matches}>
+                <button
+                  className="btn-primary"
+                  onClick={onConfirm}
+                  disabled={!matches || busy}
+                  style={destructive ? { backgroundColor: '#FF1F00' } : undefined}
+                >
                   {confirmLabel || t('common.continue')}
                 </button>
               </div>

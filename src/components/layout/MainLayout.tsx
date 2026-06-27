@@ -9,6 +9,10 @@ import {
   CalendarDaysIcon,
   BoltIcon,
   CommandLineIcon,
+  SparklesIcon,
+  BookOpenIcon,
+  CodeBracketIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +32,15 @@ const navigation = [
   { key: 'console', href: '/console', icon: CommandLineIcon },
 ]
 
+const DOCS_URL = import.meta.env.VITE_AMPERE_DOCS_URL || 'https://ampere.prod.thunder.chargee.io/api/v2'
+const DEVELOPER_DOCS_URL = 'https://docs.developer.chargee.io/'
+
+const resources = [
+  { key: 'whatsNew', href: '/whats-new', icon: SparklesIcon, external: false },
+  { key: 'apiReference', href: DOCS_URL, icon: CodeBracketIcon, external: true },
+  { key: 'developerDocs', href: DEVELOPER_DOCS_URL, icon: BookOpenIcon, external: true },
+]
+
 export function MainLayout({ children }: { children: React.ReactNode }) {
   useContextSync()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -41,21 +54,47 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     navigate('/login')
   }
 
+  const itemCls = (active: boolean) =>
+    cn(
+      'group flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
+      active ? 'bg-dark-blue text-beige' : 'text-gray-600 hover:bg-gray-100 hover:text-ink',
+    )
+
   const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
     <nav className="flex-1 space-y-1 px-3 py-4">
       {navigation.map((item) => {
-        const active = location.pathname === item.href
         const Icon = item.icon
         return (
-          <Link
-            key={item.key}
-            to={item.href}
-            onClick={onNavigate}
-            className={cn(
-              'group flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-semibold transition-colors',
-              active ? 'bg-dark-blue text-beige' : 'text-gray-600 hover:bg-gray-100 hover:text-ink',
-            )}
-          >
+          <Link key={item.key} to={item.href} onClick={onNavigate} className={itemCls(location.pathname === item.href)}>
+            <Icon className="size-5 shrink-0" />
+            {t(`navigation.${item.key}`)}
+          </Link>
+        )
+      })}
+
+      <div className="px-3 pb-1 pt-5 text-11 font-bold uppercase tracking-wide text-text-gray">
+        {t('navigation.resources')}
+      </div>
+      {resources.map((item) => {
+        const Icon = item.icon
+        if (item.external) {
+          return (
+            <a
+              key={item.key}
+              href={item.href}
+              target="_blank"
+              rel="noreferrer"
+              onClick={onNavigate}
+              className={itemCls(false)}
+            >
+              <Icon className="size-5 shrink-0" />
+              <span className="flex-1">{t(`navigation.${item.key}`)}</span>
+              <ArrowTopRightOnSquareIcon className="size-4 opacity-50" />
+            </a>
+          )
+        }
+        return (
+          <Link key={item.key} to={item.href} onClick={onNavigate} className={itemCls(location.pathname === item.href)}>
             <Icon className="size-5 shrink-0" />
             {t(`navigation.${item.key}`)}
           </Link>

@@ -4,7 +4,6 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
-import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { TypeToConfirmDialog } from '@/components/common/TypeToConfirmDialog'
 import { ScheduleModal } from './ScheduleModal'
 import { useContextStore } from '@/store/context'
@@ -160,11 +159,12 @@ export function SchedulesPage() {
         onClose={() => setCreateOpen(false)}
         onSubmit={handleCreate}
       />
-      <ConfirmDialog
+      <TypeToConfirmDialog
         open={!!toDelete}
         destructive
         title={t('common.delete')}
-        message={t('schedules.deleteConfirm')}
+        body={`${t('schedules.deleteConfirm')} ${t('common.scheduleWarnBody')}`}
+        confirmWord={groupName ?? ''}
         confirmLabel={t('common.delete')}
         busy={deleteMutation.isPending}
         onConfirm={handleDelete}

@@ -35,8 +35,30 @@
     "schedules": "Schedules",
     "flex": "Flex",
     "console": "API Console",
+    "resources": "Resources",
+    "whatsNew": "What's new",
+    "apiReference": "API reference",
+    "developerDocs": "Developer docs",
     "openSidebar": "Open sidebar",
     "closeSidebar": "Close sidebar"
+  },
+  "whatsNew": {
+    "eyebrow": "What's new",
+    "title": "What's new",
+    "subtitle": "The latest changes to the developer playground.",
+    "released": "Released",
+    "v1": {
+      "title": "Renewed playground interface",
+      "date": "27 Jun 2026",
+      "items": [
+        "Rebuilt UI with a fully-typed API client generated from the live Ampere OpenAPI spec.",
+        "Group → address → device navigation with full-group address search and quick switching.",
+        "Device explorer with per-type tabs, a detail drawer, and a live indicator for steerable assets.",
+        "Telemetry for sparky, solar, smart meter, charger and address P4 energy — with charts, forecasts, zoom and local-time display.",
+        "A Raw + Docs API Inspector on every screen and a full API Console to try any endpoint.",
+        "English and Dutch throughout."
+      ]
+    }
   },
   "auth": {
     "signIn": "Sign in",

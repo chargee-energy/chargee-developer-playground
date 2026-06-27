@@ -12,6 +12,7 @@ import { TelemetryPage } from './features/telemetry/TelemetryPage'
 import { SchedulesPage } from './features/schedules/SchedulesPage'
 import { FlexPage } from './features/flex/FlexPage'
 import { ConsolePage } from './features/console/ConsolePage'
+import { WhatsNewPage } from './features/whats-new/WhatsNewPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,6 +56,7 @@ export function App() {
                     <Route path="/schedules" element={<SchedulesPage />} />
                     <Route path="/flex" element={<FlexPage />} />
                     <Route path="/console" element={<ConsolePage />} />
+                    <Route path="/whats-new" element={<WhatsNewPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </MainLayout>

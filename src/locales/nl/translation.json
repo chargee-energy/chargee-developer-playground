@@ -35,8 +35,30 @@
     "schedules": "Schema's",
     "flex": "Flex",
     "console": "API Console",
+    "resources": "Bronnen",
+    "whatsNew": "Nieuw",
+    "apiReference": "API-referentie",
+    "developerDocs": "Ontwikkelaarsdocs",
     "openSidebar": "Menu openen",
     "closeSidebar": "Menu sluiten"
+  },
+  "whatsNew": {
+    "eyebrow": "Nieuw",
+    "title": "Wat is er nieuw",
+    "subtitle": "De laatste wijzigingen in de developer playground.",
+    "released": "Uitgebracht",
+    "v1": {
+      "title": "Vernieuwde playground-interface",
+      "date": "27 jun 2026",
+      "items": [
+        "Herbouwde UI met een volledig getypeerde API-client, gegenereerd uit de live Ampere OpenAPI-spec.",
+        "Navigatie groep → adres → apparaat met zoeken door alle adressen en snel wisselen.",
+        "Apparaatverkenner met tabs per type, een detailpaneel en een live-indicator voor stuurbare assets.",
+        "Telemetrie voor sparky, omvormer, slimme meter, lader en adres-P4-energie — met grafieken, voorspellingen, zoom en weergave in lokale tijd.",
+        "Een Raw + Docs API Inspector op elk scherm en een volledige API Console om elk endpoint te proberen.",
+        "Volledig in het Engels en Nederlands."
+      ]
+    }
   },
   "auth": {
     "signIn": "Inloggen",
