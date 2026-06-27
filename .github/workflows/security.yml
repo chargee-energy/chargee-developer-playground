@@ -1,0 +1,35 @@
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    # Weekly, Monday 06:00 UTC — catches newly-disclosed advisories.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Gate: fail only on high/critical vulnerabilities in dependencies that
+      # actually ship to the browser (dev tooling is reported below, not gated).
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      # Informational: full advisory list (dev deps included) and outdated
+      # packages — surfaced in the log without failing the build.
+      - name: Full advisory report
+        if: always()
+        run: npm audit || true
+      - name: Outdated packages
+        if: always()
+        run: npm outdated || true
