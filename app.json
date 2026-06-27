@@ -1,0 +1,22 @@
+{
+  "name": "Chargee Developer Playground",
+  "description": "Vite + React frontend for exploring the Ampere API",
+  "repository": "https://github.com/chargee-energy/chargee-developer-playground",
+  "logo": "https://www.chargee.energy/images/chargee-icon.svg",
+  "keywords": ["react", "vite", "energy", "api", "chargee", "ampere"],
+  "env": {
+    "VITE_AMPERE_API_URL": {
+      "description": "Ampere API origin (no /api/v2 suffix). Compiled into the build.",
+      "value": "https://ampere.prod.thunder.chargee.io"
+    },
+    "VITE_AMPERE_DOCS_URL": {
+      "description": "Swagger UI base used for 'View in API docs' links.",
+      "value": "https://ampere.prod.thunder.chargee.io/api/v2"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}

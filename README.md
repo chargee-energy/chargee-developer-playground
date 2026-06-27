@@ -62,7 +62,7 @@ src/
   components/  layout/ (shell + group/address ContextBar) · common/ (JsonViewer,
                ApiInspector, DataTable, ConfirmDialog, …) · PageHeader
   features/    auth · dashboard · addresses · devices · telemetry · schedules ·
-               flex · console
+               flex · console · whats-new
   locales/     en · nl
 ```
 
@@ -74,14 +74,55 @@ slide-over showing the exact request, status, timing, the raw JSON response
 link. Every request made by the app is captured automatically by an axios
 interceptor. The **API Console** (`/console`) lets you fire any endpoint directly.
 
-## Build & deploy
+## Build
 
 ```bash
-npm run build                 # tsc + vite build → dist/
+npm run build     # tsc -b && vite build → dist/
+npm start         # serve the built dist/ as a SPA (uses $PORT, default 3000)
+```
+
+`VITE_*` values are **compiled into the bundle at build time**, so they must be
+present when `npm run build` runs (not just at runtime).
+
+## Deploy to Heroku
+
+The app is a static SPA served by [`serve`](https://www.npmjs.com/package/serve)
+on the `heroku/nodejs` buildpack:
+
+- **Build** — Heroku runs `heroku-postbuild` (`npm run build`) → `dist/`.
+- **Run** — the `Procfile` serves it: `web: npx serve -s dist -l $PORT --single`
+  (`-s/--single` rewrites unknown routes to `index.html` for client-side routing).
+- `serve` is a runtime dependency so it survives dev-dependency pruning.
+- `engines.node` pins Node 22.
+
+Provision and configure (one-time):
+
+```bash
+heroku create chargee-developer-playground
+heroku buildpacks:set heroku/nodejs
+
+# Build-time config — Heroku exposes config vars to the build, so these are
+# compiled into the bundle. Set them BEFORE deploying.
+heroku config:set VITE_AMPERE_API_URL=https://ampere.prod.thunder.chargee.io
+heroku config:set VITE_AMPERE_DOCS_URL=https://ampere.prod.thunder.chargee.io/api/v2
+
+git push heroku main
+```
+
+`app.json` declares the buildpack and these env vars (handy for review apps /
+"Deploy to Heroku"). After changing a `VITE_*` config var you must **rebuild**
+(redeploy) for it to take effect, since the value is baked into the bundle.
+
+> The browser talks to the Ampere API directly, so the API must allow CORS from
+> the app's origin. No reverse proxy is configured.
+
+## Deploy with Docker (alternative)
+
+```bash
 docker compose up --build     # static SPA on http://localhost:3600
 ```
 
-The API origin/docs URL are compiled in at build time — override with
+Override the compiled API origin/docs URL with
 `--build-arg VITE_AMPERE_API_URL=…` (see `Dockerfile`).
 
 ## Notes
