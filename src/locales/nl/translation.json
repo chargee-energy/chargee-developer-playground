@@ -229,6 +229,10 @@
     "resQuarterHourly": "15 min",
     "resHourly": "Per uur",
     "resDaily": "Per dag",
+    "resWeekly": "Per week",
+    "resMonthly": "Per maand",
+    "resYearly": "Per jaar",
+    "resolutionLabel": "Resolutie",
     "elecRange": "Elektriciteitsmetingen",
     "gasRange": "Gasmetingen",
     "noReadings": "Geen metingen voor de geselecteerde periode."

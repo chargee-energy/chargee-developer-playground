@@ -229,6 +229,10 @@
     "resQuarterHourly": "15 min",
     "resHourly": "Hourly",
     "resDaily": "Daily",
+    "resWeekly": "Weekly",
+    "resMonthly": "Monthly",
+    "resYearly": "Yearly",
+    "resolutionLabel": "Resolution",
     "elecRange": "Electricity readings",
     "gasRange": "Gas readings",
     "noReadings": "No readings for the selected period."

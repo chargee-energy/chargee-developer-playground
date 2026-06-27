@@ -77,6 +77,16 @@ export function todayISO(): string {
   return format(new Date(), 'yyyy-MM-dd')
 }
 
+/** Current month as YYYY-MM. */
+export function thisMonth(): string {
+  return format(new Date(), 'yyyy-MM')
+}
+
+/** Current calendar year. */
+export function thisYear(): number {
+  return new Date().getFullYear()
+}
+
 export function fmtNumber(value?: number | null, digits = 2): string {
   if (value === null || value === undefined || Number.isNaN(value)) return '—'
   return value.toLocaleString(undefined, { maximumFractionDigits: digits })

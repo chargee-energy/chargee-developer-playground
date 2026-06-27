@@ -6,9 +6,8 @@ import { RefreshButton } from '@/components/common/RefreshButton'
 import { AutoChart } from './AutoChart'
 import { ForecastView } from './ForecastView'
 import { Section, DateInput } from './parts'
-import { localDayRangeUTC } from './range'
+import { useResolutionRange } from './useResolutionRange'
 import { todayISO } from '@/utils/format'
-import { cn } from '@/utils/cn'
 import {
   useSmartMetersControllerGetLatestElectricityReadingV2,
   useSmartMetersControllerGetLatestGasReadingV2,
@@ -20,20 +19,15 @@ import {
   useSmartMetersForecastControllerGetReturnForecastForSmartMeterV2,
 } from '@/api/generated/smart-meters/smart-meters'
 
-type Resolution = 'quarter_hourly' | 'hourly' | 'daily'
-const RESOLUTIONS: Resolution[] = ['quarter_hourly', 'hourly', 'daily']
-
 export function SmartMeterTelemetry({ addressUuid, identifier }: { addressUuid: string; identifier: string }) {
   const { t } = useTranslation()
   const [date, setDate] = useState(todayISO())
-  const [resolution, setResolution] = useState<Resolution>('quarter_hourly')
 
   const latestElec = useSmartMetersControllerGetLatestElectricityReadingV2(addressUuid, identifier)
   const latestGas = useSmartMetersControllerGetLatestGasReadingV2(addressUuid, identifier)
 
-  // Raw readings are ~per-second (capped at 1000, no offset), so a full day
-  // comes from the interval-aggregation endpoint instead.
-  const range = { resolution, ...localDayRangeUTC(date) }
+  // Resolution + adaptive period picker drive the interval-aggregation range.
+  const { range, control: intervalControls } = useResolutionRange()
   const elec = useSmartMetersAggregationControllerGetElectricityIntervalsV2(addressUuid, identifier, range)
   const gas = useSmartMetersAggregationControllerGetGasIntervalsV2(addressUuid, identifier, range)
 
@@ -41,30 +35,6 @@ export function SmartMeterTelemetry({ addressUuid, identifier }: { addressUuid: 
   const ret = useSmartMetersForecastControllerGetReturnForecastForSmartMeterV2(addressUuid, identifier, { date })
 
   const dateControl = <DateInput value={date} onChange={setDate} />
-  const resolutionLabels: Record<Resolution, string> = {
-    quarter_hourly: t('telemetry.resQuarterHourly'),
-    hourly: t('telemetry.resHourly'),
-    daily: t('telemetry.resDaily'),
-  }
-  const intervalControls = (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex gap-1 rounded-full bg-beige p-1">
-        {RESOLUTIONS.map((r) => (
-          <button
-            key={r}
-            onClick={() => setResolution(r)}
-            className={cn(
-              'rounded-full px-3 py-1 text-13 font-semibold transition-colors',
-              resolution === r ? 'bg-dark-blue text-beige' : 'text-text-gray hover:text-ink',
-            )}
-          >
-            {resolutionLabels[r]}
-          </button>
-        ))}
-      </div>
-      {dateControl}
-    </div>
-  )
 
   return (
     <div className="space-y-6">
