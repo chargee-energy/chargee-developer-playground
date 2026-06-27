@@ -7,6 +7,10 @@ export interface ApiEndpoint {
   operationId: string
   tag: string
   summary: string
+  /** Example query params (name -> sample value), derived from the spec. */
+  queryExample?: Record<string, unknown>
+  /** Example request body, derived from the spec's requestBody schema. */
+  bodyExample?: unknown
 }
 
 export const API_ENDPOINTS: ApiEndpoint[] = [
@@ -15,7 +19,11 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/auth/login",
     "operationId": "AuthController_login_v2",
     "tag": "Auth",
-    "summary": "Login using your credentials"
+    "summary": "Login using your credentials",
+    "bodyExample": {
+      "email": "",
+      "password": ""
+    }
   },
   {
     "method": "POST",
@@ -36,7 +44,10 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/auth/refresh",
     "operationId": "AuthController_refreshTokens_v2",
     "tag": "Auth",
-    "summary": "Get new tokens using the refresh token"
+    "summary": "Get new tokens using the refresh token",
+    "bodyExample": {
+      "refreshToken": "1234567890abcdef"
+    }
   },
   {
     "method": "GET",
@@ -64,49 +75,73 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/chargers/{charger_uuid}/energy/consumption",
     "operationId": "ChargerController_listProductionEnergy_v2",
     "tag": "Chargers",
-    "summary": "List live consumption readings from charger"
+    "summary": "List live consumption readings from charger",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00.000+00:00",
+      "toDate": "2026-01-01T00:00:00.000+00:00",
+      "sortBy": "DESC",
+      "limit": 100
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/electricity/p4/15min",
     "operationId": "EnergyController_elec15min_v2",
     "tag": "Energy",
-    "summary": "Electricity 15min readings for a day"
+    "summary": "Electricity 15min readings for a day",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/electricity/p4/1day",
     "operationId": "EnergyController_elec1day_v2",
     "tag": "Energy",
-    "summary": "Electricity daily readings for month containing date"
+    "summary": "Electricity daily readings for month containing date",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/electricity/p4/1month",
     "operationId": "EnergyController_elec1month_v2",
     "tag": "Energy",
-    "summary": "Electricity monthly readings for year containing date"
+    "summary": "Electricity monthly readings for year containing date",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/gas/p4/15min",
     "operationId": "EnergyController_gas15min_v2",
     "tag": "Energy",
-    "summary": "Gas 15min readings for a day"
+    "summary": "Gas 15min readings for a day",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/gas/p4/1day",
     "operationId": "EnergyController_gas1day_v2",
     "tag": "Energy",
-    "summary": "Gas daily readings for month containing date"
+    "summary": "Gas daily readings for month containing date",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/gas/p4/1month",
     "operationId": "EnergyController_gas1month_v2",
     "tag": "Energy",
-    "summary": "Gas monthly readings for year containing date"
+    "summary": "Gas monthly readings for year containing date",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
@@ -127,14 +162,22 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/groups",
     "operationId": "GroupController_getGroups_v2",
     "tag": "Groups",
-    "summary": "Get groups assigned to the authenticated user"
+    "summary": "Get groups assigned to the authenticated user",
+    "queryExample": {
+      "limit": 100,
+      "offset": 0
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/groups/{group_uuid}/addresses",
     "operationId": "GroupController_getGroupSparkies_v2",
     "tag": "Groups",
-    "summary": "Get addresses assigned to a specific group"
+    "summary": "Get addresses assigned to a specific group",
+    "queryExample": {
+      "limit": 100,
+      "offset": 0
+    }
   },
   {
     "method": "GET",
@@ -148,21 +191,39 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/groups/{group_uuid}/flex/aggregation",
     "operationId": "GroupFlexAggregationController_listAggregates_v2",
     "tag": "Groups",
-    "summary": "Get aggregated solar inverter production and flex metrics for a group"
+    "summary": "Get aggregated solar inverter production and flex metrics for a group",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00.000+00:00",
+      "toDate": "2026-01-01T23:59:59.000+00:00",
+      "sortBy": "DESC",
+      "limit": 100,
+      "offset": 0
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/groups/{group_uuid}/flex/schedules",
     "operationId": "GroupFlexScheduleController_list_v2",
     "tag": "Groups",
-    "summary": "List flex schedules for a group"
+    "summary": "List flex schedules for a group",
+    "queryExample": {
+      "isActive": true,
+      "limit": 100,
+      "offset": 0
+    }
   },
   {
     "method": "POST",
     "path": "/api/v2/groups/{group_uuid}/flex/schedules",
     "operationId": "GroupFlexScheduleController_add_v2",
     "tag": "Groups",
-    "summary": "Create flex schedule for a group"
+    "summary": "Create flex schedule for a group",
+    "bodyExample": {
+      "groupGridTargetKw": 100,
+      "addressGridTargetW": 5000,
+      "solarInverterCapacityPercentage": 100,
+      "time": "2026-03-24T13:59:49.050+00:00"
+    }
   },
   {
     "method": "GET",
@@ -204,14 +265,23 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/delivery-forecast",
     "operationId": "SmartMetersForecastController_getDeliveryForecastForSmartMeter_v2",
     "tag": "Smart Meters",
-    "summary": "Get the delivery forecast for a date of a smart meter"
+    "summary": "Get the delivery forecast for a date of a smart meter",
+    "queryExample": {
+      "date": ""
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/energy/electricity",
     "operationId": "SmartMetersController_getElectricityReadings_v2",
     "tag": "Smart Meters",
-    "summary": "Get electricity readings for a smart meter"
+    "summary": "Get electricity readings for a smart meter",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00",
+      "sortBy": "DESC",
+      "limit": 100
+    }
   },
   {
     "method": "GET",
@@ -225,7 +295,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/energy/gas",
     "operationId": "SmartMetersController_getGasReadings_v2",
     "tag": "Smart Meters",
-    "summary": "Get gas readings for a smart meter"
+    "summary": "Get gas readings for a smart meter",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00",
+      "sortBy": "DESC",
+      "limit": 100
+    }
   },
   {
     "method": "GET",
@@ -239,35 +315,54 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/interval/electricity",
     "operationId": "SmartMetersAggregationController_getElectricityIntervals_v2",
     "tag": "Smart Meters",
-    "summary": "Get electricity interval aggregation for a smart meter"
+    "summary": "Get electricity interval aggregation for a smart meter",
+    "queryExample": {
+      "resolution": "hourly",
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/interval/gas",
     "operationId": "SmartMetersAggregationController_getGasIntervals_v2",
     "tag": "Smart Meters",
-    "summary": "Get gas interval aggregation for a smart meter"
+    "summary": "Get gas interval aggregation for a smart meter",
+    "queryExample": {
+      "resolution": "hourly",
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/return-forecast",
     "operationId": "SmartMetersForecastController_getReturnForecastForSmartMeter_v2",
     "tag": "Smart Meters",
-    "summary": "Get the return forecast for a date of a smart meter"
+    "summary": "Get the return forecast for a date of a smart meter",
+    "queryExample": {
+      "date": ""
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/smart-meters/electricity/ean",
     "operationId": "SmartMetersEanController_findByElectricityEan_v2",
     "tag": "Smart Meters",
-    "summary": "Find a smart meter by electricity EAN"
+    "summary": "Find a smart meter by electricity EAN",
+    "queryExample": {
+      "ean": "871687940007565340"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/smart-meters/gas/ean",
     "operationId": "SmartMetersEanController_findByGasEan_v2",
     "tag": "Smart Meters",
-    "summary": "Find a smart meter by gas EAN"
+    "summary": "Find a smart meter by gas EAN",
+    "queryExample": {
+      "ean": "871687940007565341"
+    }
   },
   {
     "method": "GET",
@@ -288,7 +383,13 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/energy/production",
     "operationId": "SolarInvertersController_getProductionEnergy_v2",
     "tag": "Solar Inverters",
-    "summary": "List live production readings from solar inverter"
+    "summary": "List live production readings from solar inverter",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00",
+      "sortBy": "DESC",
+      "limit": 100
+    }
   },
   {
     "method": "GET",
@@ -302,7 +403,14 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/flex/schedules",
     "operationId": "SolarInverterFlexScheduleController_list_v2",
     "tag": "Solar Inverters",
-    "summary": "List flex schedules for a solar inverter"
+    "summary": "List flex schedules for a solar inverter",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-02T00:00:00+01:00",
+      "isActive": true,
+      "limit": 100,
+      "offset": 0
+    }
   },
   {
     "method": "GET",
@@ -316,28 +424,46 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/interval/production",
     "operationId": "SolarInverterAggregationController_getProductionIntervals_v2",
     "tag": "Solar Inverters",
-    "summary": "Get production interval aggregation for a solar inverter"
+    "summary": "Get production interval aggregation for a solar inverter",
+    "queryExample": {
+      "resolution": "hourly",
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/production-forecast",
     "operationId": "SolarInverterForecastController_getProductionForecastForSolarInverter_v2",
     "tag": "Solar Inverters",
-    "summary": "Get the production forecast for a date of a solar inverter"
+    "summary": "Get the production forecast for a date of a solar inverter",
+    "queryExample": {
+      "date": ""
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/schedules",
     "operationId": "SolarInverterScheduleController_list_v2",
     "tag": "Solar Inverters",
-    "summary": "List schedules for solar inverter"
+    "summary": "List schedules for solar inverter",
+    "queryExample": {
+      "isActive": true,
+      "limit": 100,
+      "offset": 0
+    }
   },
   {
     "method": "POST",
     "path": "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/schedules",
     "operationId": "SolarInverterScheduleController_add_v2",
     "tag": "Solar Inverters",
-    "summary": "Create solar inverter schedule"
+    "summary": "Create solar inverter schedule",
+    "bodyExample": {
+      "powerlimit": 100,
+      "zeroExport": false,
+      "time": "2026-01-01T00:00:00.000+00:00"
+    }
   },
   {
     "method": "GET",
@@ -372,7 +498,10 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/sparkies/{serial_number}/electricity/15min",
     "operationId": "SparkyController_getElectricity15minForSN_v2",
     "tag": "Sparky",
-    "summary": "Get the electricity records from sparky for the specific date range"
+    "summary": "Get the electricity records from sparky for the specific date range",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
@@ -400,21 +529,30 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "path": "/api/v2/sparkies/{serial_number}/gas/15min",
     "operationId": "SparkyController_getGas15minForSN_v2",
     "tag": "Sparky",
-    "summary": "Get the gas records from sparky for the specific date range"
+    "summary": "Get the gas records from sparky for the specific date range",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "GET",
     "path": "/api/v2/sparkies/{serial_number}/total/15min",
     "operationId": "SparkyController_getElectricityAndGas15minForSN_v2",
     "tag": "Sparky",
-    "summary": "Get the electricity and gas records from sparky for the specific date range"
+    "summary": "Get the electricity and gas records from sparky for the specific date range",
+    "queryExample": {
+      "date": "2026-01-01"
+    }
   },
   {
     "method": "POST",
     "path": "/api/v2/sparkies/box-code",
     "operationId": "SparkyController_getSparkyDetailsByBoxCode_v2",
     "tag": "Sparky",
-    "summary": "Get sparky details by box code"
+    "summary": "Get sparky details by box code",
+    "bodyExample": {
+      "boxCode": "V3-1002548"
+    }
   },
   {
     "method": "GET",

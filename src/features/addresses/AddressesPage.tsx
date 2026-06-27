@@ -7,7 +7,7 @@ import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Pagination } from '@/components/common/Pagination'
 import { useContextStore } from '@/store/context'
-import { useGroupControllerGetGroupSparkiesV2 } from '@/api/generated/groups/groups'
+import { useGroupAddresses } from '@/hooks/useGroupAddresses'
 import { shortId, fmtDate } from '@/utils/format'
 
 const PAGE_SIZE = 24
@@ -19,28 +19,24 @@ export function AddressesPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
 
-  const query = useGroupControllerGetGroupSparkiesV2(
-    groupUuid ?? '',
-    { limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE },
-    { query: { enabled: !!groupUuid } },
-  )
-
-  const addresses = useMemo(() => query.data?.results ?? [], [query.data])
-  const total = query.data?.meta.total ?? 0
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const { addresses: all, total, isLoading: loading, error, refetch } = useGroupAddresses(groupUuid)
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return addresses
+    if (!search.trim()) return all
     const q = search.toLowerCase()
-    return addresses.filter(
+    return all.filter(
       (a) =>
         a.uuid.toLowerCase().includes(q) ||
         a.sparky?.serialNumber?.toLowerCase().includes(q) ||
         a.sparky?.boxCode?.toLowerCase().includes(q),
     )
-  }, [addresses, search])
+  }, [all, search])
 
-  const openDevices = (record: (typeof addresses)[number]) => {
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, pageCount)
+  const pageItems = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+
+  const openDevices = (record: (typeof all)[number]) => {
     setAddress(record.uuid, record)
     navigate('/devices')
   }
@@ -69,22 +65,26 @@ export function AddressesPage() {
           className="input pl-10"
           placeholder={t('addresses.searchPlaceholder')}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
         />
       </div>
       <p className="text-13 text-text-gray">
         {t('common.total', { count: total })} · {t('addresses.searchNote')}
+        {total > all.length && ` · ${t('addresses.loadedNote', { loaded: all.length, total })}`}
       </p>
 
       <DataState
-        isLoading={query.isLoading}
-        error={query.error}
+        isLoading={loading}
+        error={error}
         isEmpty={filtered.length === 0}
         emptyMessage={t('common.noResults')}
-        onRetry={() => query.refetch()}
+        onRetry={refetch}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((a) => {
+          {pageItems.map((a) => {
             const selected = a.uuid === addressUuid
             return (
               <div
@@ -120,7 +120,7 @@ export function AddressesPage() {
           })}
         </div>
 
-        <Pagination page={page} pageCount={pageCount} onChange={setPage} />
+        <Pagination page={safePage} pageCount={pageCount} onChange={setPage} />
       </DataState>
     </div>
   )

@@ -1,6 +1,7 @@
 // Derive a flat endpoint registry from openapi.json so the UI can map any
-// concrete request back to its operationId/tag and build a Swagger UI
-// deep-link ("View in API docs"). Run as part of `npm run api:generate`.
+// concrete request back to its operationId/tag, build a Swagger UI deep-link
+// ("View in API docs"), and prefill the API Console with example query params
+// and a request-body template. Run as part of `npm run api:generate`.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -11,18 +12,73 @@ const OUT = resolve(__dirname, '..', 'src', 'api', 'endpoints.generated.ts')
 
 const spec = JSON.parse(readFileSync(SPEC, 'utf8'))
 const METHODS = ['get', 'post', 'put', 'patch', 'delete']
+const schemas = spec.components?.schemas ?? {}
+
+function deref(schema, seen = new Set()) {
+  if (schema?.$ref) {
+    const name = schema.$ref.split('/').pop()
+    if (seen.has(name)) return {}
+    seen.add(name)
+    return deref(schemas[name] ?? {}, seen)
+  }
+  return schema ?? {}
+}
+
+// Build a sample value for a JSON schema (examples/defaults preferred).
+function sample(schema, seen = new Set(), depth = 0) {
+  const s = deref(schema, seen)
+  if (s.example !== undefined) return s.example
+  if (s.default !== undefined) return s.default
+  if (Array.isArray(s.enum) && s.enum.length) return s.enum[0]
+  const type = s.type ?? (s.properties ? 'object' : undefined)
+  if (depth > 4) return type === 'object' ? {} : type === 'array' ? [] : null
+  switch (type) {
+    case 'object': {
+      const out = {}
+      for (const [k, v] of Object.entries(s.properties ?? {})) out[k] = sample(v, new Set(seen), depth + 1)
+      return out
+    }
+    case 'array':
+      return [sample(s.items ?? {}, new Set(seen), depth + 1)]
+    case 'string':
+      return s.format === 'date-time' ? '2026-01-01T00:00:00Z' : ''
+    case 'integer':
+    case 'number':
+      return 0
+    case 'boolean':
+      return false
+    default:
+      return null
+  }
+}
 
 const endpoints = []
 for (const [path, item] of Object.entries(spec.paths ?? {})) {
   for (const method of METHODS) {
     const op = item[method]
     if (!op) continue
+
+    // Example query params: name -> example/default/typed placeholder.
+    const queryExample = {}
+    for (const p of op.parameters ?? []) {
+      if (p.in !== 'query') continue
+      const ps = p.schema ?? {}
+      queryExample[p.name] = ps.example ?? ps.default ?? sample(ps)
+    }
+
+    // Request body template (application/json only).
+    let bodyExample
+    const bodySchema = op.requestBody?.content?.['application/json']?.schema
+    if (bodySchema) bodyExample = sample(bodySchema)
+
     endpoints.push({
       method: method.toUpperCase(),
       path,
       operationId: op.operationId ?? '',
       tag: (op.tags && op.tags[0]) ?? 'default',
       summary: op.summary ?? op.description ?? '',
+      ...(Object.keys(queryExample).length ? { queryExample } : {}),
+      ...(bodyExample !== undefined ? { bodyExample } : {}),
     })
   }
 }
@@ -36,6 +92,10 @@ const body = `export interface ApiEndpoint {
   operationId: string
   tag: string
   summary: string
+  /** Example query params (name -> sample value), derived from the spec. */
+  queryExample?: Record<string, unknown>
+  /** Example request body, derived from the spec's requestBody schema. */
+  bodyExample?: unknown
 }
 
 export const API_ENDPOINTS: ApiEndpoint[] = ${JSON.stringify(endpoints, null, 2)}

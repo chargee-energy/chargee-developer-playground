@@ -3,10 +3,8 @@ import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { useContextStore } from '@/store/context'
-import {
-  useGroupControllerGetGroupsV2,
-  useGroupControllerGetGroupSparkiesV2,
-} from '@/api/generated/groups/groups'
+import { useGroupControllerGetGroupsV2 } from '@/api/generated/groups/groups'
+import { useGroupAddresses } from '@/hooks/useGroupAddresses'
 
 // Pages where picking a specific address is meaningful. Elsewhere (dashboard,
 // addresses, flex, console) the address control is hidden.
@@ -20,19 +18,15 @@ export function ContextBar() {
   const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 })
   const groups = useMemo(() => groupsQuery.data?.results ?? [], [groupsQuery.data])
 
-  const addressesQuery = useGroupControllerGetGroupSparkiesV2(
-    groupUuid ?? '',
-    { limit: 200 },
-    { query: { enabled: !!groupUuid } },
-  )
-  const addresses = addressesQuery.data?.results ?? []
+  const showAddress = ADDRESS_ROUTES.includes(pathname) && !!groupUuid
+
+  // Full address list (chunked), only fetched where the control is shown.
+  const { addresses } = useGroupAddresses(groupUuid, showAddress)
 
   // Auto-select the only group.
   useEffect(() => {
     if (!groupUuid && groups.length === 1) setGroup(groups[0].uuid, groups[0].name)
   }, [groups, groupUuid, setGroup])
-
-  const showAddress = ADDRESS_ROUTES.includes(pathname) && !!groupUuid
   const idx = addresses.findIndex((a) => a.uuid === addressUuid)
   const goTo = (i: number) => {
     const a = addresses[i]

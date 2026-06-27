@@ -5,8 +5,8 @@ import { PageHeader } from '@/components/PageHeader'
 import { JsonViewer } from '@/components/common/JsonViewer'
 import { StatusBadge, MethodBadge } from '@/components/common/StatusBadge'
 import { Spinner } from '@/components/common/Spinner'
-import { API_ENDPOINTS, docUrlFor, endpointsByTag } from '@/api/endpoints'
-import { AXIOS_INSTANCE } from '@/api/mutator'
+import { API_ENDPOINTS, docUrlFor, endpointsByTag, type ApiEndpoint } from '@/api/endpoints'
+import { AXIOS_INSTANCE, TOKEN_KEY, REFRESH_KEY } from '@/api/mutator'
 
 interface RunResult {
   status: number | null
@@ -15,10 +15,19 @@ interface RunResult {
   error?: string
 }
 
+// Spec-derived example text for an endpoint's query params and request body.
+function examplesFor(e?: ApiEndpoint) {
+  return {
+    query: e?.queryExample ? JSON.stringify(e.queryExample, null, 2) : '',
+    body: e?.bodyExample !== undefined ? JSON.stringify(e.bodyExample, null, 2) : '',
+  }
+}
+
 export function ConsolePage() {
   const { t } = useTranslation()
   const grouped = useMemo(() => endpointsByTag(), [])
-  const [opId, setOpId] = useState(API_ENDPOINTS[0]?.operationId ?? '')
+  const firstEndpoint = API_ENDPOINTS[0]
+  const [opId, setOpId] = useState(firstEndpoint?.operationId ?? '')
   const endpoint = useMemo(() => API_ENDPOINTS.find((e) => e.operationId === opId), [opId])
 
   const pathParams = useMemo(
@@ -26,10 +35,20 @@ export function ConsolePage() {
     [endpoint],
   )
   const [pathValues, setPathValues] = useState<Record<string, string>>({})
-  const [queryText, setQueryText] = useState('')
-  const [bodyText, setBodyText] = useState('')
+  const [queryText, setQueryText] = useState(() => examplesFor(firstEndpoint).query)
+  const [bodyText, setBodyText] = useState(() => examplesFor(firstEndpoint).body)
   const [sending, setSending] = useState(false)
   const [result, setResult] = useState<RunResult | null>(null)
+
+  const selectEndpoint = (id: string) => {
+    const ep = API_ENDPOINTS.find((e) => e.operationId === id)
+    const ex = examplesFor(ep)
+    setOpId(id)
+    setPathValues({})
+    setResult(null)
+    setQueryText(ex.query)
+    setBodyText(ex.body)
+  }
 
   const isWrite = endpoint && endpoint.method !== 'GET'
 
@@ -54,6 +73,14 @@ export function ConsolePage() {
     const start = performance.now()
     try {
       const res = await AXIOS_INSTANCE({ method: endpoint.method, url, params: params as any, data })
+      // Persist a token returned by /auth/login or /auth/refresh so the rest of
+      // the session (and further console calls) use it.
+      const tok = (res.data as any)?.accessToken ?? (res.data as any)?.access_token
+      if (tok) {
+        localStorage.setItem(TOKEN_KEY, tok)
+        const refresh = (res.data as any)?.refreshToken
+        if (refresh) localStorage.setItem(REFRESH_KEY, refresh)
+      }
       setResult({ status: res.status, durationMs: Math.round(performance.now() - start), data: res.data })
     } catch (e: any) {
       setResult({
@@ -84,11 +111,7 @@ export function ConsolePage() {
             <select
               className="input"
               value={opId}
-              onChange={(e) => {
-                setOpId(e.target.value)
-                setPathValues({})
-                setResult(null)
-              }}
+              onChange={(e) => selectEndpoint(e.target.value)}
             >
               {Object.entries(grouped).map(([tag, eps]) => (
                 <optgroup key={tag} label={tag}>

@@ -70,6 +70,7 @@
     "noResults": "Geen resultaten gevonden",
     "total": "{{count}} totaal",
     "page": "Pagina {{page}} van {{pages}}",
+    "goToPage": "Ga naar pagina",
     "previous": "Vorige",
     "next": "Volgende",
     "refresh": "Vernieuwen",
@@ -117,7 +118,8 @@
     "hasFlint": "Flint",
     "viewDevices": "Bekijk apparaten",
     "selectGroupFirst": "Selecteer een groep om de adressen te tonen.",
-    "searchNote": "Zoeken filtert de geladen pagina. De API pagineert op offset/limit."
+    "searchNote": "Zoeken doorzoekt alle adressen in de groep.",
+    "loadedNote": "Eerste {{loaded}} van {{total}} adressen getoond."
   },
   "devices": {
     "title": "Apparaten",

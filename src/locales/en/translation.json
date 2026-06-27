@@ -70,6 +70,7 @@
     "noResults": "No results found",
     "total": "{{count}} total",
     "page": "Page {{page}} of {{pages}}",
+    "goToPage": "Go to page",
     "previous": "Previous",
     "next": "Next",
     "refresh": "Refresh",
@@ -117,7 +118,8 @@
     "hasFlint": "Flint",
     "viewDevices": "View devices",
     "selectGroupFirst": "Select a group to list its addresses.",
-    "searchNote": "Search filters the currently loaded page. The API paginates by offset/limit."
+    "searchNote": "Search matches across all addresses in the group.",
+    "loadedNote": "Showing the first {{loaded}} of {{total}} addresses."
   },
   "devices": {
     "title": "Devices",

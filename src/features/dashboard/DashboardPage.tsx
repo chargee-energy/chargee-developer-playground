@@ -4,7 +4,6 @@ import { MapPinIcon, CommandLineIcon } from '@heroicons/react/24/outline'
 import { PageHeader } from '@/components/PageHeader'
 import { useContextStore } from '@/store/context'
 import { useGroupControllerGetGroupsV2, useGroupControllerGetGroupSparkiesV2 } from '@/api/generated/groups/groups'
-import { shortId } from '@/utils/format'
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -18,7 +17,7 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 export function DashboardPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { groupUuid, groupName, addressUuid } = useContextStore()
+  const { groupUuid, groupName } = useContextStore()
 
   const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 })
   const addressesQuery = useGroupControllerGetGroupSparkiesV2(
@@ -39,11 +38,10 @@ export function DashboardPage() {
         primaryCall={{ method: 'GET', url: '/api/v2/groups' }}
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <Stat label={t('dashboard.groups')} value={groupCount} />
         <Stat label={t('dashboard.addresses')} value={groupUuid ? addressCount : '—'} />
         <Stat label={t('dashboard.selectedGroup')} value={groupName ?? '—'} />
-        <Stat label={t('dashboard.selectedAddress')} value={addressUuid ? shortId(addressUuid) : '—'} />
       </div>
 
       <div className="card sun-glow p-7">
