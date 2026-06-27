@@ -7,6 +7,39 @@ const API_ORIGIN = import.meta.env.VITE_AMPERE_API_URL || 'https://ampere.prod.t
 export const TOKEN_KEY = 'pg_access_token'
 export const REFRESH_KEY = 'pg_refresh_token'
 
+// --- Token storage --------------------------------------------------------
+// "Remember me" persists in localStorage (survives restarts); otherwise the
+// session lives in sessionStorage (cleared when the tab closes). Reads check
+// both so the rest of the app doesn't care which was used.
+export const getToken = () => sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY)
+export const getRefreshToken = () =>
+  sessionStorage.getItem(REFRESH_KEY) ?? localStorage.getItem(REFRESH_KEY)
+
+export function storeTokens(accessToken: string, refreshToken?: string | null, remember = true) {
+  const store = remember ? localStorage : sessionStorage
+  const other = remember ? sessionStorage : localStorage
+  store.setItem(TOKEN_KEY, accessToken)
+  other.removeItem(TOKEN_KEY)
+  if (refreshToken) {
+    store.setItem(REFRESH_KEY, refreshToken)
+    other.removeItem(REFRESH_KEY)
+  }
+}
+
+/** Replace just the access token in whichever store currently holds it. */
+function replaceAccessToken(accessToken: string, refreshToken?: string | null) {
+  const store = localStorage.getItem(TOKEN_KEY) !== null ? localStorage : sessionStorage
+  store.setItem(TOKEN_KEY, accessToken)
+  if (refreshToken) store.setItem(REFRESH_KEY, refreshToken)
+}
+
+export function clearTokens() {
+  for (const s of [localStorage, sessionStorage]) {
+    s.removeItem(TOKEN_KEY)
+    s.removeItem(REFRESH_KEY)
+  }
+}
+
 export const AXIOS_INSTANCE = Axios.create({
   baseURL: API_ORIGIN,
   headers: { 'Content-Type': 'application/json' },
@@ -14,7 +47,7 @@ export const AXIOS_INSTANCE = Axios.create({
 
 // --- Auth: attach bearer token -------------------------------------------
 AXIOS_INSTANCE.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY)
+  const token = getToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -30,7 +63,7 @@ function recordCall(partial: Omit<ApiCall, 'id'>) {
 let refreshing: Promise<string | null> | null = null
 
 async function tryRefresh(): Promise<string | null> {
-  const refreshToken = localStorage.getItem(REFRESH_KEY)
+  const refreshToken = getRefreshToken()
   try {
     const res = await Axios.post(
       `${API_ORIGIN}/api/v2/auth/refresh`,
@@ -39,8 +72,7 @@ async function tryRefresh(): Promise<string | null> {
     )
     const newToken = res.data?.accessToken ?? res.data?.access_token
     if (newToken) {
-      localStorage.setItem(TOKEN_KEY, newToken)
-      if (res.data?.refreshToken) localStorage.setItem(REFRESH_KEY, res.data.refreshToken)
+      replaceAccessToken(newToken, res.data?.refreshToken)
       return newToken
     }
     return null
@@ -93,8 +125,7 @@ AXIOS_INSTANCE.interceptors.response.use(
         cfg.headers.Authorization = `Bearer ${newToken}`
         return AXIOS_INSTANCE(cfg)
       }
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(REFRESH_KEY)
+      clearTokens()
       if (!window.location.pathname.startsWith('/login')) {
         window.location.assign('/login')
       }

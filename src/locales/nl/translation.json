@@ -47,7 +47,10 @@
     "loginTitle": "Welkom terug",
     "loginSubtitle": "Log in met je Ampere-account om de API te verkennen.",
     "loginError": "Inloggen mislukt. Controleer je e-mail en wachtwoord.",
-    "role": "Rol"
+    "role": "Rol",
+    "rememberMe": "Onthoud mij",
+    "credentialsNote": "Je hebt Ampere API-inloggegevens nodig om in te loggen. Neem voor hulp of inloggegevens contact op met",
+    "notProductionNote": "De playground is bedoeld om de Ampere API te testen en te verkennen. Niet voor productie- of support-toegang."
   },
   "common": {
     "loading": "Laden…",

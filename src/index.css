@@ -108,6 +108,32 @@
   }
 }
 
+/* Slowly drifting, blurred colour blobs for the login backdrop. */
+@layer utilities {
+  .animate-blob {
+    animation: blob 18s ease-in-out infinite;
+  }
+}
+
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(var(--bx, 30px), var(--by, -24px)) scale(1.12);
+  }
+  66% {
+    transform: translate(calc(var(--bx, 30px) * -0.6), calc(var(--by, -24px) * -0.7)) scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blob {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     animation: none;

@@ -47,7 +47,10 @@
     "loginTitle": "Welcome back",
     "loginSubtitle": "Sign in with your Ampere account to start exploring the API.",
     "loginError": "Login failed. Check your email and password.",
-    "role": "Role"
+    "role": "Role",
+    "rememberMe": "Remember me",
+    "credentialsNote": "You need Ampere API credentials to sign in. For guidance or login details, contact",
+    "notProductionNote": "The playground is for testing and exploring the Ampere API. It is not meant for production or support access."
   },
   "common": {
     "loading": "Loading…",

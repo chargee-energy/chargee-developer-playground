@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -19,6 +19,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const { login, isAuthenticated } = useAuthStore()
   const [serverError, setServerError] = useState('')
+  const [remember, setRemember] = useState(true)
 
   const {
     register,
@@ -31,7 +32,7 @@ export function LoginPage() {
   const onSubmit = async (values: FormValues) => {
     setServerError('')
     try {
-      await login(values.email, values.password)
+      await login(values.email, values.password, remember)
       navigate('/')
     } catch (err: any) {
       setServerError(err?.response?.data?.message || t('auth.loginError'))
@@ -39,8 +40,28 @@ export function LoginPage() {
   }
 
   return (
-    <div className="sun-glow flex min-h-screen items-center justify-center px-4">
-      <div className="card w-full max-w-md p-8">
+    <div className="sun-glow relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      {/* Animated brand backdrop — drifting, blurred colour blobs. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="animate-blob absolute -left-24 -top-24 size-[28rem] rounded-full bg-medium-purple/30 blur-3xl"
+          style={{ '--bx': '60px', '--by': '40px' } as CSSProperties}
+        />
+        <div
+          className="animate-blob absolute -right-32 top-1/4 size-[32rem] rounded-full bg-orange/20 blur-3xl"
+          style={{ '--bx': '-50px', '--by': '60px', animationDelay: '-6s' } as CSSProperties}
+        />
+        <div
+          className="animate-blob absolute -bottom-32 left-1/3 size-[30rem] rounded-full bg-green/20 blur-3xl"
+          style={{ '--bx': '40px', '--by': '-50px', animationDelay: '-12s' } as CSSProperties}
+        />
+        <div
+          className="animate-blob absolute bottom-1/4 right-1/4 size-72 rounded-full bg-yellow/20 blur-3xl"
+          style={{ '--bx': '-30px', '--by': '-30px', animationDelay: '-3s' } as CSSProperties}
+        />
+      </div>
+
+      <div className="card reveal relative z-10 w-full max-w-md p-8">
         <div className="mb-8 flex flex-col items-center text-center">
           <img src={logo} alt="Chargee" className="mb-5 h-9" />
           <h1 className="text-28 font-extrabold text-dark-blue">{t('auth.loginTitle')}</h1>
@@ -69,6 +90,16 @@ export function LoginPage() {
             {errors.password && <p className="mt-1 text-13 text-red">{errors.password.message}</p>}
           </div>
 
+          <label className="flex cursor-pointer items-center gap-2 text-13 text-text-gray">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="size-4 rounded border-beige-2 text-dark-purple focus:ring-dark-purple"
+            />
+            {t('auth.rememberMe')}
+          </label>
+
           {serverError && (
             <p className="rounded-xl bg-red/10 px-3 py-2 text-13 text-red">{serverError}</p>
           )}
@@ -78,6 +109,22 @@ export function LoginPage() {
             {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
           </button>
         </form>
+
+        <div className="mt-6 space-y-3 border-t border-beige-2 pt-5 text-13 leading-160 text-text-gray">
+          <p>
+            {t('auth.credentialsNote')}{' '}
+            <a
+              href="mailto:support@chargee.energy"
+              className="font-semibold text-dark-purple hover:underline"
+            >
+              support@chargee.energy
+            </a>
+            .
+          </p>
+          <p className="rounded-xl bg-light-purple-3 px-3 py-2 text-dark-blue">
+            {t('auth.notProductionNote')}
+          </p>
+        </div>
       </div>
     </div>
   )

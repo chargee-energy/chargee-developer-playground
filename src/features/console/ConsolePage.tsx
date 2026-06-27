@@ -6,7 +6,7 @@ import { JsonViewer } from '@/components/common/JsonViewer'
 import { StatusBadge, MethodBadge } from '@/components/common/StatusBadge'
 import { Spinner } from '@/components/common/Spinner'
 import { API_ENDPOINTS, docUrlFor, endpointsByTag, type ApiEndpoint } from '@/api/endpoints'
-import { AXIOS_INSTANCE, TOKEN_KEY, REFRESH_KEY } from '@/api/mutator'
+import { AXIOS_INSTANCE, storeTokens } from '@/api/mutator'
 
 interface RunResult {
   status: number | null
@@ -76,11 +76,7 @@ export function ConsolePage() {
       // Persist a token returned by /auth/login or /auth/refresh so the rest of
       // the session (and further console calls) use it.
       const tok = (res.data as any)?.accessToken ?? (res.data as any)?.access_token
-      if (tok) {
-        localStorage.setItem(TOKEN_KEY, tok)
-        const refresh = (res.data as any)?.refreshToken
-        if (refresh) localStorage.setItem(REFRESH_KEY, refresh)
-      }
+      if (tok) storeTokens(tok, (res.data as any)?.refreshToken, true)
       setResult({ status: res.status, durationMs: Math.round(performance.now() - start), data: res.data })
     } catch (e: any) {
       setResult({
