@@ -301,10 +301,16 @@
     "notActivated": "Not activated",
     "viewInAmpere": "View in Ampere",
     "activationHint": "Select a group above to check which shipped serials are activated in Ampere.",
-    "statTotal": "Total orders",
+    "statTotal": "Orders",
     "statPending": "Pending",
     "statFulfilled": "Fulfilled",
-    "statActivated": "Sparkies activated"
+    "statActivated": "Activated",
+    "statNotActivated": "Not activated",
+    "funnelAllOrders": "all orders",
+    "funnelOfOrders": "{{pct}}% of orders",
+    "funnelOfOrdersShort": "of orders",
+    "funnelOfFulfilled": "{{pct}}% of fulfilled",
+    "funnelPickGroup": "pick a group"
   },
   "console": {
     "title": "API Console",

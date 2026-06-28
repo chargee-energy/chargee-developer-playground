@@ -301,10 +301,16 @@
     "notActivated": "Niet geactiveerd",
     "viewInAmpere": "Bekijk in Ampere",
     "activationHint": "Selecteer hierboven een groep om te zien welke verzonden serienummers in Ampere geactiveerd zijn.",
-    "statTotal": "Totaal bestellingen",
+    "statTotal": "Bestellingen",
     "statPending": "In behandeling",
     "statFulfilled": "Afgerond",
-    "statActivated": "Sparky's geactiveerd"
+    "statActivated": "Geactiveerd",
+    "statNotActivated": "Niet geactiveerd",
+    "funnelAllOrders": "alle bestellingen",
+    "funnelOfOrders": "{{pct}}% van bestellingen",
+    "funnelOfOrdersShort": "van bestellingen",
+    "funnelOfFulfilled": "{{pct}}% van afgerond",
+    "funnelPickGroup": "kies een groep"
   },
   "console": {
     "title": "API Console",

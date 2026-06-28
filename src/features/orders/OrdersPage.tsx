@@ -18,6 +18,7 @@ import type { GroupAddressDto } from '@/api/generated/model'
 import { fmtDate, shortId } from '@/utils/format'
 import { StatusChip } from './StatusChip'
 import { OrderDetailDrawer } from './OrderDetailDrawer'
+import { OrdersFunnel } from './OrdersFunnel'
 
 const PAGE_SIZE = 20
 const norm = (s: string) => s.trim().toUpperCase()
@@ -164,29 +165,8 @@ export function OrdersPage() {
         }
       />
 
-      {/* Analytics */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label={t('orders.statTotal')} value={stats.total} loading={ordersQuery.isLoading} />
-        <StatTile
-          label={t('orders.statPending')}
-          value={stats.pending}
-          pct={pct(stats.pending, stats.total)}
-          loading={ordersQuery.isLoading}
-        />
-        <StatTile
-          label={t('orders.statFulfilled')}
-          value={stats.fulfilled}
-          pct={pct(stats.fulfilled, stats.total)}
-          loading={ordersQuery.isLoading}
-        />
-        <StatTile
-          label={t('orders.statActivated')}
-          value={groupUuid ? `${stats.activated} / ${stats.sparkies}` : '—'}
-          pct={groupUuid ? pct(stats.activated, stats.sparkies) : undefined}
-          loading={ordersQuery.isLoading}
-          hint={groupUuid ? undefined : t('orders.activationHint')}
-        />
-      </div>
+      {/* Analytics funnel: order → fulfilled → activated */}
+      <OrdersFunnel stats={stats} hasGroup={!!groupUuid} loading={ordersQuery.isLoading} />
 
       <DataState
         isLoading={ordersQuery.isLoading}
@@ -217,35 +197,6 @@ export function OrdersPage() {
         hasGroup={!!groupUuid}
         onJump={jumpToAddress}
       />
-    </div>
-  )
-}
-
-function pct(part: number, whole: number): number {
-  return whole > 0 ? Math.round((part / whole) * 100) : 0
-}
-
-function StatTile({
-  label,
-  value,
-  pct,
-  hint,
-  loading,
-}: {
-  label: string
-  value: number | string
-  pct?: number
-  hint?: string
-  loading?: boolean
-}) {
-  return (
-    <div className="rounded-2xl border border-beige-2 bg-cream p-4">
-      <p className="text-11 font-bold uppercase tracking-wide text-text-gray">{label}</p>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className="text-2xl font-extrabold text-dark-blue">{loading ? '…' : value}</span>
-        {!loading && pct !== undefined && <span className="text-13 font-semibold text-text-gray">{pct}%</span>}
-      </div>
-      {hint && <p className="mt-1 text-11 leading-150 text-text-gray">{hint}</p>}
     </div>
   )
 }
