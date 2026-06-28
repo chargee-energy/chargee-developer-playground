@@ -41,21 +41,21 @@ export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
       label: t('orders.statTotal'),
       value: total,
       caption: t('orders.funnelAllOrders'),
-      color: '#6245DE',
+      color: '#1D1543',
     },
     {
       key: 'fulfilled',
       label: t('orders.statFulfilled'),
       value: fulfilled,
       caption: t('orders.funnelOfOrders', { pct: pct(fulfilled, total) }),
-      color: '#5571E6',
+      color: '#6245DE',
     },
     {
       key: 'activated',
       label: t('orders.statActivated'),
       value: hasGroup ? activated : null,
       caption: hasGroup ? t('orders.funnelOfFulfilled', { pct: pct(activated, sparkies) }) : t('orders.funnelPickGroup'),
-      color: '#1570EF',
+      color: '#8A6FE8',
     },
   ]
 
@@ -72,20 +72,27 @@ export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
     const yL = yOf(stages[i - 1]?.value ?? s.value)
     const yR = yOf(s.value)
     const cx = x0 + segW * 0.5
-    return { d: `M${x0},${H} L${x0},${yL} C${cx},${yL} ${cx},${yR} ${x1},${yR} L${x1},${H} Z`, key: s.key }
+    // Soft rounded top corners for an on-brand feel.
+    const r = Math.min(14, (H - yL) / 2, (H - yR) / 2, segW / 2)
+    const d =
+      `M${x0},${H} L${x0},${yL + r} Q${x0},${yL} ${x0 + r},${yL} ` +
+      `C${cx},${yL} ${cx},${yR} ${x1 - r},${yR} Q${x1},${yR} ${x1},${yR + r} L${x1},${H} Z`
+    return { d, key: s.key }
   })
 
   return (
     <div className="card p-5">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <p className="text-11 font-bold uppercase tracking-wide text-text-gray">{t('orders.funnelTitle')}</p>
-        <div className="rounded-2xl border border-beige-2 bg-cream px-4 py-2">
+        <div className="rounded-20 bg-light-purple-3 px-4 py-2">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-extrabold text-dark-purple">
               {loading || !hasGroup ? '—' : `${pct(activated, sparkies)}%`}
             </span>
           </div>
-          <p className="text-11 leading-tight text-text-gray">{t('orders.funnelActivationRate')}</p>
+          <p className="text-11 font-semibold leading-tight text-dark-purple/70">
+            {t('orders.funnelActivationRate')}
+          </p>
         </div>
       </div>
 
@@ -98,9 +105,9 @@ export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
       >
         <defs>
           <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#6A4CE0" />
-            <stop offset="50%" stopColor="#5571E6" />
-            <stop offset="100%" stopColor="#1E8AF0" />
+            <stop offset="0%" stopColor="#1D1543" />
+            <stop offset="50%" stopColor="#6245DE" />
+            <stop offset="100%" stopColor="#9C87F8" />
           </linearGradient>
         </defs>
         {paths.map((p) => (
