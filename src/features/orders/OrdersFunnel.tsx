@@ -77,7 +77,7 @@ export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
     const d =
       `M${x0},${H} L${x0},${yL + r} Q${x0},${yL} ${x0 + r},${yL} ` +
       `C${cx},${yL} ${cx},${yR} ${x1 - r},${yR} Q${x1},${yR} ${x1},${yR + r} L${x1},${H} Z`
-    return { d, key: s.key }
+    return { d, key: s.key, color: s.color }
   })
 
   return (
@@ -103,15 +103,8 @@ export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
         role="img"
         aria-label={t('orders.funnelTitle')}
       >
-        <defs>
-          <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#1D1543" />
-            <stop offset="50%" stopColor="#6245DE" />
-            <stop offset="100%" stopColor="#9C87F8" />
-          </linearGradient>
-        </defs>
         {paths.map((p) => (
-          <path key={p.key} d={p.d} fill="url(#funnelGrad)" opacity={loading ? 0.25 : 1} />
+          <path key={p.key} d={p.d} fill={p.color} opacity={loading ? 0.25 : 1} />
         ))}
       </svg>
 

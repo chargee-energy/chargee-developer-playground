@@ -179,3 +179,39 @@ export function orderSerials(order: Order): Array<{ product: string; serial: str
   }
   return out
 }
+
+/** The delivery address of an order (Monta first, then the webshop order). */
+export function orderAddress(order: Order): OrderAddress | undefined {
+  return (
+    order.montaOrderData?.consumerDetails?.deliveryAddress ??
+    order.orderData?.consumerDetails?.deliveryAddress
+  )
+}
+
+/** Customer name from the delivery address, when known. */
+export function orderCustomerName(order: Order): string {
+  const a = orderAddress(order)
+  return [a?.firstName, a?.lastName].filter(Boolean).join(' ')
+}
+
+/** Lowercased haystack for free-text search (name, address, serials, ids). */
+export function orderSearchText(order: Order): string {
+  const a = orderAddress(order)
+  const parts = [
+    order.webshopOrderId,
+    order.montaOrderId,
+    order.id,
+    order.status,
+    a?.firstName,
+    a?.lastName,
+    a?.street,
+    a?.houseNumber,
+    a?.houseNumberAddition,
+    a?.postalCode,
+    a?.city,
+    a?.countryCode,
+    a?.emailAddress,
+    ...orderSerials(order).flatMap(({ product, serial }) => [product, serial]),
+  ]
+  return parts.filter(Boolean).join(' ').toLowerCase()
+}

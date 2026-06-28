@@ -1,11 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRightOnRectangleIcon, CheckCircleIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import {
+  ArrowRightOnRectangleIcon,
+  CheckCircleIcon,
+  MagnifyingGlassIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline'
 import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { Pagination } from '@/components/common/Pagination'
@@ -13,15 +18,21 @@ import { Spinner } from '@/components/common/Spinner'
 import { useOrderAuthStore } from '@/store/orderAuth'
 import { useContextStore } from '@/store/context'
 import { useGroupAddresses } from '@/hooks/useGroupAddresses'
-import { getAllOrders, orderSerials, type Order } from '@/api/orderClient'
+import { getAllOrders, orderSearchText, orderSerials, type Order } from '@/api/orderClient'
 import type { GroupAddressDto } from '@/api/generated/model'
 import { fmtDate, shortId } from '@/utils/format'
+import { cn } from '@/utils/cn'
 import { StatusChip } from './StatusChip'
 import { OrderDetailDrawer } from './OrderDetailDrawer'
 import { OrdersFunnel } from './OrdersFunnel'
 
 const PAGE_SIZE = 20
 const norm = (s: string) => s.trim().toUpperCase()
+
+type OrderFilter = 'all' | 'fulfilled' | 'pending' | 'activated'
+
+const orderIsActivated = (order: Order, activated: Set<string>) =>
+  orderSerials(order).some((s) => activated.has(norm(s.serial)))
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) })
 type FormValues = z.infer<typeof schema>
@@ -34,6 +45,8 @@ export function OrdersPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Order | null>(null)
+  const [filter, setFilter] = useState<OrderFilter>('all')
+  const [search, setSearch] = useState('')
 
   const ordersQuery = useQuery({
     queryKey: ['all-orders'],
@@ -80,9 +93,35 @@ export function OrdersPage() {
     navigate('/devices')
   }
 
-  // Client-side pagination over the full set.
-  const pageCount = Math.max(1, Math.ceil(orders.length / PAGE_SIZE))
-  const pageOrders = orders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  // Counts per filter (for the chip badges).
+  const counts = useMemo(
+    () => ({
+      all: orders.length,
+      fulfilled: orders.filter((o) => o.status === 'fulfilled').length,
+      pending: orders.filter((o) => o.status === 'pending').length,
+      activated: orders.filter((o) => orderIsActivated(o, activated)).length,
+    }),
+    [orders, activated],
+  )
+
+  // Apply the active status/activation filter, then the free-text search.
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return orders.filter((o) => {
+      if (filter === 'fulfilled' && o.status !== 'fulfilled') return false
+      if (filter === 'pending' && o.status !== 'pending') return false
+      if (filter === 'activated' && !orderIsActivated(o, activated)) return false
+      if (q && !orderSearchText(o).includes(q)) return false
+      return true
+    })
+  }, [orders, filter, search, activated])
+
+  // Reset to the first page whenever the result set changes.
+  useEffect(() => setPage(1), [filter, search])
+
+  // Client-side pagination over the filtered set.
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageOrders = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   // --- Connect form ---
   const [serverError, setServerError] = useState('')
@@ -168,11 +207,53 @@ export function OrdersPage() {
       {/* Analytics funnel: order → fulfilled → activated */}
       <OrdersFunnel stats={stats} hasGroup={!!groupUuid} loading={ordersQuery.isLoading} />
 
+      {/* Search + filters */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative sm:max-w-sm sm:flex-1">
+          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-text-gray" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('orders.searchPlaceholder')}
+            className="input pl-10"
+            aria-label={t('orders.searchPlaceholder')}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(['all', 'fulfilled', 'pending', 'activated'] as const).map((key) => {
+            const disabled = key === 'activated' && !groupUuid
+            const active = filter === key
+            return (
+              <button
+                key={key}
+                type="button"
+                disabled={disabled}
+                onClick={() => setFilter(key)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-13 font-semibold transition-colors',
+                  active
+                    ? 'bg-dark-purple text-white'
+                    : 'border border-beige-2 bg-white text-text-gray hover:bg-light-purple-3 hover:text-dark-purple',
+                  disabled && 'cursor-not-allowed opacity-40 hover:bg-white hover:text-text-gray',
+                )}
+                title={disabled ? t('orders.funnelPickGroup') : undefined}
+              >
+                {t(`orders.filter_${key}`)}
+                <span className={cn('text-11 font-bold', active ? 'text-white/80' : 'text-text-gray')}>
+                  {counts[key]}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <DataState
         isLoading={ordersQuery.isLoading}
         error={ordersQuery.error}
-        isEmpty={orders.length === 0}
-        emptyMessage={t('orders.empty')}
+        isEmpty={filtered.length === 0}
+        emptyMessage={orders.length === 0 ? t('orders.empty') : t('common.noResults')}
         onRetry={() => ordersQuery.refetch()}
       >
         <div className="space-y-4">
