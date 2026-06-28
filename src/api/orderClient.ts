@@ -6,9 +6,6 @@ import { useInspectorStore, nextCallId, type ApiCall } from '@/store/inspector'
 const ORDER_ORIGIN = import.meta.env.VITE_ORDER_API_URL || 'https://order-api.chargee.io'
 
 export const ORDER_TOKEN_KEY = 'pg_order_access_token'
-// The SKU that identifies a Sparky varies per customer (e.g. GREENCHOICESPARKYV3),
-// so it is configured by the user at connect time and persisted alongside the token.
-export const ORDER_SKU_KEY = 'pg_order_sparky_sku'
 
 export const getOrderToken = () =>
   sessionStorage.getItem(ORDER_TOKEN_KEY) ?? localStorage.getItem(ORDER_TOKEN_KEY)
@@ -23,21 +20,6 @@ export function storeOrderToken(token: string, remember = true) {
 export function clearOrderToken() {
   localStorage.removeItem(ORDER_TOKEN_KEY)
   sessionStorage.removeItem(ORDER_TOKEN_KEY)
-}
-
-export const getOrderSku = () =>
-  sessionStorage.getItem(ORDER_SKU_KEY) ?? localStorage.getItem(ORDER_SKU_KEY) ?? ''
-
-export function storeOrderSku(sku: string, remember = true) {
-  const store = remember ? localStorage : sessionStorage
-  const other = remember ? sessionStorage : localStorage
-  store.setItem(ORDER_SKU_KEY, sku)
-  other.removeItem(ORDER_SKU_KEY)
-}
-
-export function clearOrderSku() {
-  localStorage.removeItem(ORDER_SKU_KEY)
-  sessionStorage.removeItem(ORDER_SKU_KEY)
 }
 
 export const ORDER_AXIOS = Axios.create({
@@ -96,16 +78,50 @@ export interface OrderLoginResponse {
   user: OrderUser
 }
 
+export interface OrderAddress {
+  firstName?: string | null
+  lastName?: string | null
+  street?: string | null
+  houseNumber?: string | null
+  houseNumberAddition?: string | null
+  postalCode?: string | null
+  city?: string | null
+  countryCode?: string | null
+  emailAddress?: string | null
+}
+
+export interface OrderLine {
+  sku: string
+  orderedQuantity?: number
+}
+
 export interface Order {
   id: string
   webshopOrderId: string
-  orderData?: { lines?: Array<{ sku: string; orderedQuantity: number }> }
-  montaOrderData?: { montaEorderId?: string; status?: string }
+  orderData?: {
+    lines?: OrderLine[]
+    origin?: string
+    consumerDetails?: { deliveryAddress?: OrderAddress; invoiceAddress?: OrderAddress; b2b?: boolean }
+  }
+  montaOrderData?: {
+    montaEorderId?: number | string
+    origin?: string
+    shipperDescription?: string | null
+    shipperCode?: string | null
+    trackAndTraceCode?: string | null
+    trackAndTraceLink?: string | null
+    deliveryStatusDescription?: string | null
+    estimatedDeliveryFrom?: string | null
+    estimatedDeliveryTo?: string | null
+    shipped?: string | null
+    consumerDetails?: { deliveryAddress?: OrderAddress; invoiceAddress?: OrderAddress }
+  }
   /**
    * Serials shipped, as an array of maps keyed by product SKU, e.g.
    * [{ GREENCHOICEFLYER: [], GREENCHOICESPARKYV3: ["v3-2023469"] }].
-   * Only `fulfilled` orders carry a Sparky serial. The serial value is the
-   * Sparky box code (matches `boxCode` on a group address in Ampere).
+   * Only serialized products (Sparkies) carry serials — accessories ship with
+   * empty arrays. The serial value is the Sparky box code (matches `boxCode`
+   * on a group address in Ampere). Only `fulfilled` orders carry serials.
    */
   serials?: Array<Record<string, string[]>>
   status: string
@@ -130,6 +146,27 @@ export async function orderLogin(email: string, password: string): Promise<Order
 export async function getOrders(page = 1, limit = 20): Promise<OrdersResponse> {
   const { data } = await ORDER_AXIOS.get<OrdersResponse>('/api/v1/orders', { params: { page, limit } })
   return data
+}
+
+/**
+ * Loads every order by paging through the list endpoint, so analytics and the
+ * activation cross-check run over the full set (the list itself is then paged
+ * client-side). Capped to avoid runaway fetches.
+ */
+export async function getAllOrders(): Promise<{ orders: Order[]; total: number; truncated: boolean }> {
+  const PAGE = 100
+  const MAX_PAGES = 50 // up to 5000 orders
+  const first = await getOrders(1, PAGE)
+  const totalPages = first.meta?.totalPages ?? 1
+  const pages = Math.min(totalPages, MAX_PAGES)
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(0, pages - 1) }, (_, i) => getOrders(i + 2, PAGE)),
+  )
+  return {
+    orders: [first, ...rest].flatMap((r) => r.data ?? []),
+    total: first.meta?.total ?? 0,
+    truncated: totalPages > MAX_PAGES,
+  }
 }
 
 /** Flatten an order's serials (array of SKU→serials maps) to { product, serial }. */
