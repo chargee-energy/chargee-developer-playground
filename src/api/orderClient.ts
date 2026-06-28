@@ -194,6 +194,15 @@ export function orderCustomerName(order: Order): string {
   return [a?.firstName, a?.lastName].filter(Boolean).join(' ')
 }
 
+/** Single-line delivery address, e.g. "Grebbeberglaan 14, 5628GJ Eindhoven". */
+export function orderAddressLine(order: Order): string {
+  const a = orderAddress(order)
+  if (!a) return ''
+  const street = [a.street, a.houseNumber, a.houseNumberAddition].filter(Boolean).join(' ')
+  const city = [a.postalCode, a.city].filter(Boolean).join(' ')
+  return [street, city].filter(Boolean).join(', ')
+}
+
 /** Lowercased haystack for free-text search (name, address, serials, ids). */
 export function orderSearchText(order: Order): string {
   const a = orderAddress(order)

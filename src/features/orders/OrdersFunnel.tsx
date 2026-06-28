@@ -8,6 +8,8 @@ export interface OrderStats {
   sparkies: number
   /** Of those, how many appear (activated) in the selected Ampere group. */
   activated: number
+  /** Shipped (fulfilled) but not activated, ordered more than 5 days ago. */
+  stale: number
 }
 
 const pct = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0)
@@ -32,7 +34,7 @@ interface Props {
  */
 export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
   const { t } = useTranslation()
-  const { total, pending, fulfilled, sparkies, activated } = stats
+  const { total, pending, fulfilled, sparkies, activated, stale } = stats
   const notActivated = Math.max(0, sparkies - activated)
 
   const stages = [
@@ -134,6 +136,10 @@ export function OrdersFunnel({ stats, hasGroup, loading }: Props) {
           {t('orders.statPending')}:{' '}
           <span className="font-semibold text-dark-blue">{loading ? '—' : pending}</span>
           {!loading && <> ({pct(pending, total)}% {t('orders.funnelOfOrdersShort')})</>}
+        </span>
+        <span>
+          {t('orders.statStale')}:{' '}
+          <span className="font-semibold text-red">{loading || !hasGroup ? '—' : stale}</span>
         </span>
       </div>
     </div>

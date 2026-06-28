@@ -15,10 +15,18 @@ import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { Pagination } from '@/components/common/Pagination'
 import { Spinner } from '@/components/common/Spinner'
+import { ExportCsvButton } from '@/components/common/ExportCsvButton'
 import { useOrderAuthStore } from '@/store/orderAuth'
 import { useContextStore } from '@/store/context'
 import { useGroupAddresses } from '@/hooks/useGroupAddresses'
-import { getAllOrders, orderSearchText, orderSerials, type Order } from '@/api/orderClient'
+import {
+  getAllOrders,
+  orderAddressLine,
+  orderCustomerName,
+  orderSearchText,
+  orderSerials,
+  type Order,
+} from '@/api/orderClient'
 import type { GroupAddressDto } from '@/api/generated/model'
 import { fmtDate, shortId } from '@/utils/format'
 import { cn } from '@/utils/cn'
@@ -27,12 +35,21 @@ import { OrderDetailDrawer } from './OrderDetailDrawer'
 import { OrdersFunnel } from './OrdersFunnel'
 
 const PAGE_SIZE = 20
+const STALE_DAYS = 5
+const STALE_MS = STALE_DAYS * 24 * 60 * 60 * 1000
 const norm = (s: string) => s.trim().toUpperCase()
 
-type OrderFilter = 'all' | 'fulfilled' | 'pending' | 'activated'
+type OrderFilter = 'all' | 'fulfilled' | 'pending' | 'activated' | 'stale'
 
 const orderIsActivated = (order: Order, activated: Set<string>) =>
   orderSerials(order).some((s) => activated.has(norm(s.serial)))
+
+/** Shipped (fulfilled) but not activated, and ordered more than 5 days ago. */
+const orderIsStale = (order: Order, activated: Set<string>, threshold: number) =>
+  order.status === 'fulfilled' &&
+  orderSerials(order).length > 0 &&
+  !orderIsActivated(order, activated) &&
+  new Date(order.createdAt).getTime() < threshold
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) })
 type FormValues = z.infer<typeof schema>
@@ -71,17 +88,20 @@ export function OrdersPage() {
 
   // Analytics over the full order set.
   const stats = useMemo(() => {
+    const threshold = Date.now() - STALE_MS
     const total = orders.length
     const fulfilled = orders.filter((o) => o.status === 'fulfilled')
     const pending = orders.filter((o) => o.status === 'pending').length
     const fulfilledSerials = fulfilled.flatMap((o) => orderSerials(o).map((s) => s.serial))
     const activatedCount = fulfilledSerials.filter((s) => activated.has(norm(s))).length
+    const stale = orders.filter((o) => orderIsStale(o, activated, threshold)).length
     return {
       total,
       pending,
       fulfilled: fulfilled.length,
       sparkies: fulfilledSerials.length,
       activated: activatedCount,
+      stale,
     }
   }, [orders, activated])
 
@@ -94,27 +114,49 @@ export function OrdersPage() {
   }
 
   // Counts per filter (for the chip badges).
-  const counts = useMemo(
-    () => ({
+  const counts = useMemo(() => {
+    const threshold = Date.now() - STALE_MS
+    return {
       all: orders.length,
       fulfilled: orders.filter((o) => o.status === 'fulfilled').length,
       pending: orders.filter((o) => o.status === 'pending').length,
       activated: orders.filter((o) => orderIsActivated(o, activated)).length,
-    }),
-    [orders, activated],
-  )
+      stale: orders.filter((o) => orderIsStale(o, activated, threshold)).length,
+    }
+  }, [orders, activated])
 
   // Apply the active status/activation filter, then the free-text search.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
+    const threshold = Date.now() - STALE_MS
     return orders.filter((o) => {
       if (filter === 'fulfilled' && o.status !== 'fulfilled') return false
       if (filter === 'pending' && o.status !== 'pending') return false
       if (filter === 'activated' && !orderIsActivated(o, activated)) return false
+      if (filter === 'stale' && !orderIsStale(o, activated, threshold)) return false
       if (q && !orderSearchText(o).includes(q)) return false
       return true
     })
   }, [orders, filter, search, activated])
+
+  // CSV rows for the current (filtered) result set.
+  const csvRows = useMemo(
+    () =>
+      filtered.map((o) => ({
+        webshopOrderId: o.webshopOrderId,
+        montaOrderId: o.montaOrderId ?? '',
+        status: o.status,
+        createdAt: o.createdAt,
+        fulfilledAt: o.fulfilledAt ?? '',
+        recipient: orderCustomerName(o),
+        address: orderAddressLine(o),
+        serials: orderSerials(o)
+          .map((s) => s.serial)
+          .join(' '),
+        activated: orderSerials(o).some((s) => activated.has(norm(s.serial))) ? 'yes' : 'no',
+      })),
+    [filtered, activated],
+  )
 
   // Reset to the first page whenever the result set changes.
   useEffect(() => setPage(1), [filter, search])
@@ -220,9 +262,9 @@ export function OrdersPage() {
             aria-label={t('orders.searchPlaceholder')}
           />
         </div>
-        <div className="flex flex-wrap gap-2">
-          {(['all', 'fulfilled', 'pending', 'activated'] as const).map((key) => {
-            const disabled = key === 'activated' && !groupUuid
+        <div className="flex flex-wrap items-center gap-2">
+          {(['all', 'fulfilled', 'pending', 'activated', 'stale'] as const).map((key) => {
+            const disabled = (key === 'activated' || key === 'stale') && !groupUuid
             const active = filter === key
             return (
               <button
@@ -246,6 +288,8 @@ export function OrdersPage() {
               </button>
             )
           })}
+          <span className="mx-1 hidden h-5 w-px bg-beige-2 sm:block" />
+          <ExportCsvButton rows={csvRows} filename={`orders-${filter}.csv`} />
         </div>
       </div>
 
@@ -297,6 +341,8 @@ function OrderCard({
 }) {
   const { t } = useTranslation()
   const serials = orderSerials(order)
+  const name = orderCustomerName(order)
+  const addressLine = orderAddressLine(order)
   return (
     <button
       type="button"
@@ -305,9 +351,12 @@ function OrderCard({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-semibold text-dark-blue">{order.webshopOrderId || shortId(order.id)}</p>
-          <p className="text-13 text-text-gray">
+          <p className="truncate font-semibold text-dark-blue">{name || order.webshopOrderId || shortId(order.id)}</p>
+          {addressLine && <p className="truncate text-13 text-text-gray">{addressLine}</p>}
+          <p className="text-11 text-text-gray">
             {t('orders.created')} {fmtDate(order.createdAt)}
+            {' · '}
+            <span className="font-mono">{order.webshopOrderId || shortId(order.id)}</span>
             {order.montaOrderId ? ` · ${t('orders.montaOrder')} ${order.montaOrderId}` : ''}
           </p>
         </div>

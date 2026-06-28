@@ -3,7 +3,7 @@ import { ArrowTopRightOnSquareIcon, CheckCircleIcon, MapPinIcon } from '@heroico
 import { Drawer } from '@/components/common/Drawer'
 import { JsonViewer } from '@/components/common/JsonViewer'
 import { StatusChip } from './StatusChip'
-import { orderSerials, type Order, type OrderAddress } from '@/api/orderClient'
+import { orderCustomerName, orderSerials, type Order, type OrderAddress } from '@/api/orderClient'
 import { fmtDateTime, shortId } from '@/utils/format'
 
 const norm = (s: string) => s.trim().toUpperCase()
@@ -44,12 +44,12 @@ export function OrderDetailDrawer({ order, onClose, activated, hasGroup, onJump 
     <Drawer
       open={!!order}
       onClose={onClose}
-      title={order?.webshopOrderId || (order ? shortId(order.id) : '')}
+      title={(order && orderCustomerName(order)) || order?.webshopOrderId || (order ? shortId(order.id) : '')}
       subtitle={
         order ? (
           <span className="inline-flex items-center gap-2">
             <StatusChip status={order.status} />
-            <code className="font-mono text-11 text-text-gray">{shortId(order.id)}</code>
+            <code className="font-mono text-11 text-text-gray">{order.webshopOrderId || shortId(order.id)}</code>
           </span>
         ) : undefined
       }
