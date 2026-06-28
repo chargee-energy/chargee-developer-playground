@@ -21,6 +21,7 @@ import { useContextStore } from '@/store/context'
 import { useGroupAddresses } from '@/hooks/useGroupAddresses'
 import {
   getAllOrders,
+  orderAddress,
   orderAddressLine,
   orderCustomerName,
   orderSearchText,
@@ -149,6 +150,7 @@ export function OrdersPage() {
         createdAt: o.createdAt,
         fulfilledAt: o.fulfilledAt ?? '',
         recipient: orderCustomerName(o),
+        email: orderAddress(o)?.emailAddress ?? '',
         address: orderAddressLine(o),
         serials: orderSerials(o)
           .map((s) => s.serial)
@@ -365,15 +367,12 @@ function OrderCard({
 
       {serials.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-11 font-bold uppercase tracking-wide text-text-gray">{t('orders.serials')}</p>
           <ul className="divide-y divide-beige-2/60">
             {serials.map(({ product, serial }) => {
               const isActive = activated.has(norm(serial))
               return (
                 <li key={`${product}-${serial}`} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
-                  <span className="min-w-0 truncate font-mono text-13 text-dark-blue">
-                    <span className="text-text-gray">{product}</span> {serial}
-                  </span>
+                  <span className="min-w-0 truncate font-mono text-13 text-dark-blue">{serial}</span>
                   <div className="flex items-center gap-2">
                     {hasGroup &&
                       (isActive ? (
