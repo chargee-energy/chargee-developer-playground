@@ -306,10 +306,13 @@
     "statFulfilled": "Fulfilled",
     "statActivated": "Activated",
     "statNotActivated": "Not activated",
+    "funnelTitle": "Order funnel",
+    "funnelActivationRate": "Activation rate of fulfilled",
     "funnelAllOrders": "all orders",
     "funnelOfOrders": "{{pct}}% of orders",
     "funnelOfOrdersShort": "of orders",
     "funnelOfFulfilled": "{{pct}}% of fulfilled",
+    "funnelOfFulfilledShort": "of fulfilled",
     "funnelPickGroup": "pick a group"
   },
   "console": {

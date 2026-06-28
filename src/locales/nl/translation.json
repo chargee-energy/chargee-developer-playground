@@ -306,10 +306,13 @@
     "statFulfilled": "Afgerond",
     "statActivated": "Geactiveerd",
     "statNotActivated": "Niet geactiveerd",
+    "funnelTitle": "Bestel-funnel",
+    "funnelActivationRate": "Activatiegraad van afgerond",
     "funnelAllOrders": "alle bestellingen",
     "funnelOfOrders": "{{pct}}% van bestellingen",
     "funnelOfOrdersShort": "van bestellingen",
     "funnelOfFulfilled": "{{pct}}% van afgerond",
+    "funnelOfFulfilledShort": "van afgerond",
     "funnelPickGroup": "kies een groep"
   },
   "console": {
