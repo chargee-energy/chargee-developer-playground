@@ -40,12 +40,16 @@ function StatusChip({ status }: { status: string }) {
   )
 }
 
-const schema = z.object({ email: z.string().email(), password: z.string().min(1) })
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+  sparkySku: z.string().min(1),
+})
 type FormValues = z.infer<typeof schema>
 
 export function OrdersPage() {
   const { t } = useTranslation()
-  const { connected, user, login, disconnect } = useOrderAuthStore()
+  const { connected, user, sparkySku, login, setSparkySku, disconnect } = useOrderAuthStore()
   const { groupUuid } = useContextStore()
   const [page, setPage] = useState(1)
 
@@ -57,11 +61,13 @@ export function OrdersPage() {
   const orders = ordersQuery.data?.data ?? []
   const meta = ordersQuery.data?.meta
 
-  // Cross-check: serials present in the selected Ampere group are "activated".
+  // Cross-check: a shipped Sparky serial is the box code. If it shows up on a
+  // group address in Ampere (box code or serial number), it has been activated.
   const { addresses } = useGroupAddresses(groupUuid, connected && !!groupUuid)
   const activated = useMemo(() => {
     const set = new Set<string>()
     for (const a of addresses) {
+      if (a.sparky?.boxCode) set.add(norm(a.sparky.boxCode))
       if (a.sparky?.serialNumber) set.add(norm(a.sparky.serialNumber))
       if (a.flint?.serialNumber) set.add(norm(a.flint.serialNumber))
     }
@@ -80,7 +86,7 @@ export function OrdersPage() {
   const onConnect = async (values: FormValues) => {
     setServerError('')
     try {
-      await login(values.email, values.password, remember)
+      await login(values.email, values.password, values.sparkySku, remember)
     } catch (err: any) {
       setServerError(err?.response?.data?.message || t('orders.connectError'))
     }
@@ -113,6 +119,21 @@ export function OrdersPage() {
                 {...register('password')}
               />
               {errors.password && <p className="mt-1 text-13 text-red">{errors.password.message}</p>}
+            </div>
+            <div>
+              <label className="label" htmlFor="order-sku">
+                {t('orders.sparkySku')}
+              </label>
+              <input
+                id="order-sku"
+                type="text"
+                spellCheck={false}
+                placeholder={t('orders.sparkySkuPlaceholder')}
+                className="input font-mono"
+                {...register('sparkySku')}
+              />
+              <p className="mt-1 text-12 leading-150 text-text-gray">{t('orders.sparkySkuHint')}</p>
+              {errors.sparkySku && <p className="mt-1 text-13 text-red">{errors.sparkySku.message}</p>}
             </div>
             <label className="flex cursor-pointer items-center gap-2 text-13 text-text-gray">
               <input
@@ -149,6 +170,24 @@ export function OrdersPage() {
         }
       />
 
+      <div className="card flex flex-wrap items-end gap-x-4 gap-y-2 p-4">
+        <div className="min-w-[14rem] flex-1">
+          <label className="label" htmlFor="sku-edit">
+            {t('orders.sparkySku')}
+          </label>
+          <input
+            id="sku-edit"
+            type="text"
+            spellCheck={false}
+            placeholder={t('orders.sparkySkuPlaceholder')}
+            className="input font-mono"
+            value={sparkySku}
+            onChange={(e) => setSparkySku(e.target.value)}
+          />
+        </div>
+        <p className="flex-1 basis-full text-12 leading-150 text-text-gray sm:basis-0">{t('orders.sparkySkuHint')}</p>
+      </div>
+
       {!groupUuid && <p className="text-13 text-text-gray">{t('orders.activationHint')}</p>}
 
       <DataState
@@ -160,7 +199,13 @@ export function OrdersPage() {
       >
         <div className="space-y-4">
           {orders.map((order) => (
-            <OrderCard key={order.id} order={order} activated={activated} hasGroup={!!groupUuid} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              activated={activated}
+              hasGroup={!!groupUuid}
+              sparkySku={sparkySku}
+            />
           ))}
         </div>
         <Pagination page={page} pageCount={meta?.totalPages ?? 1} onChange={setPage} />
@@ -173,13 +218,16 @@ function OrderCard({
   order,
   activated,
   hasGroup,
+  sparkySku,
 }: {
   order: Order
   activated: Set<string>
   hasGroup: boolean
+  sparkySku: string
 }) {
   const { t } = useTranslation()
   const serials = orderSerials(order)
+  const sku = norm(sparkySku)
   return (
     <div className="card p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -200,13 +248,15 @@ function OrderCard({
           <p className="mb-2 text-11 font-bold uppercase tracking-wide text-text-gray">{t('orders.serials')}</p>
           <ul className="divide-y divide-beige-2/60">
             {serials.map(({ product, serial }) => {
+              // Only the configured Sparky SKU is matched against Ampere.
+              const isSparky = !sku || norm(product) === sku
               const isActive = activated.has(norm(serial))
               return (
                 <li key={`${product}-${serial}`} className="flex items-center justify-between gap-3 py-1.5">
                   <span className="min-w-0 truncate font-mono text-13 text-dark-blue">
                     <span className="text-text-gray">{product}</span> {serial}
                   </span>
-                  {hasGroup ? (
+                  {hasGroup && isSparky ? (
                     isActive ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-light-green px-2 py-0.5 text-11 font-bold text-green">
                         <CheckCircleIcon className="size-3.5" />

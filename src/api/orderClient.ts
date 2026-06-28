@@ -6,6 +6,9 @@ import { useInspectorStore, nextCallId, type ApiCall } from '@/store/inspector'
 const ORDER_ORIGIN = import.meta.env.VITE_ORDER_API_URL || 'https://order-api.chargee.io'
 
 export const ORDER_TOKEN_KEY = 'pg_order_access_token'
+// The SKU that identifies a Sparky varies per customer (e.g. GREENCHOICESPARKYV3),
+// so it is configured by the user at connect time and persisted alongside the token.
+export const ORDER_SKU_KEY = 'pg_order_sparky_sku'
 
 export const getOrderToken = () =>
   sessionStorage.getItem(ORDER_TOKEN_KEY) ?? localStorage.getItem(ORDER_TOKEN_KEY)
@@ -20,6 +23,21 @@ export function storeOrderToken(token: string, remember = true) {
 export function clearOrderToken() {
   localStorage.removeItem(ORDER_TOKEN_KEY)
   sessionStorage.removeItem(ORDER_TOKEN_KEY)
+}
+
+export const getOrderSku = () =>
+  sessionStorage.getItem(ORDER_SKU_KEY) ?? localStorage.getItem(ORDER_SKU_KEY) ?? ''
+
+export function storeOrderSku(sku: string, remember = true) {
+  const store = remember ? localStorage : sessionStorage
+  const other = remember ? sessionStorage : localStorage
+  store.setItem(ORDER_SKU_KEY, sku)
+  other.removeItem(ORDER_SKU_KEY)
+}
+
+export function clearOrderSku() {
+  localStorage.removeItem(ORDER_SKU_KEY)
+  sessionStorage.removeItem(ORDER_SKU_KEY)
 }
 
 export const ORDER_AXIOS = Axios.create({
@@ -83,8 +101,13 @@ export interface Order {
   webshopOrderId: string
   orderData?: { lines?: Array<{ sku: string; orderedQuantity: number }> }
   montaOrderData?: { montaEorderId?: string; status?: string }
-  /** Serials shipped, keyed by product code, e.g. { SPARKYEASY: ["TEST-..."] }. */
-  serials?: Record<string, string[]>
+  /**
+   * Serials shipped, as an array of maps keyed by product SKU, e.g.
+   * [{ GREENCHOICEFLYER: [], GREENCHOICESPARKYV3: ["v3-2023469"] }].
+   * Only `fulfilled` orders carry a Sparky serial. The serial value is the
+   * Sparky box code (matches `boxCode` on a group address in Ampere).
+   */
+  serials?: Array<Record<string, string[]>>
   status: string
   montaOrderId?: string | null
   lastSyncedAt?: string | null
@@ -109,11 +132,13 @@ export async function getOrders(page = 1, limit = 20): Promise<OrdersResponse> {
   return data
 }
 
-/** Flatten an order's serials map to a list of { product, serial }. */
+/** Flatten an order's serials (array of SKU→serials maps) to { product, serial }. */
 export function orderSerials(order: Order): Array<{ product: string; serial: string }> {
   const out: Array<{ product: string; serial: string }> = []
-  for (const [product, serials] of Object.entries(order.serials ?? {})) {
-    for (const serial of serials ?? []) out.push({ product, serial })
+  for (const entry of order.serials ?? []) {
+    for (const [product, serials] of Object.entries(entry ?? {})) {
+      for (const serial of serials ?? []) out.push({ product, serial })
+    }
   }
   return out
 }
