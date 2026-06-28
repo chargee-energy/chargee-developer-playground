@@ -1,0 +1,119 @@
+import Axios, { type AxiosError } from 'axios'
+import { useInspectorStore, nextCallId, type ApiCall } from '@/store/inspector'
+
+// The Order fulfillment API is a separate service with its own credentials and
+// token (independent of the Ampere session).
+const ORDER_ORIGIN = import.meta.env.VITE_ORDER_API_URL || 'https://order-api.chargee.io'
+
+export const ORDER_TOKEN_KEY = 'pg_order_access_token'
+
+export const getOrderToken = () =>
+  sessionStorage.getItem(ORDER_TOKEN_KEY) ?? localStorage.getItem(ORDER_TOKEN_KEY)
+
+export function storeOrderToken(token: string, remember = true) {
+  const store = remember ? localStorage : sessionStorage
+  const other = remember ? sessionStorage : localStorage
+  store.setItem(ORDER_TOKEN_KEY, token)
+  other.removeItem(ORDER_TOKEN_KEY)
+}
+
+export function clearOrderToken() {
+  localStorage.removeItem(ORDER_TOKEN_KEY)
+  sessionStorage.removeItem(ORDER_TOKEN_KEY)
+}
+
+export const ORDER_AXIOS = Axios.create({
+  baseURL: ORDER_ORIGIN,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+ORDER_AXIOS.interceptors.request.use((config) => {
+  const token = getOrderToken()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  ;(config as any).__startedAt = performance.now()
+  return config
+})
+
+// Mirror order-API calls into the shared API Inspector (raw + cURL).
+function record(cfg: any, partial: Omit<ApiCall, 'id' | 'method' | 'url' | 'fullUrl' | 'durationMs' | 'startedAt'>) {
+  useInspectorStore.getState().record({
+    id: nextCallId(),
+    method: (cfg.method ?? 'get').toUpperCase(),
+    url: cfg.url ?? '',
+    fullUrl: `${cfg.baseURL ?? ''}${cfg.url ?? ''}`,
+    params: cfg.params,
+    durationMs: cfg.__startedAt ? Math.round(performance.now() - cfg.__startedAt) : 0,
+    startedAt: new Date().toISOString(),
+    ...partial,
+  })
+}
+
+ORDER_AXIOS.interceptors.response.use(
+  (response) => {
+    record(response.config, { status: response.status, statusText: response.statusText, response: response.data })
+    return response
+  },
+  (error: AxiosError) => {
+    record(error.config ?? {}, {
+      status: error.response?.status ?? null,
+      statusText: error.response?.statusText,
+      response: error.response?.data,
+      error: error.message,
+    })
+    return Promise.reject(error)
+  },
+)
+
+// --- Types ---------------------------------------------------------------
+export interface OrderUser {
+  id: string
+  email: string
+  firstName?: string
+  lastName?: string
+  montaApiUsername?: string
+}
+
+export interface OrderLoginResponse {
+  accessToken: string
+  user: OrderUser
+}
+
+export interface Order {
+  id: string
+  webshopOrderId: string
+  orderData?: { lines?: Array<{ sku: string; orderedQuantity: number }> }
+  montaOrderData?: { montaEorderId?: string; status?: string }
+  /** Serials shipped, keyed by product code, e.g. { SPARKYEASY: ["TEST-..."] }. */
+  serials?: Record<string, string[]>
+  status: string
+  montaOrderId?: string | null
+  lastSyncedAt?: string | null
+  fulfilledAt?: string | null
+  createdAt: string
+  updatedAt?: string | null
+}
+
+export interface OrdersResponse {
+  data: Order[]
+  meta: { page: number; limit: number; total: number; totalPages: number }
+}
+
+// --- Endpoints -----------------------------------------------------------
+export async function orderLogin(email: string, password: string): Promise<OrderLoginResponse> {
+  const { data } = await ORDER_AXIOS.post<OrderLoginResponse>('/api/v1/auth/login', { email, password })
+  return data
+}
+
+export async function getOrders(page = 1, limit = 20): Promise<OrdersResponse> {
+  const { data } = await ORDER_AXIOS.get<OrdersResponse>('/api/v1/orders', { params: { page, limit } })
+  return data
+}
+
+/** Flatten an order's serials map to a list of { product, serial }. */
+export function orderSerials(order: Order): Array<{ product: string; serial: string }> {
+  const out: Array<{ product: string; serial: string }> = []
+  for (const [product, serials] of Object.entries(order.serials ?? {})) {
+    for (const serial of serials ?? []) out.push({ product, serial })
+  }
+  return out
+}

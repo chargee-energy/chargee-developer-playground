@@ -9,6 +9,7 @@ import {
   CalendarDaysIcon,
   BoltIcon,
   CommandLineIcon,
+  ShoppingBagIcon,
   SparklesIcon,
   BookOpenIcon,
   CodeBracketIcon,
@@ -29,6 +30,7 @@ const navigation = [
   { key: 'devices', href: '/devices', icon: CpuChipIcon },
   { key: 'schedules', href: '/schedules', icon: CalendarDaysIcon },
   { key: 'flex', href: '/flex', icon: BoltIcon },
+  { key: 'orders', href: '/orders', icon: ShoppingBagIcon },
   { key: 'console', href: '/console', icon: CommandLineIcon },
 ]
 

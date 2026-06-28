@@ -34,6 +34,7 @@
     "devices": "Devices",
     "schedules": "Schedules",
     "flex": "Flex",
+    "orders": "Orders",
     "console": "API Console",
     "resources": "Resources",
     "whatsNew": "What's new",
@@ -268,6 +269,25 @@
     "groupGridTarget": "Group grid target (kW)",
     "deleteConfirm": "Delete this flex schedule?",
     "empty": "No flex schedules."
+  },
+  "orders": {
+    "eyebrow": "Order API",
+    "title": "Orders",
+    "subtitle": "Connect the Order fulfillment API to see shipments and cross-check activation against Ampere.",
+    "connectTitle": "Connect the Order API",
+    "connectBody": "The Order fulfillment API uses credentials separate from Ampere. Use the email and password from your Order API onboarding. Contact support@chargee.energy if you need access.",
+    "connect": "Connect",
+    "connecting": "Connecting…",
+    "connectError": "Could not connect. Check your Order API email and password.",
+    "connectedAs": "Connected as {{email}}",
+    "disconnect": "Disconnect",
+    "empty": "No orders found.",
+    "created": "Created",
+    "montaOrder": "Monta order",
+    "serials": "Serials",
+    "activated": "Activated",
+    "notActivated": "Not activated",
+    "activationHint": "Select a group above to check which shipped serials are activated in Ampere."
   },
   "console": {
     "title": "API Console",

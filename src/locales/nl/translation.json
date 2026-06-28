@@ -34,6 +34,7 @@
     "devices": "Apparaten",
     "schedules": "Schema's",
     "flex": "Flex",
+    "orders": "Bestellingen",
     "console": "API Console",
     "resources": "Bronnen",
     "whatsNew": "Nieuw",
@@ -268,6 +269,25 @@
     "groupGridTarget": "Groep netdoel (kW)",
     "deleteConfirm": "Dit flex-schema verwijderen?",
     "empty": "Geen flex-schema's."
+  },
+  "orders": {
+    "eyebrow": "Order API",
+    "title": "Bestellingen",
+    "subtitle": "Koppel de Order fulfillment API om zendingen te zien en activatie te vergelijken met Ampere.",
+    "connectTitle": "Koppel de Order API",
+    "connectBody": "De Order fulfillment API gebruikt aparte inloggegevens dan Ampere. Gebruik de e-mail en het wachtwoord uit je Order API-onboarding. Neem contact op met support@chargee.energy voor toegang.",
+    "connect": "Koppelen",
+    "connecting": "Bezig met koppelen…",
+    "connectError": "Koppelen mislukt. Controleer je Order API e-mail en wachtwoord.",
+    "connectedAs": "Gekoppeld als {{email}}",
+    "disconnect": "Ontkoppelen",
+    "empty": "Geen bestellingen gevonden.",
+    "created": "Aangemaakt",
+    "montaOrder": "Monta-order",
+    "serials": "Serienummers",
+    "activated": "Geactiveerd",
+    "notActivated": "Niet geactiveerd",
+    "activationHint": "Selecteer hierboven een groep om te zien welke verzonden serienummers in Ampere geactiveerd zijn."
   },
   "console": {
     "title": "API Console",
