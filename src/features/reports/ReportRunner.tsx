@@ -1,19 +1,10 @@
-import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowPathIcon, ArrowDownTrayIcon, StopIcon } from '@heroicons/react/24/outline'
 import { DataTable, type Column } from '@/components/common/DataTable'
 import { Spinner } from '@/components/common/Spinner'
 import { downloadCsv } from '@/utils/csv'
 import type { ReportStatus } from './useAddressReport'
-
-export interface ReportMetric {
-  label: string
-  value: ReactNode
-  sub?: ReactNode
-}
-
-/** Percentage helper shared by report metrics (guards divide-by-zero). */
-export const pct = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0)
+import type { ReportMetric } from './reportMetrics'
 
 function MetricCard({ label, value, sub }: ReportMetric) {
   return (

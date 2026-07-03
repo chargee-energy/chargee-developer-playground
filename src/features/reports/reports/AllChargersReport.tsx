@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { type Column } from '@/components/common/DataTable'
 import { useContextStore } from '@/store/context'
 import { cn } from '@/utils/cn'
-import { ReportRunner, pct, type ReportMetric } from '../ReportRunner'
+import { ReportRunner } from '../ReportRunner'
+import { pct, type ReportMetric } from '../reportMetrics'
 import { useAllChargersReport, type ChargerReportRow } from '../useAllChargersReport'
 import type { FreshnessStatus } from '../reportFreshness'
 
@@ -60,7 +61,6 @@ export function AllChargersReport() {
     const total = rows.length
     const connected = rows.filter((r) => r.status === 'connected').length
     const stale = rows.filter((r) => r.status === 'stale').length
-    const disconnected = rows.filter((r) => r.status === 'disconnected').length
     const local = rows.filter((r) => r.connectionType === 'local').length
     const cloud = total - local
     const charging = rows.filter((r) => r.activity === 'charging').length

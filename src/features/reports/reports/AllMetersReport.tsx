@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type Column } from '@/components/common/DataTable'
 import { useContextStore } from '@/store/context'
-import { ReportRunner, pct, type ReportMetric } from '../ReportRunner'
+import { ReportRunner } from '../ReportRunner'
+import { pct, type ReportMetric } from '../reportMetrics'
 import { useAllMetersReport, type MeterReportRow } from '../useAllMetersReport'
 
 export function AllMetersReport() {
