@@ -35,6 +35,7 @@
     "schedules": "Schedules",
     "flex": "Flex",
     "orders": "Orders",
+    "reports": "Reports",
     "console": "API Console",
     "resources": "Resources",
     "whatsNew": "What's new",
@@ -189,6 +190,57 @@
     "identifier": "Identifier",
     "brand": "Brand",
     "model": "Model"
+  },
+  "reports": {
+    "eyebrow": "Group",
+    "title": "Reports",
+    "subtitle": "Generate group-wide reports across all connected devices.",
+    "selectGroupFirst": "Select a group to generate reports.",
+    "open": "Open report",
+    "generate": "Generate report",
+    "regenerate": "Regenerate",
+    "cancel": "Cancel",
+    "downloadCsv": "Download CSV",
+    "progress": "Processing {{done}} of {{total}} addresses…",
+    "resultCount": "{{n}} inverters found",
+    "generatedAt": "Generated {{time}}",
+    "empty": "No solar inverters found across this group.",
+    "metrics": {
+      "total": "Inverters",
+      "addressCoverage": "Addresses with inverters",
+      "addressCoverageSub": "{{covered}} of {{total}} addresses",
+      "distribution": "Local vs Cloud",
+      "distributionSub": "{{local}} local · {{cloud}} cloud",
+      "working": "Working",
+      "stale": "Stale",
+      "disconnected": "Disconnected",
+      "ofTotal": "{{n}} inverters"
+    },
+    "col": {
+      "address": "Address",
+      "sparky": "Sparky serial",
+      "flint": "Flint serial",
+      "brand": "Brand",
+      "model": "Model",
+      "connection": "Connection",
+      "status": "Production",
+      "lastProduction": "Last production"
+    },
+    "connection": {
+      "local": "Local",
+      "cloud": "Cloud"
+    },
+    "status": {
+      "connected": "Connected",
+      "stale": "Stale",
+      "disconnected": "Disconnected"
+    },
+    "templates": {
+      "allSolarInverters": {
+        "title": "All solar inverters",
+        "description": "An overview of every solar inverter across all addresses in the group, with address, sparky/flint serial, brand, model, connection type, production status and last production state."
+      }
+    }
   },
   "telemetry": {
     "title": "Telemetry",

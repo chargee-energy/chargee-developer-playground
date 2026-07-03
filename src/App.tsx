@@ -17,6 +17,7 @@ const SchedulesPage = lazy(() => import('./features/schedules/SchedulesPage').th
 const FlexPage = lazy(() => import('./features/flex/FlexPage').then((m) => ({ default: m.FlexPage })))
 const ConsolePage = lazy(() => import('./features/console/ConsolePage').then((m) => ({ default: m.ConsolePage })))
 const OrdersPage = lazy(() => import('./features/orders/OrdersPage').then((m) => ({ default: m.OrdersPage })))
+const ReportsPage = lazy(() => import('./features/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })))
 const WhatsNewPage = lazy(() => import('./features/whats-new/WhatsNewPage').then((m) => ({ default: m.WhatsNewPage })))
 
 const queryClient = new QueryClient({
@@ -68,6 +69,7 @@ export function App() {
                       <Route path="/schedules" element={<SchedulesPage />} />
                       <Route path="/flex" element={<FlexPage />} />
                       <Route path="/orders" element={<OrdersPage />} />
+                      <Route path="/reports" element={<ReportsPage />} />
                       <Route path="/console" element={<ConsolePage />} />
                       <Route path="/whats-new" element={<WhatsNewPage />} />
                       <Route path="*" element={<Navigate to="/" replace />} />

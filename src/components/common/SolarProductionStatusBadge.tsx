@@ -1,10 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
-
-/** Local (steerable) inverters stream live, so stale after just 1 minute. */
-const LOCAL_STALE_MS = 60 * 1000
-/** Cloud (non-steerable) inverters report periodically, so stale after 8 hours. */
-const CLOUD_STALE_MS = 8 * 60 * 60 * 1000
+import { deriveProductionStatus } from '@/features/reports/reportSolarStatus'
 
 interface SolarProductionStatusBadgeProps {
   /** The inverter's last production state, if any. */
@@ -23,8 +19,10 @@ interface SolarProductionStatusBadgeProps {
 export function SolarProductionStatusBadge({ lastProductionState, isSteerable }: SolarProductionStatusBadgeProps) {
   const { t } = useTranslation()
 
-  const time = lastProductionState?.time
-  if (!lastProductionState || !time) {
+  const status = deriveProductionStatus(lastProductionState, isSteerable)
+  const local = isSteerable === true
+
+  if (status === 'disconnected') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-red/10 px-2 py-0.5 text-11 font-bold text-red">
         {t('devices.disconnected')}
@@ -32,11 +30,7 @@ export function SolarProductionStatusBadge({ lastProductionState, isSteerable }:
     )
   }
 
-  const local = isSteerable === true
-  const threshold = local ? LOCAL_STALE_MS : CLOUD_STALE_MS
-  const ageMs = Date.now() - new Date(time).getTime()
-
-  if (Number.isFinite(ageMs) && ageMs > threshold) {
+  if (status === 'stale') {
     return (
       <span
         title={local ? t('devices.productionStaleLocal') : t('devices.productionStaleCloud')}
