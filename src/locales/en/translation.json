@@ -202,19 +202,41 @@
     "cancel": "Cancel",
     "downloadCsv": "Download CSV",
     "progress": "Processing {{done}} of {{total}} addresses…",
-    "resultCount": "{{n}} inverters found",
+    "resultCount": "{{n}} results found",
     "generatedAt": "Generated {{time}}",
     "empty": "No solar inverters found across this group.",
+    "emptyVehicles": "No vehicles found across this group.",
+    "emptyChargers": "No chargers found across this group.",
+    "emptyHvacs": "No HVAC units found across this group.",
+    "emptyBatteries": "No batteries found across this group.",
+    "emptyMeters": "No smart meters found across this group.",
     "metrics": {
       "total": "Inverters",
+      "totalVehicles": "Vehicles",
+      "totalChargers": "Chargers",
+      "totalHvacs": "HVAC units",
+      "totalBatteries": "Batteries",
+      "totalMeters": "Meters",
       "addressCoverage": "Addresses with inverters",
+      "addressCoverageVehicles": "Addresses with vehicles",
+      "addressCoverageChargers": "Addresses with chargers",
+      "addressCoverageHvacs": "Addresses with HVAC",
+      "addressCoverageBatteries": "Addresses with batteries",
+      "addressCoverageMeters": "Addresses with meters",
       "addressCoverageSub": "{{covered}} of {{total}} addresses",
       "distribution": "Local vs Cloud",
       "distributionSub": "{{local}} local · {{cloud}} cloud",
       "working": "Working",
+      "connected": "Connected",
+      "pluggedIn": "Plugged in",
+      "charging": "Charging",
+      "active": "Active",
+      "withElectricity": "With electricity EAN",
+      "withGas": "With gas EAN",
       "stale": "Stale",
       "disconnected": "Disconnected",
-      "ofTotal": "{{n}} inverters"
+      "ofTotal": "{{n}} inverters",
+      "ofTotalVehicles": "{{n}} vehicles"
     },
     "col": {
       "address": "Address",
@@ -222,9 +244,20 @@
       "flint": "Flint serial",
       "brand": "Brand",
       "model": "Model",
+      "year": "Year",
+      "category": "Category",
+      "temperature": "Temperature",
+      "activity": "Activity",
       "connection": "Connection",
       "status": "Production",
-      "lastProduction": "Last production"
+      "lastProduction": "Last production",
+      "battery": "Battery",
+      "charge": "Charge",
+      "lastSeen": "Last seen",
+      "meterType": "Type",
+      "meterNumber": "Meter number",
+      "eanElectricity": "EAN electricity",
+      "eanGas": "EAN gas"
     },
     "connection": {
       "local": "Local",
@@ -235,10 +268,46 @@
       "stale": "Stale",
       "disconnected": "Disconnected"
     },
+    "chargeState": {
+      "charging": "Charging",
+      "pluggedIn": "Plugged in",
+      "idle": "Idle"
+    },
+    "batteryState": {
+      "charging": "Charging",
+      "discharging": "Discharging",
+      "idle": "Idle",
+      "fault": "Fault",
+      "unknown": "Unknown"
+    },
+    "hvacState": {
+      "active": "Active",
+      "idle": "Idle"
+    },
     "templates": {
       "allSolarInverters": {
         "title": "All solar inverters",
         "description": "An overview of every solar inverter across all addresses in the group, with address, sparky/flint serial, brand, model, connection type, production status and last production state."
+      },
+      "allVehicles": {
+        "title": "All vehicles",
+        "description": "An overview of every vehicle across all addresses in the group, with address, sparky/flint serial, brand, model, battery level, charge state and last seen."
+      },
+      "allChargers": {
+        "title": "All chargers",
+        "description": "An overview of every charger across all addresses in the group, with address, sparky/flint serial, brand, model, connection type, charge activity and last update."
+      },
+      "allHvacs": {
+        "title": "All HVAC",
+        "description": "An overview of every HVAC unit across all addresses in the group, with address, sparky/flint serial, brand, model, current temperature, activity and last update."
+      },
+      "allBatteries": {
+        "title": "All batteries",
+        "description": "An overview of every battery across all addresses in the group, with address, sparky/flint serial, brand, model, battery level, charge status and last update."
+      },
+      "allMeters": {
+        "title": "All smart meters",
+        "description": "An overview of every smart meter across all addresses in the group, with address, sparky/flint serial, meter type, meter number, and electricity and gas EANs."
       }
     }
   },

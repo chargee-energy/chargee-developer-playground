@@ -202,19 +202,41 @@
     "cancel": "Annuleren",
     "downloadCsv": "CSV downloaden",
     "progress": "Bezig met {{done}} van {{total}} adressen…",
-    "resultCount": "{{n}} omvormers gevonden",
+    "resultCount": "{{n}} resultaten gevonden",
     "generatedAt": "Gegenereerd {{time}}",
     "empty": "Geen omvormers gevonden in deze groep.",
+    "emptyVehicles": "Geen voertuigen gevonden in deze groep.",
+    "emptyChargers": "Geen laders gevonden in deze groep.",
+    "emptyHvacs": "Geen HVAC-units gevonden in deze groep.",
+    "emptyBatteries": "Geen batterijen gevonden in deze groep.",
+    "emptyMeters": "Geen slimme meters gevonden in deze groep.",
     "metrics": {
       "total": "Omvormers",
+      "totalVehicles": "Voertuigen",
+      "totalChargers": "Laders",
+      "totalHvacs": "HVAC-units",
+      "totalBatteries": "Batterijen",
+      "totalMeters": "Meters",
       "addressCoverage": "Adressen met omvormers",
+      "addressCoverageVehicles": "Adressen met voertuigen",
+      "addressCoverageChargers": "Adressen met laders",
+      "addressCoverageHvacs": "Adressen met HVAC",
+      "addressCoverageBatteries": "Adressen met batterijen",
+      "addressCoverageMeters": "Adressen met meters",
       "addressCoverageSub": "{{covered}} van {{total}} adressen",
       "distribution": "Lokaal vs Cloud",
       "distributionSub": "{{local}} lokaal · {{cloud}} cloud",
       "working": "Werkend",
+      "connected": "Verbonden",
+      "pluggedIn": "Ingeplugd",
+      "charging": "Laden",
+      "active": "Actief",
+      "withElectricity": "Met elektriciteit-EAN",
+      "withGas": "Met gas-EAN",
       "stale": "Verouderd",
       "disconnected": "Niet verbonden",
-      "ofTotal": "{{n}} omvormers"
+      "ofTotal": "{{n}} omvormers",
+      "ofTotalVehicles": "{{n}} voertuigen"
     },
     "col": {
       "address": "Adres",
@@ -222,9 +244,20 @@
       "flint": "Flint serienummer",
       "brand": "Merk",
       "model": "Model",
+      "year": "Jaar",
+      "category": "Categorie",
+      "temperature": "Temperatuur",
+      "activity": "Activiteit",
       "connection": "Verbinding",
       "status": "Productie",
-      "lastProduction": "Laatste productie"
+      "lastProduction": "Laatste productie",
+      "battery": "Accu",
+      "charge": "Laadstatus",
+      "lastSeen": "Laatst gezien",
+      "meterType": "Type",
+      "meterNumber": "Meternummer",
+      "eanElectricity": "EAN elektriciteit",
+      "eanGas": "EAN gas"
     },
     "connection": {
       "local": "Lokaal",
@@ -235,10 +268,46 @@
       "stale": "Verouderd",
       "disconnected": "Niet verbonden"
     },
+    "chargeState": {
+      "charging": "Laden",
+      "pluggedIn": "Ingeplugd",
+      "idle": "Inactief"
+    },
+    "batteryState": {
+      "charging": "Laden",
+      "discharging": "Ontladen",
+      "idle": "Inactief",
+      "fault": "Storing",
+      "unknown": "Onbekend"
+    },
+    "hvacState": {
+      "active": "Actief",
+      "idle": "Inactief"
+    },
     "templates": {
       "allSolarInverters": {
         "title": "Alle omvormers",
         "description": "Een overzicht van elke omvormer op alle adressen in de groep, met adres, sparky/flint serienummer, merk, model, verbindingstype, productiestatus en laatste productiestatus."
+      },
+      "allVehicles": {
+        "title": "Alle voertuigen",
+        "description": "Een overzicht van elk voertuig op alle adressen in de groep, met adres, sparky/flint serienummer, merk, model, accuniveau, laadstatus en laatst gezien."
+      },
+      "allChargers": {
+        "title": "Alle laders",
+        "description": "Een overzicht van elke lader op alle adressen in de groep, met adres, sparky/flint serienummer, merk, model, verbindingstype, laadactiviteit en laatste update."
+      },
+      "allHvacs": {
+        "title": "Alle HVAC",
+        "description": "Een overzicht van elke HVAC-unit op alle adressen in de groep, met adres, sparky/flint serienummer, merk, model, huidige temperatuur, activiteit en laatste update."
+      },
+      "allBatteries": {
+        "title": "Alle batterijen",
+        "description": "Een overzicht van elke batterij op alle adressen in de groep, met adres, sparky/flint serienummer, merk, model, accuniveau, laadstatus en laatste update."
+      },
+      "allMeters": {
+        "title": "Alle slimme meters",
+        "description": "Een overzicht van elke slimme meter op alle adressen in de groep, met adres, sparky/flint serienummer, metertype, meternummer, en elektriciteit- en gas-EAN's."
       }
     }
   },
