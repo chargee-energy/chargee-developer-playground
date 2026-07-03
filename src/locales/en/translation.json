@@ -49,6 +49,18 @@
     "title": "What's new",
     "subtitle": "The latest changes to the developer playground.",
     "released": "Released",
+    "v2": {
+      "title": "Reports and device health",
+      "date": "3 Jul 2026",
+      "items": [
+        "New Reports section: generate group-wide reports for solar inverters, vehicles, chargers, HVAC, batteries and smart meters.",
+        "Reports throttle their requests across all addresses, with live progress and a cancel option.",
+        "Each report includes key metrics (device counts, address coverage, connection and health breakdowns) and a one-click CSV export.",
+        "Reports are cached per group, so you can navigate away and come back without regenerating.",
+        "Devices: solar inverters now show production health (connected, stale or disconnected) plus a Live or Cloud connection badge.",
+        "Login: 'Remember me' now keeps you signed in across reloads by refreshing your session automatically."
+      ]
+    },
     "v1": {
       "title": "Renewed playground interface",
       "date": "27 Jun 2026",

@@ -49,6 +49,18 @@
     "title": "Wat is er nieuw",
     "subtitle": "De laatste wijzigingen in de developer playground.",
     "released": "Uitgebracht",
+    "v2": {
+      "title": "Rapporten en apparaatstatus",
+      "date": "3 jul 2026",
+      "items": [
+        "Nieuwe Rapporten-sectie: genereer groepsbrede rapporten voor omvormers, voertuigen, laders, HVAC, batterijen en slimme meters.",
+        "Rapporten verdelen hun verzoeken over alle adressen, met live voortgang en een annuleeroptie.",
+        "Elk rapport bevat kerncijfers (aantallen apparaten, adresdekking, verbindings- en statusverdeling) en een CSV-export met één klik.",
+        "Rapporten worden per groep bewaard, zodat je weg kunt navigeren en terug kunt komen zonder opnieuw te genereren.",
+        "Apparaten: omvormers tonen nu de productiestatus (verbonden, verouderd of niet verbonden) plus een Live- of Cloud-badge.",
+        "Inloggen: 'Onthoud mij' houdt je nu ingelogd na herladen door je sessie automatisch te vernieuwen."
+      ]
+    },
     "v1": {
       "title": "Vernieuwde playground-interface",
       "date": "27 jun 2026",
