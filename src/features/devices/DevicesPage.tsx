@@ -19,6 +19,8 @@ import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
 import { DataTable, type Column } from '@/components/common/DataTable'
 import { LiveBadge } from '@/components/common/LiveBadge'
+import { CloudBadge } from '@/components/common/CloudBadge'
+import { SolarProductionStatusBadge } from '@/components/common/SolarProductionStatusBadge'
 import { DeviceDetailDrawer, type DeviceDetail } from './DeviceDetailDrawer'
 import { useContextStore } from '@/store/context'
 import { useTelemetryStore } from '@/store/telemetry'
@@ -92,7 +94,21 @@ export function DevicesPage() {
         { key: 'identifier', header: 'identifier' },
         { key: 'brand', header: 'brand', render: (r) => r.info?.brand ?? '—' },
         { key: 'model', header: 'model', render: (r) => r.info?.model ?? '—' },
-        liveCol(solarSteerable),
+        {
+          key: '__production',
+          header: 'production',
+          render: (r) => (
+            <SolarProductionStatusBadge
+              lastProductionState={r.lastProductionState}
+              isSteerable={r.info?.isSteerable === true}
+            />
+          ),
+        },
+        {
+          key: '__live',
+          header: '',
+          render: (r) => (solarSteerable(r) ? <LiveBadge /> : <CloudBadge />),
+        },
       ],
     },
     {

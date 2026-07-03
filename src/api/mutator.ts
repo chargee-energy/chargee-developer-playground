@@ -115,7 +115,11 @@ AXIOS_INSTANCE.interceptors.response.use(
     })
 
     // Attempt a single refresh-and-retry on 401, then fall back to logout.
-    if (error.response?.status === 401 && !cfg.__isRetry && !cfg.url?.includes('/auth/')) {
+    // Only the auth flow endpoints themselves are excluded — crucially `/auth/me`
+    // is NOT, so a reload with an expired access token (the "remember me" case)
+    // can refresh via the stored refresh token instead of forcing a re-login.
+    const isAuthFlow = ['/auth/login', '/auth/refresh', '/auth/logout'].some((p) => cfg.url?.includes(p))
+    if (error.response?.status === 401 && !cfg.__isRetry && !isAuthFlow) {
       refreshing = refreshing ?? tryRefresh()
       const newToken = await refreshing
       refreshing = null
