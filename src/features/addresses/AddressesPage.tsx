@@ -9,6 +9,7 @@ import { Pagination } from '@/components/common/Pagination'
 import { useContextStore } from '@/store/context'
 import { useGroupAddresses } from '@/hooks/useGroupAddresses'
 import { shortId, fmtDate } from '@/utils/format'
+import { formatBoxCode } from '@/utils/sparky'
 
 const PAGE_SIZE = 24
 
@@ -28,7 +29,7 @@ export function AddressesPage() {
       (a) =>
         a.uuid.toLowerCase().includes(q) ||
         a.sparky?.serialNumber?.toLowerCase().includes(q) ||
-        a.sparky?.boxCode?.toLowerCase().includes(q),
+        formatBoxCode(a.sparky?.boxCode).toLowerCase().includes(q),
     )
   }, [all, search])
 
@@ -108,7 +109,7 @@ export function AddressesPage() {
                   </div>
                   <div className="flex justify-between gap-2">
                     <dt className="text-text-gray">{t('addresses.boxCode')}</dt>
-                    <dd className="font-mono text-dark-blue">{a.sparky?.boxCode ?? '—'}</dd>
+                    <dd className="font-mono text-dark-blue">{formatBoxCode(a.sparky?.boxCode)}</dd>
                   </div>
                 </dl>
                 <button className="btn-secondary mt-auto" onClick={() => openDevices(a)}>

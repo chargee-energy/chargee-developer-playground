@@ -31,6 +31,7 @@ import {
 import type { GroupAddressDto } from '@/api/generated/model'
 import { fmtDate, shortId } from '@/utils/format'
 import { cn } from '@/utils/cn'
+import { formatBoxCode } from '@/utils/sparky'
 import { StatusChip } from './StatusChip'
 import { OrderDetailDrawer } from './OrderDetailDrawer'
 import { OrdersFunnel } from './OrdersFunnel'
@@ -79,7 +80,7 @@ export function OrdersPage() {
   const addressBySerial = useMemo(() => {
     const m = new Map<string, GroupAddressDto>()
     for (const a of addresses) {
-      if (a.sparky?.boxCode) m.set(norm(a.sparky.boxCode), a)
+      if (a.sparky?.boxCode) m.set(norm(formatBoxCode(a.sparky.boxCode)), a)
       if (a.sparky?.serialNumber) m.set(norm(a.sparky.serialNumber), a)
       if (a.flint?.serialNumber) m.set(norm(a.flint.serialNumber), a)
     }

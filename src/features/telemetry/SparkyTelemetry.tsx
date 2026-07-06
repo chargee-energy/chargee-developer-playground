@@ -5,6 +5,7 @@ import { InsightCards } from '@/components/common/InsightCards'
 import { RefreshButton } from '@/components/common/RefreshButton'
 import { TimeSeriesChart } from './TimeSeriesChart'
 import { AutoChart } from './AutoChart'
+import { GridPowerCard } from './GridPowerCard'
 import { Section, DateInput } from './parts'
 import { fmtTime, todayISO } from '@/utils/format'
 import { GAS_COLOR } from '@/utils/records'
@@ -20,10 +21,11 @@ export function SparkyTelemetry({ serial }: { serial: string }) {
   const { t } = useTranslation()
   const [date, setDate] = useState(todayISO())
   const [live, setLive] = useState(false)
-  const [livePoints, setLivePoints] = useState<Array<{ time: string; delivered: number; returned: number }>>([])
+  const [netWatts, setNetWatts] = useState<number | null>(null)
+  const [netHistory, setNetHistory] = useState<number[]>([])
 
   const latestP1 = useSparkyControllerGetLatestP1V2(serial, {
-    query: { enabled: live, refetchInterval: live ? 5000 : false },
+    query: { enabled: live, refetchInterval: live ? 2000 : false },
   })
   const elec15 = useSparkyControllerGetElectricity15minForSNV2(serial, { date })
   const gas15 = useSparkyControllerGetGas15minForSNV2(serial, { date })
@@ -33,11 +35,21 @@ export function SparkyTelemetry({ serial }: { serial: string }) {
   useEffect(() => {
     const d = latestP1.data as any
     if (!d) return
-    const delivered = (parseFloat(String(d.power_delivered ?? '0')) || 0) * 1000
-    // Returned/exported power is plotted below zero.
-    const returned = -((parseFloat(String(d.power_returned ?? '0')) || 0) * 1000)
-    setLivePoints((prev) => [...prev, { time: fmtTime(new Date().toISOString()), delivered, returned }].slice(-60))
+    // DSMR reports power in kW; net grid power in W (positive = consuming,
+    // negative = returning to the grid).
+    const delivered = parseFloat(String(d.power_delivered ?? '0')) || 0
+    const returned = parseFloat(String(d.power_returned ?? '0')) || 0
+    const net = Math.round((delivered - returned) * 1000)
+    setNetWatts(net)
+    setNetHistory((prev) => [...prev, net].slice(-60))
   }, [latestP1.data])
+
+  useEffect(() => {
+    if (!live) {
+      setNetWatts(null)
+      setNetHistory([])
+    }
+  }, [live])
 
   const dateControl = <DateInput value={date} onChange={setDate} />
 
@@ -53,7 +65,7 @@ export function SparkyTelemetry({ serial }: { serial: string }) {
       </Section>
 
       <Section
-        title={`${t('telemetry.realtime')} · W`}
+        title={t('telemetry.gridPower')}
         action={
           <button className={live ? 'btn-primary h-9' : 'btn-secondary h-9'} onClick={() => setLive((v) => !v)}>
             {live ? `● ${t('telemetry.realtimeOn')}` : t('telemetry.realtime')}
@@ -62,18 +74,8 @@ export function SparkyTelemetry({ serial }: { serial: string }) {
       >
         {!live ? (
           <p className="py-8 text-center text-sm text-text-gray">{t('telemetry.realtimePaused')}</p>
-        ) : livePoints.length === 0 ? (
-          <p className="py-8 text-center text-sm text-text-gray">{t('common.loading')}</p>
         ) : (
-          <TimeSeriesChart
-            data={livePoints}
-            xKey="time"
-            unit="W"
-            series={[
-              { key: 'delivered', name: t('telemetry.delivered'), color: '#FF8500' },
-              { key: 'returned', name: t('telemetry.returned'), color: '#16B364' },
-            ]}
-          />
+          <GridPowerCard netWatts={netWatts} history={netHistory} />
         )}
       </Section>
 

@@ -25,6 +25,7 @@ import { DeviceDetailDrawer, type DeviceDetail } from './DeviceDetailDrawer'
 import { useContextStore } from '@/store/context'
 import { useTelemetryStore } from '@/store/telemetry'
 import { cn } from '@/utils/cn'
+import { formatBoxCode } from '@/utils/sparky'
 import type { TelemetryKind, TelemetryTarget } from '@/features/telemetry/types'
 
 import { useVehicleControllerGetVehiclesForAddressV2 } from '@/api/generated/vehicles/vehicles'
@@ -171,7 +172,7 @@ export function DevicesPage() {
       emptyMessage: t('devices.emptySparky'),
       cols: [
         { key: 'serialNumber', header: 'serial' },
-        { key: 'boxCode', header: 'box code' },
+        { key: 'boxCode', header: 'box code', render: (r) => formatBoxCode(r.boxCode) },
       ],
     },
     { key: 'flint', icon: CpuChipIcon, rows: addressRecord?.flint ? [addressRecord.flint] : [], idField: 'serialNumber', emptyMessage: t('devices.emptyFlint') },
