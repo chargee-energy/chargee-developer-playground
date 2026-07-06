@@ -49,6 +49,20 @@
     "title": "Wat is er nieuw",
     "subtitle": "De laatste wijzigingen in de developer playground.",
     "released": "Uitgebracht",
+    "v3": {
+      "title": "Adresrapporten, batterijadvies en live netvermogen",
+      "date": "6 jul 2026",
+      "items": [
+        "Rapporten heeft nu een sectie Individueel met rapporten voor één adres, naast de groepsbrede rapporten.",
+        "Energiebenchmark: vergelijk een adres met een willekeurige steekproef van andere adressen in de groep op totaal verbruik, piekverbruik, sluipverbruik en zelfconsumptie, met percentielen en verdelingsgrafieken.",
+        "Batterijadvies: simuleer een thuisbatterij tegen de werkelijke consumptie en productie van het adres, met EPEX-spotprijzen of vaste tarieven.",
+        "Probeer interactief elke batterijcapaciteit en elk omvormervermogen en zie direct besparing, investering, terugverdientijd en ROI; elke capaciteit van 1 tot 30 kWh wordt vergeleken in een grafiek.",
+        "Controleer de simulatie met een laad-/ontlaadgrafiek per dag en een dagdetail per uur, inclusief laadtoestand en spotprijzen.",
+        "Exporteer het batterijadvies als pdf in Chargee-huisstijl (Nederlands of Engels) met samenvatting, kerncijfers, vergelijkingstabel en laad-/ontlaadbijlagen.",
+        "Sparky-telemetrie: nieuwe realtime Netvermogen-widget die live netafname of teruglevering toont met een trendlijn.",
+        "Apparaten: het tabblad Sparky toont nu de boxcode correct."
+      ]
+    },
     "v2": {
       "title": "Rapporten en apparaatstatus",
       "date": "3 jul 2026",
@@ -206,8 +220,12 @@
   "reports": {
     "eyebrow": "Groep",
     "title": "Rapporten",
-    "subtitle": "Genereer groepsbrede rapporten over alle gekoppelde apparaten.",
+    "subtitle": "Genereer groepsbrede en individuele adresrapporten.",
     "selectGroupFirst": "Selecteer een groep om rapporten te genereren.",
+    "selectAddressFirst": "Selecteer een adres in de balk hierboven om dit rapport uit te voeren.",
+    "selectAddressHint": "Deze rapporten draaien voor het adres dat in de balk hierboven is geselecteerd.",
+    "sectionIndividual": "Individuele rapporten",
+    "sectionGroup": "Groepsrapporten",
     "open": "Rapport openen",
     "generate": "Rapport genereren",
     "regenerate": "Opnieuw genereren",
@@ -296,7 +314,93 @@
       "active": "Actief",
       "idle": "Inactief"
     },
+    "battery": {
+      "period": "Periode",
+      "periodMonths": "{{n}} maanden",
+      "strategy": "Strategie",
+      "strategySelf": "Zelfconsumptie",
+      "strategyProfit": "Handelen (spot)",
+      "priceMode": "Prijzen",
+      "priceSpot": "EPEX spot",
+      "priceFixed": "Vaste tarieven",
+      "progressRequests": "Data ophalen: {{done}} van {{total}} aanvragen…",
+      "downloadPdf": "PDF downloaden",
+      "pdfLanguage": "PDF-taal",
+      "fixedConsumption": "Verbruik €/kWh",
+      "fixedReturn": "Teruglevering €/kWh",
+      "batteryCost": "Batterijkosten €/kWh",
+      "noSmartMeter": "Dit adres heeft geen slimme meter, dus er is geen verbruikshistorie om mee te simuleren.",
+      "noSolarNote": "Geen omvormer gevonden op dit adres. Met de zelfconsumptiestrategie kan de batterij alleen laden uit zonne-overschot, dus de besparing is minimaal. Overweeg de handelsstrategie.",
+      "noData": "Geen energiehistorie gevonden voor dit adres in de gekozen periode.",
+      "inverterSub": "95e percentiel van 15-min pieken",
+      "inverterRecommendedSub": "Suggestie: {{kw}} kW",
+      "tryTitle": "Probeer een configuratie",
+      "trySub": "Kies een batterijcapaciteit en omvormervermogen om te zien hoe de cijfers uitpakken. De grafiek en vergelijkingstabel rekenen met het gekozen omvormervermogen.",
+      "tryCapacity": "Batterijcapaciteit",
+      "tryInverter": "Omvormer kW",
+      "tryReset": "Herstel standaard",
+      "annualSavings": "Besparing / jaar",
+      "investment": "Investering",
+      "payback": "Terugverdientijd",
+      "paybackYears": "{{years}} jr",
+      "roi": "ROI",
+      "selfConsumptionSub": "{{pct}}% zelfconsumptie",
+      "sweepTitle": "Capaciteitsvergelijking",
+      "sweepSub": "Elke capaciteit van 1 tot 30 kWh gesimuleerd tegen de historische data. De gemarkeerde balk is de hierboven gekozen capaciteit.",
+      "chartAnnualSavings": "Besparing / jaar",
+      "chartRoi": "ROI",
+      "monthlyTitle": "Geschatte maandelijkse besparing ({{capacity}} kWh batterij)",
+      "chartMonthlySavings": "Besparing",
+      "dailyTitle": "Laden en ontladen per dag",
+      "dailySub": "Gesimuleerde batterijactiviteit per dag (geladen boven, ontladen onder de lijn). Gebruik de schuif om door de periode te bladeren.",
+      "dayDetailTitle": "Dagdetail",
+      "dayDetailSub": "Simulatie per uur voor één dag, om het batterijgedrag te controleren. Tijden zijn in UTC.",
+      "chartCharge": "Geladen",
+      "chartDischarge": "Ontladen",
+      "chartSoc": "Laadtoestand",
+      "day": {
+        "pick": "Dag",
+        "empty": "Geen gegevens voor deze dag",
+        "colTime": "Tijd (UTC)",
+        "colDelivered": "Netafname (kWh)",
+        "colReturned": "Teruglevering (kWh)",
+        "colProduced": "Zon (kWh)",
+        "colCharge": "Geladen (kWh)",
+        "colDischarge": "Ontladen (kWh)",
+        "colSoc": "SoC",
+        "colPrice": "Prijs (€/kWh)"
+      }
+    },
+    "benchmark": {
+      "cohortSize": "Vergelijk met",
+      "progressAddresses": "Bezig met adres {{done}} van {{total}}…",
+      "noSmartMeter": "Dit adres heeft geen slimme meter, dus er is geen verbruiksdata om te benchmarken.",
+      "noTargetData": "Geen energiehistorie gevonden voor dit adres in de gekozen periode.",
+      "cohortSummary": "Vergeleken met {{n}} van {{requested}} gesamplede adressen",
+      "skipped": "{{n}} overgeslagen (geen slimme meter of geen data)",
+      "period": "Periode {{from}} – {{to}}",
+      "emptyCohort": "Geen van de gesamplede adressen had bruikbare data. Probeer een grotere steekproef.",
+      "notApplicable": "Niet van toepassing voor dit adres (geen zonne-productie).",
+      "cohortMedian": "Cohortmediaan: {{value}}",
+      "betterThan": "Beter dan {{pct}}% van het cohort",
+      "addresses": "adressen",
+      "histogramHint": "Verdeling binnen het cohort — de gemarkeerde balk bevat dit adres.",
+      "metric": {
+        "totalUsageKwh": "Totaal verbruik",
+        "peakUsageKw": "Piekverbruik",
+        "standbyUsageW": "Sluipverbruik",
+        "selfConsumptionPct": "Zelfconsumptie"
+      }
+    },
     "templates": {
+      "benchmark": {
+        "title": "Energiebenchmark",
+        "description": "Vergelijk dit adres met een willekeurige steekproef van andere adressen in de groep op totaal verbruik, piekverbruik, sluipverbruik en zelfconsumptie."
+      },
+      "batteryAdvice": {
+        "title": "Batterijadvies",
+        "description": "Simuleer een thuisbatterij tegen de historische consumptie en productie van dit adres, met vaste tarieven of EPEX-spotprijzen, en vergelijk capaciteiten en omvormervermogens op besparing, terugverdientijd en ROI."
+      },
       "allSolarInverters": {
         "title": "Alle omvormers",
         "description": "Een overzicht van elke omvormer op alle adressen in de groep, met adres, sparky/flint serienummer, merk, model, verbindingstype, productiestatus en laatste productiestatus."

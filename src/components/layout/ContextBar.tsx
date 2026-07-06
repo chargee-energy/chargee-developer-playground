@@ -8,7 +8,7 @@ import { useGroupAddresses } from '@/hooks/useGroupAddresses'
 
 // Pages where picking a specific address is meaningful. Elsewhere (dashboard,
 // addresses, flex, console) the address control is hidden.
-const ADDRESS_ROUTES = ['/devices', '/schedules', '/telemetry']
+const ADDRESS_ROUTES = ['/devices', '/schedules', '/telemetry', '/reports']
 
 export function ContextBar() {
   const { t } = useTranslation()

@@ -27,7 +27,7 @@ interface CachedReport<TRow> {
 const EMPTY_TOTALS: ReportTotals = { addresses: 0, addressesWithData: 0 }
 
 /** Fetch every address in a group by paging through the offset/limit endpoint. */
-async function loadAllAddresses(groupUuid: string, signal: AbortSignal): Promise<GroupAddressDto[]> {
+export async function loadAllAddresses(groupUuid: string, signal: AbortSignal): Promise<GroupAddressDto[]> {
   const first = await groupControllerGetGroupSparkiesV2(groupUuid, { limit: ADDRESS_PAGE, offset: 0 }, undefined, signal)
   const total = first.meta?.total ?? 0
   const pages = Math.min(Math.ceil(total / ADDRESS_PAGE), MAX_ADDRESS_PAGES)

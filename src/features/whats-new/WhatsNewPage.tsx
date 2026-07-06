@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/PageHeader'
 
 // Releases shown on the What's new page, newest first.
 const RELEASES = [
+  { key: 'v3', version: 'v1.2.0' },
   { key: 'v2', version: 'v1.1.0' },
   { key: 'v1', version: 'v1.0.0' },
 ]

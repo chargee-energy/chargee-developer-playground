@@ -49,6 +49,20 @@
     "title": "What's new",
     "subtitle": "The latest changes to the developer playground.",
     "released": "Released",
+    "v3": {
+      "title": "Address reports, battery advice and live grid power",
+      "date": "6 Jul 2026",
+      "items": [
+        "Reports now has an Individual section with reports for a single address, next to the group-wide reports.",
+        "Energy benchmark report: compare an address against a random sample of other group addresses on overall usage, peak usage, standby usage and self-consumption, with percentile ranks and distribution charts.",
+        "Battery advice report: simulate a home battery against the address's real consumption and production, using EPEX spot prices or fixed rates.",
+        "Try any battery capacity and inverter power interactively and instantly see savings, investment, payback and ROI; every capacity from 1 to 30 kWh is compared in a sweep chart.",
+        "Verify the simulation with a daily charge/discharge chart and an hour-by-hour day detail, including state of charge and spot prices.",
+        "Export the battery advice as a Chargee-branded PDF (Dutch or English) with a summary, key figures, comparison table and charge/discharge appendices.",
+        "Sparky telemetry: new realtime Net power widget showing live grid consumption or return with a smooth trend sparkline.",
+        "Devices: the Sparky tab now displays the box code correctly."
+      ]
+    },
     "v2": {
       "title": "Reports and device health",
       "date": "3 Jul 2026",
@@ -206,8 +220,12 @@
   "reports": {
     "eyebrow": "Group",
     "title": "Reports",
-    "subtitle": "Generate group-wide reports across all connected devices.",
+    "subtitle": "Generate group-wide and individual address reports.",
     "selectGroupFirst": "Select a group to generate reports.",
+    "selectAddressFirst": "Select an address in the bar above to run this report.",
+    "selectAddressHint": "These reports run for the address selected in the bar above.",
+    "sectionIndividual": "Individual reports",
+    "sectionGroup": "Group reports",
     "open": "Open report",
     "generate": "Generate report",
     "regenerate": "Regenerate",
@@ -296,7 +314,93 @@
       "active": "Active",
       "idle": "Idle"
     },
+    "battery": {
+      "period": "Period",
+      "periodMonths": "{{n}} months",
+      "strategy": "Strategy",
+      "strategySelf": "Self-consumption",
+      "strategyProfit": "Trading (spot)",
+      "priceMode": "Prices",
+      "priceSpot": "EPEX spot",
+      "priceFixed": "Fixed rates",
+      "progressRequests": "Fetching data: {{done}} of {{total}} requests…",
+      "downloadPdf": "Download PDF",
+      "pdfLanguage": "PDF language",
+      "fixedConsumption": "Consumption €/kWh",
+      "fixedReturn": "Return €/kWh",
+      "batteryCost": "Battery cost €/kWh",
+      "noSmartMeter": "This address has no smart meter, so there is no consumption history to simulate against.",
+      "noSolarNote": "No solar inverter found on this address. With the self-consumption strategy the battery can only charge from solar excess, so savings will be minimal. Consider the trading strategy.",
+      "noData": "No energy history found for this address in the selected period.",
+      "inverterSub": "95th percentile of 15-min peaks",
+      "inverterRecommendedSub": "Suggested: {{kw}} kW",
+      "tryTitle": "Try a configuration",
+      "trySub": "Pick a battery capacity and inverter power to see how the numbers work out. The chart and comparison table update to the chosen inverter power.",
+      "tryCapacity": "Battery capacity",
+      "tryInverter": "Inverter kW",
+      "tryReset": "Reset to defaults",
+      "annualSavings": "Savings / year",
+      "investment": "Investment",
+      "payback": "Payback",
+      "paybackYears": "{{years}} yr",
+      "roi": "ROI",
+      "selfConsumptionSub": "{{pct}}% self-consumption",
+      "sweepTitle": "Capacity comparison",
+      "sweepSub": "Every capacity from 1 to 30 kWh simulated against the historical data. The highlighted bar is the capacity selected above.",
+      "chartAnnualSavings": "Savings / year",
+      "chartRoi": "ROI",
+      "monthlyTitle": "Estimated monthly savings ({{capacity}} kWh battery)",
+      "chartMonthlySavings": "Savings",
+      "dailyTitle": "Daily charge & discharge",
+      "dailySub": "Simulated battery activity per day (charged above, discharged below the line). Use the slider to scroll through the period.",
+      "dayDetailTitle": "Day detail",
+      "dayDetailSub": "Hour-by-hour simulation for one day, to verify the battery behaviour. Times are in UTC.",
+      "chartCharge": "Charged",
+      "chartDischarge": "Discharged",
+      "chartSoc": "State of charge",
+      "day": {
+        "pick": "Day",
+        "empty": "No data for this day",
+        "colTime": "Time (UTC)",
+        "colDelivered": "Grid delivery (kWh)",
+        "colReturned": "Grid return (kWh)",
+        "colProduced": "Solar (kWh)",
+        "colCharge": "Charged (kWh)",
+        "colDischarge": "Discharged (kWh)",
+        "colSoc": "SoC",
+        "colPrice": "Price (€/kWh)"
+      }
+    },
+    "benchmark": {
+      "cohortSize": "Compare against",
+      "progressAddresses": "Processing address {{done}} of {{total}}…",
+      "noSmartMeter": "This address has no smart meter, so there is no usage data to benchmark.",
+      "noTargetData": "No energy history found for this address in the selected period.",
+      "cohortSummary": "Compared against {{n}} of {{requested}} sampled addresses",
+      "skipped": "{{n}} skipped (no smart meter or no data)",
+      "period": "Period {{from}} – {{to}}",
+      "emptyCohort": "None of the sampled addresses had usable data. Try a larger sample.",
+      "notApplicable": "Not applicable for this address (no solar production).",
+      "cohortMedian": "Cohort median: {{value}}",
+      "betterThan": "Better than {{pct}}% of the cohort",
+      "addresses": "addresses",
+      "histogramHint": "Distribution across the cohort — the highlighted bar contains this address.",
+      "metric": {
+        "totalUsageKwh": "Overall usage",
+        "peakUsageKw": "Peak usage",
+        "standbyUsageW": "Standby usage",
+        "selfConsumptionPct": "Self-consumption"
+      }
+    },
     "templates": {
+      "benchmark": {
+        "title": "Energy benchmark",
+        "description": "Compare this address against a random sample of other addresses in the group on overall usage, peak usage, standby usage and self-consumption."
+      },
+      "batteryAdvice": {
+        "title": "Battery recommendation",
+        "description": "Simulate a home battery against this address's historical consumption and production, using fixed rates or EPEX spot prices, and compare capacities and inverter sizes on savings, payback and ROI."
+      },
       "allSolarInverters": {
         "title": "All solar inverters",
         "description": "An overview of every solar inverter across all addresses in the group, with address, sparky/flint serial, brand, model, connection type, production status and last production state."
