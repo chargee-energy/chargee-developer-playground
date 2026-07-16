@@ -6,24 +6,33 @@
  * OpenAPI spec version: 2.0.0
  */
 import type { BatteryChargeStateDto } from './batteryChargeStateDto';
-import type { BatteryDtoInstallationDate } from './batteryDtoInstallationDate';
-import type { BatteryDtoCreatedAt } from './batteryDtoCreatedAt';
-import type { BatteryDtoUpdatedAt } from './batteryDtoUpdatedAt';
 
 export interface BatteryDto {
   /** The uuid of the battery */
   identifier: string;
-  /** The brand of the battery */
-  brand: string;
+  /**
+   * Human-readable brand name as provided by the vendor.
+   * @nullable
+   */
+  brand?: string | null;
   /** The model of the battery */
   model: string;
   /** The site name of the battery */
   siteName: string;
   lastChargeState: BatteryChargeStateDto;
-  /** The timestamp this battert was installed. */
-  installationDate: BatteryDtoInstallationDate;
-  /** The timestamp this resource was created. */
-  createdAt: BatteryDtoCreatedAt;
-  /** The timestamp this resource was updated. */
-  updatedAt: BatteryDtoUpdatedAt;
+  /**
+   * The timestamp this battery was installed.
+   * @nullable
+   */
+  installationDate: string | null;
+  /**
+   * The timestamp this resource was created.
+   * @nullable
+   */
+  createdAt: string | null;
+  /**
+   * The timestamp this resource was updated.
+   * @nullable
+   */
+  updatedAt: string | null;
 }

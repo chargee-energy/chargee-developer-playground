@@ -127,6 +127,7 @@ export function useChargerControllerGetChargersForAddressV2<TData = Awaited<Retu
 
 
 /**
+ * Returns charger consumption readings. Timestamps in the response use the same offset as the fromDate/toDate query parameters (e.g. Europe/Amsterdam +01:00 or +02:00).
  * @summary List live consumption readings from charger
  */
 export const chargerControllerListProductionEnergyV2 = (

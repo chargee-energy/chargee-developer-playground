@@ -5,39 +5,30 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { VehicleChargeDtoTime } from './vehicleChargeDtoTime';
-import type { VehicleChargeDtoIsFullyCharged } from './vehicleChargeDtoIsFullyCharged';
-import type { VehicleChargeDtoIsPluggedIn } from './vehicleChargeDtoIsPluggedIn';
-import type { VehicleChargeDtoIsCharging } from './vehicleChargeDtoIsCharging';
-import type { VehicleChargeDtoBatteryLevel } from './vehicleChargeDtoBatteryLevel';
-import type { VehicleChargeDtoRange } from './vehicleChargeDtoRange';
-import type { VehicleChargeDtoBatteryCapacity } from './vehicleChargeDtoBatteryCapacity';
-import type { VehicleChargeDtoChargeLimit } from './vehicleChargeDtoChargeLimit';
-import type { VehicleChargeDtoMaxCurrent } from './vehicleChargeDtoMaxCurrent';
 import type { VehicleChargeDtoPowerDeliveryState } from './vehicleChargeDtoPowerDeliveryState';
 
 export interface VehicleChargeDto {
   /**
-   * The timestamp of the charge state update (ISO 8601).
+   * The timestamp of the charge state update.
    * @nullable
    */
-  time: VehicleChargeDtoTime;
+  time: string | null;
   /** Indicates if the vehicle is currently fully charged */
-  isFullyCharged: VehicleChargeDtoIsFullyCharged;
+  isFullyCharged: string;
   /** Indicates if the vehicle is plugged in */
-  isPluggedIn: VehicleChargeDtoIsPluggedIn;
+  isPluggedIn: string;
   /** Indicates if the vehicle is charging */
-  isCharging: VehicleChargeDtoIsCharging;
+  isCharging: string;
   /** The current battery level of the vehicle in percentage */
-  batteryLevel: VehicleChargeDtoBatteryLevel;
+  batteryLevel: string;
   /** The current range of the vehicle in kilometers */
-  range: VehicleChargeDtoRange;
+  range: string;
   /** The total battery capacity of the vehicle in kilowatt-hours */
-  batteryCapacity: VehicleChargeDtoBatteryCapacity;
+  batteryCapacity: string;
   /** The charge limit of the vehicle in percentage */
-  chargeLimit: VehicleChargeDtoChargeLimit;
+  chargeLimit: string;
   /** The maximum current the vehicle can draw from the charger in amperes */
-  maxCurrent: VehicleChargeDtoMaxCurrent;
+  maxCurrent: string;
   /** The maximum current the vehicle can draw from the charger in amperes */
   powerDeliveryState: VehicleChargeDtoPowerDeliveryState;
 }

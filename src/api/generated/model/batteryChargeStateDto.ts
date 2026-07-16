@@ -5,24 +5,20 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { BatteryChargeStateDtoTime } from './batteryChargeStateDtoTime';
 import type { BatteryChargeStateDtoStatus } from './batteryChargeStateDtoStatus';
-import type { BatteryChargeStateDtoBatteryCapacity } from './batteryChargeStateDtoBatteryCapacity';
-import type { BatteryChargeStateDtoBatteryLevel } from './batteryChargeStateDtoBatteryLevel';
-import type { BatteryChargeStateDtoChargeRate } from './batteryChargeStateDtoChargeRate';
 
 export interface BatteryChargeStateDto {
   /**
-   * The timestamp of the charge state update (ISO 8601).
+   * The timestamp of the charge state update
    * @nullable
    */
-  time: BatteryChargeStateDtoTime;
-  /** The current status of the battery [UNKNOWN = 0, IDLE = 1, CHARGING = 2, DISCHARGING = 3, FAULT = 4,UNRECOGNIZED = -1] */
+  time: string | null;
+  /** The current status of the battery */
   status: BatteryChargeStateDtoStatus;
-  /** The total capacity of the battery in watts */
-  batteryCapacity: BatteryChargeStateDtoBatteryCapacity;
+  /** The total capacity of the battery in Wh */
+  batteryCapacity: number;
   /** The current battery level from the battery in percentage */
-  batteryLevel: BatteryChargeStateDtoBatteryLevel;
+  batteryLevel: number;
   /** The charge rate of the battery in watts */
-  chargeRate: BatteryChargeStateDtoChargeRate;
+  chargeRate: number;
 }

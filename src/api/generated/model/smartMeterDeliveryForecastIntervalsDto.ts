@@ -7,8 +7,11 @@
  */
 
 export interface SmartMeterDeliveryForecastIntervalsDto {
-  /** The timestamp of interval */
+  /** Europe/Amsterdam timestamp of the interval (ISO 8601 with +01:00 or +02:00 offset) */
   start: string;
-  /** The Wh sum of the interval in Wh */
-  whSum: number;
+  /**
+   * The Wh sum of the interval in Wh
+   * @nullable
+   */
+  whSum: number | null;
 }

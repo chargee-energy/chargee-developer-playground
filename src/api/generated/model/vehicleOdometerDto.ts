@@ -5,14 +5,13 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { VehicleOdometerDtoTime } from './vehicleOdometerDtoTime';
 
 export interface VehicleOdometerDto {
   /** The odometer reading in kilometers */
   km: number;
   /**
-   * The timestamp of the odometer update (ISO 8601).
+   * The timestamp of the odometer update.
    * @nullable
    */
-  time: VehicleOdometerDtoTime;
+  time: string | null;
 }

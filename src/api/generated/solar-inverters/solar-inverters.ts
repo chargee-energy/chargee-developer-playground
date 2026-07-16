@@ -1010,7 +1010,7 @@ export function useSolarInverterFlexScheduleControllerFindByUuidV2<TData = Await
 
 
 /**
- * Returns production forecast intervals for the solar inverter on the given date. 
+ * Returns production forecast intervals for the solar inverter on the given local date in Europe/Amsterdam. All timestamps in the response use the Europe/Amsterdam offset (+01:00 or +02:00).
  * @summary Get the production forecast for a date of a solar inverter
  */
 export const solarInverterForecastControllerGetProductionForecastForSolarInverterV2 = (

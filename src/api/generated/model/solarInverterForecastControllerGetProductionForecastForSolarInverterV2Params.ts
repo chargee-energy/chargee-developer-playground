@@ -8,7 +8,7 @@
 
 export type SolarInverterForecastControllerGetProductionForecastForSolarInverterV2Params = {
 /**
- * The date to fetch the forecast for (YYYY-MM-DD). Returns empty results when no forecast exists for this date.
+ * Local calendar date in Europe/Amsterdam (YYYY-MM-DD)
  * @pattern ^\d{4}-\d{2}-\d{2}$
  */
 date: string;

@@ -6,23 +6,32 @@
  * OpenAPI spec version: 2.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
   BatteryDto,
-  PaginatedBatteryDtoResponse
+  BatteryForecastControllerComputeBatteryForecastWithPricesV2Params,
+  BatteryForecastControllerGetBatteryForecastV2Params,
+  BatteryForecastWithPricesRequestDto,
+  PaginatedBatteryDtoResponse,
+  PaginatedBatteryForecastDtoResponse,
+  PaginatedBatteryForecastStrategyDtoResponse
 } from '.././model';
 
 import { customInstance } from '../../mutator';
@@ -225,3 +234,281 @@ export function useBatteryControllerGetBatteryV2<TData = Awaited<ReturnType<type
 
 
 
+/**
+ * Returns the optimization strategies that can be requested when computing a battery forecast.
+ * @summary List available battery forecast strategies
+ */
+export const batteryForecastControllerListBatteryForecastStrategiesV2 = (
+    addressUuid: unknown,
+    batteryUuid: unknown,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PaginatedBatteryForecastStrategyDtoResponse>(
+      {url: `/api/v2/addresses/${addressUuid}/batteries/${batteryUuid}/forecast/strategies`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getBatteryForecastControllerListBatteryForecastStrategiesV2QueryKey = (addressUuid?: unknown,
+    batteryUuid?: unknown,) => {
+    return [
+    `/api/v2/addresses/${addressUuid}/batteries/${batteryUuid}/forecast/strategies`
+    ] as const;
+    }
+
+    
+export const getBatteryForecastControllerListBatteryForecastStrategiesV2QueryOptions = <TData = Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError = unknown>(addressUuid: unknown,
+    batteryUuid: unknown, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBatteryForecastControllerListBatteryForecastStrategiesV2QueryKey(addressUuid,batteryUuid);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>> = ({ signal }) => batteryForecastControllerListBatteryForecastStrategiesV2(addressUuid,batteryUuid, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(addressUuid && batteryUuid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BatteryForecastControllerListBatteryForecastStrategiesV2QueryResult = NonNullable<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>>
+export type BatteryForecastControllerListBatteryForecastStrategiesV2QueryError = unknown
+
+
+export function useBatteryForecastControllerListBatteryForecastStrategiesV2<TData = Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError = unknown>(
+ addressUuid: unknown,
+    batteryUuid: unknown, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>,
+          TError,
+          Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBatteryForecastControllerListBatteryForecastStrategiesV2<TData = Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError = unknown>(
+ addressUuid: unknown,
+    batteryUuid: unknown, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>,
+          TError,
+          Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBatteryForecastControllerListBatteryForecastStrategiesV2<TData = Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError = unknown>(
+ addressUuid: unknown,
+    batteryUuid: unknown, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List available battery forecast strategies
+ */
+
+export function useBatteryForecastControllerListBatteryForecastStrategiesV2<TData = Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError = unknown>(
+ addressUuid: unknown,
+    batteryUuid: unknown, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerListBatteryForecastStrategiesV2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBatteryForecastControllerListBatteryForecastStrategiesV2QueryOptions(addressUuid,batteryUuid,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * Computes on-demand battery charge/discharge forecasts for the given time range [fromDate, toDate) using all supported strategies and EPEX day-ahead prices. Query dates may include a timezone offset; timestamps in the response use UTC (+00:00). Use POST to supply custom prices and optionally filter strategies. Requires battery charge state updated within the last 60 minutes.
+ * @summary Get the battery forecast for a time range
+ */
+export const batteryForecastControllerGetBatteryForecastV2 = (
+    addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerGetBatteryForecastV2Params,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PaginatedBatteryForecastDtoResponse>(
+      {url: `/api/v2/addresses/${addressUuid}/batteries/${batteryUuid}/forecast`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getBatteryForecastControllerGetBatteryForecastV2QueryKey = (addressUuid?: string,
+    batteryUuid?: string,
+    params?: BatteryForecastControllerGetBatteryForecastV2Params,) => {
+    return [
+    `/api/v2/addresses/${addressUuid}/batteries/${batteryUuid}/forecast`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getBatteryForecastControllerGetBatteryForecastV2QueryOptions = <TData = Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError = unknown>(addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerGetBatteryForecastV2Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBatteryForecastControllerGetBatteryForecastV2QueryKey(addressUuid,batteryUuid,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>> = ({ signal }) => batteryForecastControllerGetBatteryForecastV2(addressUuid,batteryUuid,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(addressUuid && batteryUuid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BatteryForecastControllerGetBatteryForecastV2QueryResult = NonNullable<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>>
+export type BatteryForecastControllerGetBatteryForecastV2QueryError = unknown
+
+
+export function useBatteryForecastControllerGetBatteryForecastV2<TData = Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError = unknown>(
+ addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerGetBatteryForecastV2Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>,
+          TError,
+          Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBatteryForecastControllerGetBatteryForecastV2<TData = Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError = unknown>(
+ addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerGetBatteryForecastV2Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>,
+          TError,
+          Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBatteryForecastControllerGetBatteryForecastV2<TData = Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError = unknown>(
+ addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerGetBatteryForecastV2Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get the battery forecast for a time range
+ */
+
+export function useBatteryForecastControllerGetBatteryForecastV2<TData = Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError = unknown>(
+ addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerGetBatteryForecastV2Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof batteryForecastControllerGetBatteryForecastV2>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBatteryForecastControllerGetBatteryForecastV2QueryOptions(addressUuid,batteryUuid,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * Computes on-demand battery charge/discharge forecasts for the given time range [fromDate, toDate). The request body is optional: supply custom electricity prices to override the defaults, or omit them to fall back to EPEX day-ahead prices (same as the GET endpoint). Optionally filter strategies in the request body; omit to compute all supported strategies. Query dates may include a timezone offset; timestamps in the response use UTC (+00:00). Requires battery charge state updated within the last 60 minutes.
+ * @summary Compute battery forecast with optional custom electricity prices
+ */
+export const batteryForecastControllerComputeBatteryForecastWithPricesV2 = (
+    addressUuid: string,
+    batteryUuid: string,
+    params: BatteryForecastControllerComputeBatteryForecastWithPricesV2Params,
+    batteryForecastWithPricesRequestDto?: BatteryForecastWithPricesRequestDto,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PaginatedBatteryForecastDtoResponse>(
+      {url: `/api/v2/addresses/${addressUuid}/batteries/${batteryUuid}/forecast`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: batteryForecastWithPricesRequestDto,
+        params, signal
+    },
+      options);
+    }
+  
+
+
+export const getBatteryForecastControllerComputeBatteryForecastWithPricesV2MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof batteryForecastControllerComputeBatteryForecastWithPricesV2>>, TError,{addressUuid: string;batteryUuid: string;params: BatteryForecastControllerComputeBatteryForecastWithPricesV2Params;data: BatteryForecastWithPricesRequestDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof batteryForecastControllerComputeBatteryForecastWithPricesV2>>, TError,{addressUuid: string;batteryUuid: string;params: BatteryForecastControllerComputeBatteryForecastWithPricesV2Params;data: BatteryForecastWithPricesRequestDto}, TContext> => {
+
+const mutationKey = ['batteryForecastControllerComputeBatteryForecastWithPricesV2'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof batteryForecastControllerComputeBatteryForecastWithPricesV2>>, {addressUuid: string;batteryUuid: string;params: BatteryForecastControllerComputeBatteryForecastWithPricesV2Params;data: BatteryForecastWithPricesRequestDto}> = (props) => {
+          const {addressUuid,batteryUuid,params,data} = props ?? {};
+
+          return  batteryForecastControllerComputeBatteryForecastWithPricesV2(addressUuid,batteryUuid,params,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BatteryForecastControllerComputeBatteryForecastWithPricesV2MutationResult = NonNullable<Awaited<ReturnType<typeof batteryForecastControllerComputeBatteryForecastWithPricesV2>>>
+    export type BatteryForecastControllerComputeBatteryForecastWithPricesV2MutationBody = BatteryForecastWithPricesRequestDto
+    export type BatteryForecastControllerComputeBatteryForecastWithPricesV2MutationError = unknown
+
+    /**
+ * @summary Compute battery forecast with optional custom electricity prices
+ */
+export const useBatteryForecastControllerComputeBatteryForecastWithPricesV2 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof batteryForecastControllerComputeBatteryForecastWithPricesV2>>, TError,{addressUuid: string;batteryUuid: string;params: BatteryForecastControllerComputeBatteryForecastWithPricesV2Params;data: BatteryForecastWithPricesRequestDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof batteryForecastControllerComputeBatteryForecastWithPricesV2>>,
+        TError,
+        {addressUuid: string;batteryUuid: string;params: BatteryForecastControllerComputeBatteryForecastWithPricesV2Params;data: BatteryForecastWithPricesRequestDto},
+        TContext
+      > => {
+
+      const mutationOptions = getBatteryForecastControllerComputeBatteryForecastWithPricesV2MutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    

@@ -5,13 +5,12 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { ScheduleDtoPowerlimit } from './scheduleDtoPowerlimit';
 import type { DateTime } from './dateTime';
 
 export interface ScheduleDto {
   uuid: string;
   /** @nullable */
-  powerlimit?: ScheduleDtoPowerlimit;
+  powerlimit?: number | null;
   zeroExport: boolean;
   time: DateTime;
 }

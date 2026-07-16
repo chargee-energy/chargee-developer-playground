@@ -5,15 +5,15 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { DateTime } from './dateTime';
-import type { HvacTemperatureStateDtoCurrentTemperature } from './hvacTemperatureStateDtoCurrentTemperature';
-import type { HvacTemperatureStateDtoIsActive } from './hvacTemperatureStateDtoIsActive';
 
 export interface HvacTemperatureStateDto {
-  /** The timestamp of the HVAC state update in milliseconds */
-  time: DateTime;
+  /**
+   * The timestamp of the HVAC state update
+   * @nullable
+   */
+  time: string | null;
   /** The current temperature from the hvac in celsius */
-  currentTemperature: HvacTemperatureStateDtoCurrentTemperature;
+  currentTemperature: string;
   /** Indicates if the hvac is active */
-  isActive: HvacTemperatureStateDtoIsActive;
+  isActive: string;
 }

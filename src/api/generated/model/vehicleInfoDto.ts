@@ -5,18 +5,20 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { VehicleInfoDtoLastSeen } from './vehicleInfoDtoLastSeen';
 
 export interface VehicleInfoDto {
-  /** The brand of the vehicle */
-  brand: string;
+  /**
+   * Human-readable brand name as provided by the vendor.
+   * @nullable
+   */
+  brand?: string | null;
   /** The model of the vehicle */
   model: string;
   /** The year of the vehicle */
   year: number;
   /**
-   * The timestamp of the last update (ISO 8601).
+   * The timestamp of the last update.
    * @nullable
    */
-  lastSeen: VehicleInfoDtoLastSeen;
+  lastSeen: string | null;
 }
