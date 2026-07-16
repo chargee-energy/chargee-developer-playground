@@ -514,6 +514,10 @@
     "create": "New flex schedule",
     "selectGroupFirst": "Select a group to view its flex data.",
     "groupGridTarget": "Group grid target (kW)",
+    "addressGridTarget": "Address grid target (W)",
+    "solarInverterCapacity": "Solar inverter capacity (%)",
+    "targetType": "Target type",
+    "noTarget": "No limit (inverters at 100%)",
     "deleteConfirm": "Delete this flex schedule?",
     "empty": "No flex schedules."
   },
