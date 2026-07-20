@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowPathIcon, ArrowDownTrayIcon, StopIcon } from '@heroicons/react/24/outline'
 import { DataTable, type Column } from '@/components/common/DataTable'
@@ -33,6 +34,10 @@ interface ReportRunnerProps<TRow> {
   emptyMessage: string
   /** Disable the generate button (e.g. no group selected). */
   canRun?: boolean
+  /** Optional controls (e.g. a date picker) rendered above the header card. */
+  filters?: ReactNode
+  /** Override the running-progress label (defaults to the per-address message). */
+  progressText?: string
 }
 
 /**
@@ -56,15 +61,20 @@ export function ReportRunner<TRow extends Record<string, any>>({
   csvFilename,
   emptyMessage,
   canRun = true,
+  filters,
+  progressText,
 }: ReportRunnerProps<TRow>) {
   const { t } = useTranslation()
 
   const running = status === 'running'
+  const indeterminate = running && progress.total === 0
   const progressPct = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
   const finished = status === 'done' || status === 'cancelled'
 
   return (
     <div className="space-y-5">
+      {filters}
+
       <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-dark-blue">{title}</p>
@@ -98,10 +108,21 @@ export function ReportRunner<TRow extends Record<string, any>>({
         <div className="card space-y-3 p-5">
           <div className="flex items-center gap-3 text-sm text-text-gray">
             <Spinner />
-            <span>{t('reports.progress', { done: progress.done, total: progress.total })}</span>
+            <span>
+              {indeterminate
+                ? t('reports.generating')
+                : (progressText ?? t('reports.progress', { done: progress.done, total: progress.total }))}
+            </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-beige-2">
-            <div className="h-full rounded-full bg-dark-purple transition-all" style={{ width: `${progressPct}%` }} />
+            <div
+              className={
+                indeterminate
+                  ? 'h-full w-1/3 animate-pulse rounded-full bg-dark-purple'
+                  : 'h-full rounded-full bg-dark-purple transition-all'
+              }
+              style={indeterminate ? undefined : { width: `${progressPct}%` }}
+            />
           </div>
         </div>
       )}
