@@ -5,6 +5,7 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
+import type { UserGroupDtoGroupKind } from './userGroupDtoGroupKind';
 
 export interface UserGroupDto {
   /** The UUID of the group */
@@ -13,10 +14,15 @@ export interface UserGroupDto {
   key: string;
   /** The display name of the group */
   name: string;
+  /** Classification of the group */
+  groupKind: UserGroupDtoGroupKind;
   /** When the group was created */
   createdAt: string;
-  /** When the group was last updated */
-  updatedAt: string;
+  /**
+   * When the group was last updated
+   * @nullable
+   */
+  updatedAt: string | null;
   /**
    * When the group was deleted (if applicable)
    * @nullable

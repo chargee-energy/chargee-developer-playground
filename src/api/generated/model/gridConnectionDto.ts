@@ -8,8 +8,6 @@
 import type { GridConnectionDtoPhaseOneCapacity } from './gridConnectionDtoPhaseOneCapacity';
 import type { GridConnectionDtoPhaseTwoCapacity } from './gridConnectionDtoPhaseTwoCapacity';
 import type { GridConnectionDtoPhaseThreeCapacity } from './gridConnectionDtoPhaseThreeCapacity';
-import type { GridConnectionDtoInstallationDate } from './gridConnectionDtoInstallationDate';
-import type { GridConnectionDtoEndDate } from './gridConnectionDtoEndDate';
 
 export interface GridConnectionDto {
   /** The uuid of the grid connection */
@@ -37,10 +35,10 @@ export interface GridConnectionDto {
    * The timestamp this grid connection was installed.
    * @nullable
    */
-  installationDate: GridConnectionDtoInstallationDate;
+  installationDate: string | null;
   /**
    * The timestamp this grid connection was ended.
    * @nullable
    */
-  endDate: GridConnectionDtoEndDate;
+  endDate: string | null;
 }

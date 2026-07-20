@@ -5,8 +5,6 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { DateTime } from './dateTime';
-import type { FlintDtoDisconnectedAt } from './flintDtoDisconnectedAt';
 
 export interface FlintDto {
   /** The unique identifier of the flint */
@@ -16,14 +14,17 @@ export interface FlintDto {
   /** The unique identifier of the address this flint is connected to */
   addressUuid: string;
   /** When the flint was connected to the address */
-  connectedAt: DateTime;
+  connectedAt: string;
   /**
    * When the flint was disconnected from the address (null if still connected)
    * @nullable
    */
-  disconnectedAt: FlintDtoDisconnectedAt;
+  disconnectedAt: string | null;
   /** When the flint was created */
-  createdAt: DateTime;
-  /** When the flint was last updated */
-  updatedAt: DateTime;
+  createdAt: string;
+  /**
+   * When the flint was last updated
+   * @nullable
+   */
+  updatedAt: string | null;
 }

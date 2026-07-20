@@ -874,7 +874,7 @@ export function useSmartMetersAggregationControllerGetGasIntervalsV2<TData = Awa
 
 
 /**
- * Returns delivery (consumption) forecast intervals for the smart meter on the given local date.
+ * Returns delivery (consumption) forecast intervals for the smart meter on the given local date in Europe/Amsterdam. All timestamps in the response use the Europe/Amsterdam offset (+01:00 or +02:00).
  * @summary Get the delivery forecast for a date of a smart meter
  */
 export const smartMetersForecastControllerGetDeliveryForecastForSmartMeterV2 = (
@@ -982,7 +982,7 @@ export function useSmartMetersForecastControllerGetDeliveryForecastForSmartMeter
 
 
 /**
- * Get the return forecast for a date of a smart meter
+ * Returns return (feed-in) forecast intervals for the smart meter on the given local date in Europe/Amsterdam. All timestamps in the response use the Europe/Amsterdam offset (+01:00 or +02:00).
  * @summary Get the return forecast for a date of a smart meter
  */
 export const smartMetersForecastControllerGetReturnForecastForSmartMeterV2 = (

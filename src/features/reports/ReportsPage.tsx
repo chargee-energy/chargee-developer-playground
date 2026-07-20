@@ -4,6 +4,7 @@ import { ArrowRightIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import { PageHeader } from '@/components/PageHeader'
 import { EmptyState } from '@/components/common/EmptyState'
 import { useContextStore } from '@/store/context'
+import { useGroupControllerGetGroupsV2 } from '@/api/generated/groups/groups'
 import { reportTemplates, type ReportTemplate } from './reportRegistry'
 
 function TemplateCard({ tpl, onOpen }: { tpl: ReportTemplate; onOpen: () => void }) {
@@ -36,6 +37,13 @@ export function ReportsPage() {
   const { groupUuid, addressUuid } = useContextStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
+  // Whether the selected group is a curtailment pool (gates pool-only reports).
+  // Uses the same cached groups query as the context bar.
+  const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 }, { query: { enabled: !!groupUuid } })
+  const isCurtailmentPool =
+    groupsQuery.data?.results?.find((g) => g.uuid === groupUuid)?.groupKind === 'CURTAILMENT_POOL'
+  const canSee = (tpl: ReportTemplate) => !tpl.curtailmentPoolOnly || isCurtailmentPool
+
   if (!groupUuid) {
     return (
       <div className="space-y-8">
@@ -50,6 +58,7 @@ export function ReportsPage() {
   if (selected) {
     const Report = selected.Component
     const needsAddress = selected.scope === 'address' && !addressUuid
+    const needsPool = !canSee(selected)
     return (
       <div className="space-y-6">
         <PageHeader
@@ -59,13 +68,19 @@ export function ReportsPage() {
           onBack={() => setSelectedId(null)}
           hideInspector
         />
-        {needsAddress ? <EmptyState title={t('reports.selectAddressFirst')} /> : <Report />}
+        {needsPool ? (
+          <EmptyState title={t('reports.curtailmentPoolOnly')} />
+        ) : needsAddress ? (
+          <EmptyState title={t('reports.selectAddressFirst')} />
+        ) : (
+          <Report />
+        )}
       </div>
     )
   }
 
-  const groupReports = reportTemplates.filter((r) => r.scope === 'group')
-  const addressReports = reportTemplates.filter((r) => r.scope === 'address')
+  const groupReports = reportTemplates.filter((r) => r.scope === 'group' && canSee(r))
+  const addressReports = reportTemplates.filter((r) => r.scope === 'address' && canSee(r))
 
   return (
     <div className="space-y-6">

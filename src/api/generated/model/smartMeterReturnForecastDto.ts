@@ -12,23 +12,20 @@ export interface SmartMeterReturnForecastDto {
   identifier: string;
   /** The uuid of the smart meter */
   smartMeterIdentifier: string;
-  /**
-   * The intervals of the smart meter return forecast
-   * @nullable
-   */
-  intervals: SmartMeterReturnForecastIntervalsDto[] | null;
-  /** The timestamp of the processed time of the smart meter return forecast */
+  /** The intervals of the smart meter return forecast */
+  intervals: SmartMeterReturnForecastIntervalsDto[];
+  /** Europe/Amsterdam timestamp when the forecast was generated/computed (processed_time_ts). */
   processedTime: string;
   /** The version of model used to make the smart meter return forecast */
   modelVersion: string;
-  /** The type of forecast */
+  /** Opaque forecast type label from the model (no published enum). Use forecastTags for filtering when available. */
   forecastType?: string;
   /** The quality score of the forecast (0-100) */
   forecastQuality?: number;
   /** Tags associated with the forecast */
   forecastTags: string[];
-  /** The duration of the forecast in hours */
+  /** Length of each forecast interval in seconds (e.g. 900 for 15 minutes, 3600 for hourly). Not the total forecast horizon. */
   forecastDuration?: number;
-  /** The timestamp when the forecast was generated */
+  /** Europe/Amsterdam start/anchor timestamp of the forecast series (hour 0 of the full forecast run), not when the forecast was generated. */
   forecastTime?: string;
 }

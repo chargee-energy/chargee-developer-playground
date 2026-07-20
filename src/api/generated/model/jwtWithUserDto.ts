@@ -31,7 +31,10 @@ export interface JwtWithUserDto {
    * @nullable
    */
   deletedAt: string | null;
+  /** JWT access token for authenticated API requests. */
   accessToken: string;
+  /** Refresh token used to obtain new access tokens. */
   refreshToken: string;
+  /** The time the access token expires. */
   expiresAt: string;
 }

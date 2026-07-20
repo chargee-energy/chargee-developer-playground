@@ -223,6 +223,7 @@
     "subtitle": "Generate group-wide and individual address reports.",
     "selectGroupFirst": "Select a group to generate reports.",
     "selectAddressFirst": "Select an address in the bar above to run this report.",
+    "curtailmentPoolOnly": "This report is only available for curtailment pool groups.",
     "selectAddressHint": "These reports run for the address selected in the bar above.",
     "sectionIndividual": "Individual reports",
     "sectionGroup": "Group reports",
@@ -232,6 +233,7 @@
     "cancel": "Cancel",
     "downloadCsv": "Download CSV",
     "progress": "Processing {{done}} of {{total}} addresses…",
+    "generating": "Generating report…",
     "resultCount": "{{n}} results found",
     "generatedAt": "Generated {{time}}",
     "empty": "No solar inverters found across this group.",
@@ -424,6 +426,86 @@
       "allMeters": {
         "title": "All smart meters",
         "description": "An overview of every smart meter across all addresses in the group, with address, sparky/flint serial, meter type, meter number, and electricity and gas EANs."
+      },
+      "groupCurtailment": {
+        "title": "Group curtailment",
+        "description": "Curtailment activity for the group on a chosen day or date range: every flex schedule and the time period it applied, with its grid target."
+      }
+    },
+    "curtailment": {
+      "dateMode": "Period",
+      "mode": {
+        "single": "Single day",
+        "range": "Date range"
+      },
+      "date": "Date",
+      "from": "From",
+      "to": "To",
+      "groupHint": "Group-level view. Each flex schedule sets a grid target that holds until the next schedule takes over.",
+      "ongoing": "Ongoing",
+      "noLimit": "No limit (100%)",
+      "empty": "No flex schedules active in the selected period.",
+      "fetching": "Fetching aggregation… {{done}} / {{total}} pages",
+      "truncated": "The aggregation window is large (1-second data) and was capped before the end. Narrow the date range to see the full window.",
+      "col": {
+        "start": "Start",
+        "end": "End",
+        "duration": "Duration",
+        "type": "Target type",
+        "target": "Target"
+      },
+      "type": {
+        "group": "Group grid",
+        "address": "Address grid",
+        "inverter": "Inverter capacity",
+        "none": "None"
+      },
+      "metrics": {
+        "curtailmentPeriods": "Curtailment periods",
+        "curtailedTime": "Time curtailed",
+        "totalSchedules": "Total flex schedules"
+      },
+      "timeline": {
+        "inverters": "{{n}} solar inverters",
+        "meters": "{{n}} smart meters"
+      },
+      "overview": {
+        "title": "Day overview",
+        "subtitle": "{{from}} → {{to}} · curtailment period shaded",
+        "hint": "Group flex aggregation with 1h of context around curtailment, as per-minute averages with a solar min–max band. Use Block detail below for full 1-second resolution."
+      },
+      "detail": {
+        "title": "Block detail",
+        "startBlock": "Start block",
+        "endBlock": "End block",
+        "window": "{{from}} → {{to}} · full resolution",
+        "loading": "Fetching full-resolution data…",
+        "empty": "No samples in this block."
+      },
+      "series": {
+        "solarProduction": "Solar production",
+        "solarRange": "Solar production (min–max)",
+        "potential": "Est. potential (no curtailment)",
+        "delivery": "Grid delivery",
+        "return": "Grid return",
+        "steerable": "Steerable power (zero export)"
+      },
+      "impact": {
+        "title": "Curtailment impact",
+        "curtailed": "Curtailed",
+        "reduction": "Reduction",
+        "peakShaved": "Peak shaved",
+        "produced": "Solar produced",
+        "exported": "Grid exported",
+        "imported": "Grid imported",
+        "estimated": "estimated",
+        "confidence": {
+          "high": "High confidence",
+          "low": "Low confidence"
+        },
+        "estimateNote": "Curtailed energy is estimated against a clear-sky solar shape (assuming an NL location), scaled per curtailment period to the group's uncurtailed production around it. The dashed line shows the estimated potential within each period.",
+        "lowNote": "Low confidence: limited uncurtailed daylight on one side of the event to anchor the clear-sky curve — treat the figure as indicative.",
+        "noEstimate": "Not enough uncurtailed daylight around the event to anchor the clear-sky curve; showing measured energy only."
       }
     }
   },

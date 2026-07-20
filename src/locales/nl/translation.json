@@ -223,6 +223,7 @@
     "subtitle": "Genereer groepsbrede en individuele adresrapporten.",
     "selectGroupFirst": "Selecteer een groep om rapporten te genereren.",
     "selectAddressFirst": "Selecteer een adres in de balk hierboven om dit rapport uit te voeren.",
+    "curtailmentPoolOnly": "Dit rapport is alleen beschikbaar voor curtailment pool-groepen.",
     "selectAddressHint": "Deze rapporten draaien voor het adres dat in de balk hierboven is geselecteerd.",
     "sectionIndividual": "Individuele rapporten",
     "sectionGroup": "Groepsrapporten",
@@ -232,6 +233,7 @@
     "cancel": "Annuleren",
     "downloadCsv": "CSV downloaden",
     "progress": "Bezig met {{done}} van {{total}} adressen…",
+    "generating": "Rapport genereren…",
     "resultCount": "{{n}} resultaten gevonden",
     "generatedAt": "Gegenereerd {{time}}",
     "empty": "Geen omvormers gevonden in deze groep.",
@@ -424,6 +426,86 @@
       "allMeters": {
         "title": "Alle slimme meters",
         "description": "Een overzicht van elke slimme meter op alle adressen in de groep, met adres, sparky/flint serienummer, metertype, meternummer, en elektriciteit- en gas-EAN's."
+      },
+      "groupCurtailment": {
+        "title": "Groepscurtailment",
+        "description": "Curtailmentactiviteit voor de groep op een gekozen dag of periode: elk flex-schema en de periode waarin het gold, met het netdoel."
+      }
+    },
+    "curtailment": {
+      "dateMode": "Periode",
+      "mode": {
+        "single": "Eén dag",
+        "range": "Periode"
+      },
+      "date": "Datum",
+      "from": "Van",
+      "to": "Tot",
+      "groupHint": "Weergave op groepsniveau. Elk flex-schema stelt een netdoel in dat geldt totdat het volgende schema het overneemt.",
+      "ongoing": "Lopend",
+      "noLimit": "Geen limiet (100%)",
+      "empty": "Geen flex-schema's actief in de gekozen periode.",
+      "fetching": "Aggregatie ophalen… {{done}} / {{total}} pagina's",
+      "truncated": "Het aggregatievenster is groot (1-seconde-data) en is afgekapt vóór het einde. Kies een kleiner datumbereik om het volledige venster te zien.",
+      "col": {
+        "start": "Start",
+        "end": "Einde",
+        "duration": "Duur",
+        "type": "Type doel",
+        "target": "Doel"
+      },
+      "type": {
+        "group": "Groep-net",
+        "address": "Adres-net",
+        "inverter": "Omvormercapaciteit",
+        "none": "Geen"
+      },
+      "metrics": {
+        "curtailmentPeriods": "Curtailmentperiodes",
+        "curtailedTime": "Tijd gecurtaild",
+        "totalSchedules": "Totaal flex-schema's"
+      },
+      "timeline": {
+        "inverters": "{{n}} omvormers",
+        "meters": "{{n}} slimme meters"
+      },
+      "overview": {
+        "title": "Dagoverzicht",
+        "subtitle": "{{from}} → {{to}} · curtailmentperiode gearceerd",
+        "hint": "Groeps-flexaggregatie met 1u context rond curtailment, als gemiddelden per minuut met een zon min–max-band. Gebruik Blokdetail hieronder voor volledige 1-seconde-resolutie."
+      },
+      "detail": {
+        "title": "Blokdetail",
+        "startBlock": "Startblok",
+        "endBlock": "Eindblok",
+        "window": "{{from}} → {{to}} · volledige resolutie",
+        "loading": "Data op volledige resolutie ophalen…",
+        "empty": "Geen samples in dit blok."
+      },
+      "series": {
+        "solarProduction": "Zonproductie",
+        "solarRange": "Zonproductie (min–max)",
+        "potential": "Gesch. potentieel (zonder curtailment)",
+        "delivery": "Netlevering",
+        "return": "Netteruglevering",
+        "steerable": "Stuurbaar vermogen (nul-export)"
+      },
+      "impact": {
+        "title": "Impact van curtailment",
+        "curtailed": "Gecurtaild",
+        "reduction": "Reductie",
+        "peakShaved": "Piek afgetopt",
+        "produced": "Zon geproduceerd",
+        "exported": "Net geleverd",
+        "imported": "Net afgenomen",
+        "estimated": "geschat",
+        "confidence": {
+          "high": "Hoge betrouwbaarheid",
+          "low": "Lage betrouwbaarheid"
+        },
+        "estimateNote": "De gecurtailde energie is geschat aan de hand van een clear-sky zoncurve (met aanname van een NL-locatie), per curtailmentperiode geschaald op de niet-gecurtailde productie eromheen. De stippellijn toont het geschatte potentieel binnen elke periode.",
+        "lowNote": "Lage betrouwbaarheid: beperkte niet-gecurtailde daglichtdata aan één kant van de gebeurtenis om de clear-sky curve te verankeren — beschouw de waarde als indicatief.",
+        "noEstimate": "Onvoldoende niet-gecurtaild daglicht rond de gebeurtenis om de clear-sky curve te verankeren; alleen gemeten energie wordt getoond."
       }
     }
   },

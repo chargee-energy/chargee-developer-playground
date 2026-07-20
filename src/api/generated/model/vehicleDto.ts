@@ -9,9 +9,6 @@ import type { VehicleInfoDto } from './vehicleInfoDto';
 import type { VehicleLocationDto } from './vehicleLocationDto';
 import type { VehicleOdometerDto } from './vehicleOdometerDto';
 import type { VehicleChargeDto } from './vehicleChargeDto';
-import type { VehicleDtoCreatedAt } from './vehicleDtoCreatedAt';
-import type { VehicleDtoUpdatedAt } from './vehicleDtoUpdatedAt';
-import type { VehicleDtoDeletedAt } from './vehicleDtoDeletedAt';
 
 export interface VehicleDto {
   /** The uuid of the vehicle */
@@ -22,10 +19,19 @@ export interface VehicleDto {
   lastLocation: VehicleLocationDto;
   lastOdometer: VehicleOdometerDto;
   lastChargeState: VehicleChargeDto;
-  /** The timestamp this resource was created. */
-  createdAt: VehicleDtoCreatedAt;
-  /** The timestamp this resource was updated. */
-  updatedAt: VehicleDtoUpdatedAt;
-  /** The timestamp this resource was deleted. */
-  deletedAt: VehicleDtoDeletedAt;
+  /**
+   * The timestamp this resource was created.
+   * @nullable
+   */
+  createdAt: string | null;
+  /**
+   * The timestamp this resource was updated.
+   * @nullable
+   */
+  updatedAt: string | null;
+  /**
+   * The timestamp this resource was deleted.
+   * @nullable
+   */
+  deletedAt: string | null;
 }

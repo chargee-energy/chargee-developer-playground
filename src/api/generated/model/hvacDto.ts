@@ -6,14 +6,15 @@
  * OpenAPI spec version: 2.0.0
  */
 import type { HvacTemperatureStateDto } from './hvacTemperatureStateDto';
-import type { HvacDtoCreatedAt } from './hvacDtoCreatedAt';
-import type { HvacDtoUpdatedAt } from './hvacDtoUpdatedAt';
 
 export interface HvacDto {
   /** The uuid of the hvac */
   identifier: string;
-  /** The brand of the hvac */
-  brand: string;
+  /**
+   * Human-readable brand name as provided by the vendor.
+   * @nullable
+   */
+  brand?: string | null;
   /** The model of the hvac */
   model: string;
   /** The display name of the hvac */
@@ -23,8 +24,14 @@ export interface HvacDto {
   /** The category of the hvac */
   category: string;
   lastTemperatureState: HvacTemperatureStateDto;
-  /** The timestamp this resource was created. */
-  createdAt: HvacDtoCreatedAt;
-  /** The timestamp this resource was updated. */
-  updatedAt: HvacDtoUpdatedAt;
+  /**
+   * The timestamp this resource was created.
+   * @nullable
+   */
+  createdAt: string | null;
+  /**
+   * The timestamp this resource was updated.
+   * @nullable
+   */
+  updatedAt: string | null;
 }

@@ -65,6 +65,50 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     "method": "GET",
+    "path": "/api/v2/addresses/{address_uuid}/batteries/{battery_uuid}/forecast",
+    "operationId": "BatteryForecastController_getBatteryForecast_v2",
+    "tag": "Batteries",
+    "summary": "Get the battery forecast for a time range",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00Z",
+      "toDate": "2026-01-01T00:00:00Z"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v2/addresses/{address_uuid}/batteries/{battery_uuid}/forecast",
+    "operationId": "BatteryForecastController_computeBatteryForecastWithPrices_v2",
+    "tag": "Batteries",
+    "summary": "Compute battery forecast with optional custom electricity prices",
+    "queryExample": {
+      "fromDate": "2026-01-01T00:00:00Z",
+      "toDate": "2026-01-01T00:00:00Z"
+    },
+    "bodyExample": {
+      "strategies": [
+        "COST_OPTIMIZED"
+      ],
+      "prices": [
+        {
+          "time": "2026-07-01T10:00:00.000+00:00",
+          "priceEurPerKwh": 0.12
+        },
+        {
+          "time": "2026-07-01T10:15:00.000+00:00",
+          "priceEurPerKwh": 0.15
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/v2/addresses/{address_uuid}/batteries/{battery_uuid}/forecast/strategies",
+    "operationId": "BatteryForecastController_listBatteryForecastStrategies_v2",
+    "tag": "Batteries",
+    "summary": "List available battery forecast strategies"
+  },
+  {
+    "method": "GET",
     "path": "/api/v2/addresses/{address_uuid}/chargers",
     "operationId": "ChargerController_getChargersForAddress_v2",
     "tag": "Chargers",
@@ -77,8 +121,8 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     "tag": "Chargers",
     "summary": "List live consumption readings from charger",
     "queryExample": {
-      "fromDate": "2026-01-01T00:00:00.000+00:00",
-      "toDate": "2026-01-01T00:00:00.000+00:00",
+      "fromDate": "2026-01-01T00:00:00+01:00",
+      "toDate": "2026-01-01T00:00:00+01:00",
       "sortBy": "DESC",
       "limit": 100
     }
@@ -178,6 +222,20 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       "limit": 100,
       "offset": 0
     }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v2/groups/{group_uuid}/addresses/{address_uuid}",
+    "operationId": "GroupController_addGroupAddress_v2",
+    "tag": "Groups",
+    "summary": "Add an address to a curtailment pool group"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v2/groups/{group_uuid}/addresses/{address_uuid}",
+    "operationId": "GroupController_removeGroupAddress_v2",
+    "tag": "Groups",
+    "summary": "Remove an address from a curtailment pool group"
   },
   {
     "method": "GET",

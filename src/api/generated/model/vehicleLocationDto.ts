@@ -6,13 +6,12 @@
  * OpenAPI spec version: 2.0.0
  */
 import type { LocationDto } from './locationDto';
-import type { VehicleLocationDtoTime } from './vehicleLocationDtoTime';
 
 export interface VehicleLocationDto {
   location: LocationDto;
   /**
-   * The timestamp of the location update (ISO 8601).
+   * The timestamp of the location update.
    * @nullable
    */
-  time: VehicleLocationDtoTime;
+  time: string | null;
 }

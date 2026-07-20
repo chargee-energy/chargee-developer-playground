@@ -5,9 +5,7 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { GroupFlexScheduleDtoGroupGridTargetKw } from './groupFlexScheduleDtoGroupGridTargetKw';
 import type { DateTime } from './dateTime';
-import type { GroupFlexScheduleDtoDeletedAt } from './groupFlexScheduleDtoDeletedAt';
 
 export interface GroupFlexScheduleDto {
   /** UUID of the flex schedule */
@@ -16,7 +14,7 @@ export interface GroupFlexScheduleDto {
    * Group grid target in kilowatts. Null means solar inverters operate at 100% (no limitation).
    * @nullable
    */
-  groupGridTargetKw?: GroupFlexScheduleDtoGroupGridTargetKw;
+  groupGridTargetKw?: number | null;
   /** Address-level grid target in watts. Present when schedule was created with addressGridTargetW. */
   addressGridTargetW?: number;
   /**
@@ -34,5 +32,5 @@ export interface GroupFlexScheduleDto {
    * Schedule deletion time (ISO 8601)
    * @nullable
    */
-  deletedAt?: GroupFlexScheduleDtoDeletedAt;
+  deletedAt?: string | null;
 }

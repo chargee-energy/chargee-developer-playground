@@ -8,6 +8,7 @@ import {
   Battery100Icon,
   BoltIcon,
   ScaleIcon,
+  BoltSlashIcon,
 } from '@heroicons/react/24/outline'
 import { AllSolarInvertersReport } from './reports/AllSolarInvertersReport'
 import { AllVehiclesReport } from './reports/AllVehiclesReport'
@@ -17,6 +18,7 @@ import { AllBatteriesReport } from './reports/AllBatteriesReport'
 import { AllMetersReport } from './reports/AllMetersReport'
 import { BenchmarkReport } from './reports/BenchmarkReport'
 import { BatteryReport } from './reports/BatteryReport'
+import { GroupCurtailmentReport } from './reports/GroupCurtailmentReport'
 
 export type ReportScope = 'group' | 'address'
 
@@ -26,6 +28,8 @@ export interface ReportTemplate {
   icon: ComponentType<SVGProps<SVGSVGElement>>
   scope: ReportScope
   Component: ComponentType
+  /** Only available when the selected group is a curtailment pool. */
+  curtailmentPoolOnly?: boolean
 }
 
 // Add new report templates here — they appear automatically in the hub gallery.
@@ -38,4 +42,5 @@ export const reportTemplates: ReportTemplate[] = [
   { id: 'allHvacs', icon: FireIcon, scope: 'group', Component: AllHvacsReport },
   { id: 'allBatteries', icon: Battery50Icon, scope: 'group', Component: AllBatteriesReport },
   { id: 'allMeters', icon: BoltIcon, scope: 'group', Component: AllMetersReport },
+  { id: 'groupCurtailment', icon: BoltSlashIcon, scope: 'group', Component: GroupCurtailmentReport, curtailmentPoolOnly: true },
 ]

@@ -5,15 +5,13 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { CreateScheduleDtoPowerlimit } from './createScheduleDtoPowerlimit';
-import type { CreateScheduleDtoZeroExport } from './createScheduleDtoZeroExport';
 import type { DateTime } from './dateTime';
 
 export interface CreateScheduleDto {
   /** Power limit percentage (0-100). Mutually exclusive with zeroExport */
-  powerlimit?: CreateScheduleDtoPowerlimit;
+  powerlimit?: number;
   /** Enable zero export. Mutually exclusive with powerlimit */
-  zeroExport?: CreateScheduleDtoZeroExport;
+  zeroExport?: boolean;
   /** Schedule execution time (ISO 8601) */
   time: DateTime;
 }

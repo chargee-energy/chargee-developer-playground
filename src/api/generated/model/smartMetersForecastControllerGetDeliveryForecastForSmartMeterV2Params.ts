@@ -8,7 +8,7 @@
 
 export type SmartMetersForecastControllerGetDeliveryForecastForSmartMeterV2Params = {
 /**
- * Local-date to fetch (YYYY-MM-DD)
+ * Local calendar date in Europe/Amsterdam (YYYY-MM-DD). Parsed in local time, not UTC.
  * @pattern ^\d{4}-\d{2}-\d{2}$
  */
 date: string;
