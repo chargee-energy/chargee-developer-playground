@@ -5,8 +5,6 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { DateTime } from './dateTime';
-import type { SparkyDtoDisconnectedAt } from './sparkyDtoDisconnectedAt';
 
 export interface SparkyDto {
   /** The unique identifier of the sparky */
@@ -16,14 +14,17 @@ export interface SparkyDto {
   /** The unique identifier of the address this sparky is connected to */
   addressUuid: string;
   /** When the sparky was connected to the address */
-  connectedAt: DateTime;
+  connectedAt: string;
   /**
    * When the sparky was disconnected from the address (null if still connected)
    * @nullable
    */
-  disconnectedAt: SparkyDtoDisconnectedAt;
+  disconnectedAt: string | null;
   /** When the sparky was created */
-  createdAt: DateTime;
-  /** When the sparky was last updated */
-  updatedAt: DateTime;
+  createdAt: string;
+  /**
+   * When the sparky was last updated
+   * @nullable
+   */
+  updatedAt: string | null;
 }

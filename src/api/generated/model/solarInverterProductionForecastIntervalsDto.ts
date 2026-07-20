@@ -7,8 +7,11 @@
  */
 
 export interface SolarInverterProductionForecastIntervalsDto {
-  /** The timestamp of interval */
+  /** Europe/Amsterdam timestamp of the interval (+01:00 or +02:00) */
   start: string;
-  /** The Wh sum of the interval in Wh */
-  whSum: number;
+  /**
+   * The Wh sum of the interval in Wh
+   * @nullable
+   */
+  whSum: number | null;
 }

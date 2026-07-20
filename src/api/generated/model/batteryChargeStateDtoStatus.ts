@@ -7,6 +7,16 @@
  */
 
 /**
- * The current status of the battery [UNKNOWN = 0, IDLE = 1, CHARGING = 2, DISCHARGING = 3, FAULT = 4,UNRECOGNIZED = -1]
+ * The current status of the battery
  */
-export type BatteryChargeStateDtoStatus = { [key: string]: unknown };
+export type BatteryChargeStateDtoStatus = typeof BatteryChargeStateDtoStatus[keyof typeof BatteryChargeStateDtoStatus];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const BatteryChargeStateDtoStatus = {
+  UNKNOWN: 'UNKNOWN',
+  IDLE: 'IDLE',
+  CHARGING: 'CHARGING',
+  DISCHARGING: 'DISCHARGING',
+  FAULT: 'FAULT',
+} as const;

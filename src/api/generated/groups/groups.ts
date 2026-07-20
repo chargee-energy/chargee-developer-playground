@@ -32,6 +32,7 @@ import type {
   GroupFlexAggregationControllerListAggregatesV2Params,
   GroupFlexScheduleControllerListV2Params,
   GroupFlexScheduleDto,
+  GroupMembershipChangeDto,
   PaginatedFlexAggregateDtoResponse,
   PaginatedGroupAddressDtoResponse,
   PaginatedGroupFlexScheduleDtoResponse,
@@ -241,6 +242,133 @@ export function useGroupControllerGetGroupSparkiesV2<TData = Awaited<ReturnType<
 
 
 /**
+ * Adds or reactivates address membership in a CURTAILMENT_POOL group. Repeating the request while membership is already active returns action unchanged (200). Requires partner ownership of the address in a PARTNER group accessible to the user.
+ * @summary Add an address to a curtailment pool group
+ */
+export const groupControllerAddGroupAddressV2 = (
+    groupUuid: string,
+    addressUuid: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GroupMembershipChangeDto | GroupMembershipChangeDto>(
+      {url: `/api/v2/groups/${groupUuid}/addresses/${addressUuid}`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getGroupControllerAddGroupAddressV2MutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof groupControllerAddGroupAddressV2>>, TError,{groupUuid: string;addressUuid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof groupControllerAddGroupAddressV2>>, TError,{groupUuid: string;addressUuid: string}, TContext> => {
+
+const mutationKey = ['groupControllerAddGroupAddressV2'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof groupControllerAddGroupAddressV2>>, {groupUuid: string;addressUuid: string}> = (props) => {
+          const {groupUuid,addressUuid} = props ?? {};
+
+          return  groupControllerAddGroupAddressV2(groupUuid,addressUuid,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GroupControllerAddGroupAddressV2MutationResult = NonNullable<Awaited<ReturnType<typeof groupControllerAddGroupAddressV2>>>
+    
+    export type GroupControllerAddGroupAddressV2MutationError = void
+
+    /**
+ * @summary Add an address to a curtailment pool group
+ */
+export const useGroupControllerAddGroupAddressV2 = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof groupControllerAddGroupAddressV2>>, TError,{groupUuid: string;addressUuid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof groupControllerAddGroupAddressV2>>,
+        TError,
+        {groupUuid: string;addressUuid: string},
+        TContext
+      > => {
+
+      const mutationOptions = getGroupControllerAddGroupAddressV2MutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
+ * Soft-disconnects address membership from a CURTAILMENT_POOL group.
+ * @summary Remove an address from a curtailment pool group
+ */
+export const groupControllerRemoveGroupAddressV2 = (
+    groupUuid: string,
+    addressUuid: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<GroupMembershipChangeDto>(
+      {url: `/api/v2/groups/${groupUuid}/addresses/${addressUuid}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getGroupControllerRemoveGroupAddressV2MutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof groupControllerRemoveGroupAddressV2>>, TError,{groupUuid: string;addressUuid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof groupControllerRemoveGroupAddressV2>>, TError,{groupUuid: string;addressUuid: string}, TContext> => {
+
+const mutationKey = ['groupControllerRemoveGroupAddressV2'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof groupControllerRemoveGroupAddressV2>>, {groupUuid: string;addressUuid: string}> = (props) => {
+          const {groupUuid,addressUuid} = props ?? {};
+
+          return  groupControllerRemoveGroupAddressV2(groupUuid,addressUuid,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GroupControllerRemoveGroupAddressV2MutationResult = NonNullable<Awaited<ReturnType<typeof groupControllerRemoveGroupAddressV2>>>
+    
+    export type GroupControllerRemoveGroupAddressV2MutationError = void
+
+    /**
+ * @summary Remove an address from a curtailment pool group
+ */
+export const useGroupControllerRemoveGroupAddressV2 = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof groupControllerRemoveGroupAddressV2>>, TError,{groupUuid: string;addressUuid: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof groupControllerRemoveGroupAddressV2>>,
+        TError,
+        {groupUuid: string;addressUuid: string},
+        TContext
+      > => {
+
+      const mutationOptions = getGroupControllerRemoveGroupAddressV2MutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * Returns a paginated list of aggregated readings for the group over a time range, based on Redis-backed interval data.
  * @summary Get aggregated solar inverter production and flex metrics for a group
  */

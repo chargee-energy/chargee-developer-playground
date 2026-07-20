@@ -257,6 +257,127 @@
         ]
       }
     },
+    "/api/v2/groups/{group_uuid}/addresses/{address_uuid}": {
+      "post": {
+        "description": "Adds or reactivates address membership in a CURTAILMENT_POOL group. Repeating the request while membership is already active returns action unchanged (200). Requires partner ownership of the address in a PARTNER group accessible to the user.",
+        "operationId": "GroupController_addGroupAddress_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the curtailment pool",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the address to add",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174001",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address membership reactivated, or already active (action unchanged)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembershipChangeDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Address membership created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembershipChangeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authorization failed"
+          },
+          "404": {
+            "description": "Group or address not found"
+          },
+          "409": {
+            "description": "Address is already assigned to another curtailment pool (ADDRESS_ALREADY_IN_CURTAILMENT_POOL)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add an address to a curtailment pool group",
+        "tags": [
+          "Groups"
+        ]
+      },
+      "delete": {
+        "description": "Soft-disconnects address membership from a CURTAILMENT_POOL group.",
+        "operationId": "GroupController_removeGroupAddress_v2",
+        "parameters": [
+          {
+            "name": "group_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the curtailment pool",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the address to remove",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174001",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address membership removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembershipChangeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Authorization failed"
+          },
+          "404": {
+            "description": "Membership not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an address from a curtailment pool group",
+        "tags": [
+          "Groups"
+        ]
+      }
+    },
     "/api/v2/groups/{group_uuid}/flex/aggregation": {
       "get": {
         "description": "Returns a paginated list of aggregated readings for the group over a time range, based on Redis-backed interval data.",
@@ -1450,6 +1571,7 @@
     },
     "/api/v2/addresses/{address_uuid}/chargers/{charger_uuid}/energy/consumption": {
       "get": {
+        "description": "Returns charger consumption readings. Timestamps in the response use the same offset as the fromDate/toDate query parameters (e.g. Europe/Amsterdam +01:00 or +02:00).",
         "operationId": "ChargerController_listProductionEnergy_v2",
         "parameters": [
           {
@@ -1476,9 +1598,9 @@
             "name": "fromDate",
             "required": false,
             "in": "query",
-            "description": "ISO 8601 start time",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
             "schema": {
-              "example": "2026-01-01T00:00:00.000+00:00",
+              "example": "2026-01-01T00:00:00+01:00",
               "type": "string"
             }
           },
@@ -1486,9 +1608,9 @@
             "name": "toDate",
             "required": false,
             "in": "query",
-            "description": "ISO 8601 end time",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
             "schema": {
-              "example": "2026-01-01T00:00:00.000+00:00",
+              "example": "2026-01-01T00:00:00+01:00",
               "type": "string"
             }
           },
@@ -2219,7 +2341,7 @@
     },
     "/api/v2/addresses/{address_uuid}/solar-inverters/{solar_inverter_uuid}/production-forecast": {
       "get": {
-        "description": "Returns production forecast intervals for the solar inverter on the given date. ",
+        "description": "Returns production forecast intervals for the solar inverter on the given local date in Europe/Amsterdam. All timestamps in the response use the Europe/Amsterdam offset (+01:00 or +02:00).",
         "operationId": "SolarInverterForecastController_getProductionForecastForSolarInverter_v2",
         "parameters": [
           {
@@ -2246,7 +2368,7 @@
             "name": "date",
             "required": true,
             "in": "query",
-            "description": "The date to fetch the forecast for (YYYY-MM-DD). Returns empty results when no forecast exists for this date.",
+            "description": "Local calendar date in Europe/Amsterdam (YYYY-MM-DD)",
             "schema": {
               "type": "string",
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
@@ -2943,7 +3065,7 @@
     },
     "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/delivery-forecast": {
       "get": {
-        "description": "Returns delivery (consumption) forecast intervals for the smart meter on the given local date.",
+        "description": "Returns delivery (consumption) forecast intervals for the smart meter on the given local date in Europe/Amsterdam. All timestamps in the response use the Europe/Amsterdam offset (+01:00 or +02:00).",
         "operationId": "SmartMetersForecastController_getDeliveryForecastForSmartMeter_v2",
         "parameters": [
           {
@@ -2970,7 +3092,7 @@
             "name": "date",
             "required": true,
             "in": "query",
-            "description": "Local-date to fetch (YYYY-MM-DD)",
+            "description": "Local calendar date in Europe/Amsterdam (YYYY-MM-DD). Parsed in local time, not UTC.",
             "schema": {
               "type": "string",
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
@@ -3006,7 +3128,7 @@
     },
     "/api/v2/addresses/{address_uuid}/smart-meters/{smart_meter_uuid}/return-forecast": {
       "get": {
-        "description": "Get the return forecast for a date of a smart meter",
+        "description": "Returns return (feed-in) forecast intervals for the smart meter on the given local date in Europe/Amsterdam. All timestamps in the response use the Europe/Amsterdam offset (+01:00 or +02:00).",
         "operationId": "SmartMetersForecastController_getReturnForecastForSmartMeter_v2",
         "parameters": [
           {
@@ -3033,7 +3155,7 @@
             "name": "date",
             "required": true,
             "in": "query",
-            "description": "Local-date to fetch (YYYY-MM-DD)",
+            "description": "Local calendar date in Europe/Amsterdam (YYYY-MM-DD). Parsed in local time, not UTC.",
             "schema": {
               "type": "string",
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
@@ -3283,6 +3405,211 @@
         ]
       }
     },
+    "/api/v2/addresses/{address_uuid}/batteries/{battery_uuid}/forecast/strategies": {
+      "get": {
+        "description": "Returns the optimization strategies that can be requested when computing a battery forecast.",
+        "operationId": "BatteryForecastController_listBatteryForecastStrategies_v2",
+        "parameters": [
+          {
+            "name": "battery_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the battery",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440008"
+            }
+          },
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedBatteryForecastStrategyDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List available battery forecast strategies",
+        "tags": [
+          "Batteries"
+        ]
+      }
+    },
+    "/api/v2/addresses/{address_uuid}/batteries/{battery_uuid}/forecast": {
+      "get": {
+        "description": "Computes on-demand battery charge/discharge forecasts for the given time range [fromDate, toDate) using all supported strategies and EPEX day-ahead prices. Query dates may include a timezone offset; timestamps in the response use UTC (+00:00). Use POST to supply custom prices and optionally filter strategies. Requires battery charge state updated within the last 60 minutes.",
+        "operationId": "BatteryForecastController_getBatteryForecast_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "battery_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the battery",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440008",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": true,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": true,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedBatteryForecastDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the battery forecast for a time range",
+        "tags": [
+          "Batteries"
+        ]
+      },
+      "post": {
+        "description": "Computes on-demand battery charge/discharge forecasts for the given time range [fromDate, toDate). The request body is optional: supply custom electricity prices to override the defaults, or omit them to fall back to EPEX day-ahead prices (same as the GET endpoint). Optionally filter strategies in the request body; omit to compute all supported strategies. Query dates may include a timezone offset; timestamps in the response use UTC (+00:00). Requires battery charge state updated within the last 60 minutes.",
+        "operationId": "BatteryForecastController_computeBatteryForecastWithPrices_v2",
+        "parameters": [
+          {
+            "name": "address_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the address",
+            "schema": {
+              "example": "35f300d6-03e5-441d-b430-ec476cee48fb",
+              "type": "string"
+            }
+          },
+          {
+            "name": "battery_uuid",
+            "required": true,
+            "in": "path",
+            "description": "The uuid of the battery",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440008",
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "required": true,
+            "in": "query",
+            "description": "The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "required": true,
+            "in": "query",
+            "description": "The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatteryForecastWithPricesRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PaginatedBatteryForecastDtoResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Compute battery forecast with optional custom electricity prices",
+        "tags": [
+          "Batteries"
+        ]
+      }
+    },
     "/api/v2/addresses/{address_uuid}/grid-connections": {
       "get": {
         "description": "Returns a paginated list of grid connections (phase capacity, type) for the given address.",
@@ -3364,7 +3691,8 @@
         "properties": {
           "uuid": {
             "type": "string",
-            "description": "The unique identifier of the user"
+            "description": "The unique identifier of the user",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "role": {
             "type": "string",
@@ -3374,11 +3702,13 @@
               "extendeduser"
             ],
             "default": "user",
+            "example": "user",
             "description": "The role of the user"
           },
           "email": {
             "type": "string",
-            "description": "The email of the user"
+            "description": "The email of the user",
+            "example": "example@chargee.energy"
           },
           "createdAt": {
             "type": "string",
@@ -3387,7 +3717,7 @@
               "description": "ISO 8601",
               "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
             },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "The time this resource was created."
           },
           "updatedAt": {
@@ -3397,19 +3727,15 @@
               "description": "ISO 8601",
               "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
             },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "The time this resource was updated.",
             "nullable": true
           },
           "loginAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-08-12T12:00:00.000Z",
             "description": "The time the user last logged in.",
+            "example": "2026-06-22T14:30:00.000+00:00",
             "nullable": true
           },
           "deletedAt": {
@@ -3419,24 +3745,25 @@
               "description": "ISO 8601",
               "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
             },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "The time this resource was deleted.",
             "nullable": true
           },
           "accessToken": {
-            "type": "string"
+            "type": "string",
+            "description": "JWT access token for authenticated API requests.",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
           },
           "refreshToken": {
-            "type": "string"
+            "type": "string",
+            "description": "Refresh token used to obtain new access tokens.",
+            "example": "1234567890abcdef"
           },
           "expiresAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-08-12T12:00:00.000Z"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The time the access token expires."
           }
         },
         "required": [
@@ -3457,7 +3784,8 @@
         "properties": {
           "uuid": {
             "type": "string",
-            "description": "The unique identifier of the user"
+            "description": "The unique identifier of the user",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "role": {
             "type": "string",
@@ -3467,11 +3795,13 @@
               "extendeduser"
             ],
             "default": "user",
+            "example": "user",
             "description": "The role of the user"
           },
           "email": {
             "type": "string",
-            "description": "The email of the user"
+            "description": "The email of the user",
+            "example": "example@chargee.energy"
           },
           "createdAt": {
             "type": "string",
@@ -3480,7 +3810,7 @@
               "description": "ISO 8601",
               "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
             },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "The time this resource was created."
           },
           "updatedAt": {
@@ -3490,19 +3820,15 @@
               "description": "ISO 8601",
               "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
             },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "The time this resource was updated.",
             "nullable": true
           },
           "loginAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-08-12T12:00:00.000Z",
             "description": "The time the user last logged in.",
+            "example": "2026-06-22T14:30:00.000+00:00",
             "nullable": true
           },
           "deletedAt": {
@@ -3512,7 +3838,7 @@
               "description": "ISO 8601",
               "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
             },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "The time this resource was deleted.",
             "nullable": true
           }
@@ -3573,30 +3899,52 @@
             "description": "The display name of the group",
             "example": "Production East Region"
           },
+          "groupKind": {
+            "type": "string",
+            "description": "Classification of the group",
+            "enum": [
+              "PARTNER",
+              "CURTAILMENT_POOL"
+            ],
+            "example": "PARTNER"
+          },
           "createdAt": {
             "type": "string",
-            "description": "When the group was created",
-            "example": "2026-01-01T00:00:00.000Z",
-            "format": "date-time"
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
+            "description": "When the group was created"
           },
           "updatedAt": {
             "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "When the group was last updated",
-            "example": "2026-01-01T00:00:00.000Z",
-            "format": "date-time"
+            "nullable": true
           },
           "deletedAt": {
             "type": "string",
-            "description": "When the group was deleted (if applicable)",
-            "example": "2026-01-01T00:00:00.000Z",
             "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
+            "description": "When the group was deleted (if applicable)",
             "nullable": true
           },
           "assignedAt": {
             "type": "string",
             "description": "When the group was assigned to the user",
-            "example": "2026-01-01T00:00:00.000Z",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2026-03-15T10:00:00.000+00:00"
           },
           "isActive": {
             "type": "boolean",
@@ -3608,6 +3956,7 @@
           "uuid",
           "key",
           "name",
+          "groupKind",
           "createdAt",
           "updatedAt",
           "deletedAt",
@@ -3733,12 +4082,14 @@
           "createdAt": {
             "type": "string",
             "description": "When the device was added to the group",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2024-03-15T10:00:00.000+00:00"
           },
           "updatedAt": {
             "type": "string",
             "description": "When the group-to-device relation was last updated",
             "format": "date-time",
+            "example": "2026-06-22T12:00:00.000+00:00",
             "nullable": true
           }
         },
@@ -3768,18 +4119,58 @@
           "results"
         ]
       },
+      "GroupMembershipChangeDto": {
+        "type": "object",
+        "properties": {
+          "groupUuid": {
+            "type": "string",
+            "description": "UUID of the curtailment pool group",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "groupKey": {
+            "type": "string",
+            "description": "Stable key of the curtailment pool group",
+            "example": "essent_solar_curtailment_pool_1"
+          },
+          "addressUuid": {
+            "type": "string",
+            "description": "UUID of the address whose pool membership changed",
+            "example": "123e4567-e89b-12d3-a456-426614174001"
+          },
+          "action": {
+            "type": "string",
+            "description": "What happened to the pool membership: added (201), reactivated (200), unchanged (200 — already an active member), or removed (200)",
+            "enum": [
+              "added",
+              "reactivated",
+              "removed",
+              "unchanged"
+            ],
+            "example": "added"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "description": "When the membership change took effect",
+            "format": "date-time",
+            "example": "2026-07-06T12:00:00.000+00:00"
+          }
+        },
+        "required": [
+          "groupUuid",
+          "groupKey",
+          "addressUuid",
+          "action",
+          "modifiedAt"
+        ]
+      },
       "FlexAggregateDto": {
         "type": "object",
         "properties": {
           "time": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-08-12T12:00:00.000Z",
             "description": "Timestamp of the aggregated reading",
+            "example": "2026-06-22T14:30:00.000+00:00",
             "nullable": true
           },
           "return": {
@@ -3861,19 +4252,19 @@
         "type": "object",
         "properties": {
           "groupGridTargetKw": {
-            "type": "object",
+            "type": "integer",
             "description": "Group grid target in kilowatts. Mutually exclusive with addressGridTargetW and solarInverterCapacityPercentage.",
             "example": 100,
             "nullable": true
           },
           "addressGridTargetW": {
-            "type": "object",
+            "type": "integer",
             "description": "Address-level grid target in watts. Mutually exclusive with groupGridTargetKw and solarInverterCapacityPercentage.",
             "example": 5000,
             "nullable": true
           },
           "solarInverterCapacityPercentage": {
-            "type": "object",
+            "type": "integer",
             "description": "Solar inverter capacity percentage (0 to 100).",
             "example": 100,
             "minimum": 0,
@@ -3902,7 +4293,7 @@
             "example": "d16163a7-1714-424f-b5a4-62346846df3b"
           },
           "groupGridTargetKw": {
-            "type": "object",
+            "type": "integer",
             "description": "Group grid target in kilowatts. Null means solar inverters operate at 100% (no limitation).",
             "example": 100,
             "nullable": true
@@ -3946,10 +4337,11 @@
             ]
           },
           "deletedAt": {
-            "type": "object",
+            "type": "string",
             "description": "Schedule deletion time (ISO 8601)",
             "example": "2026-03-24T13:59:49.050+00:00",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           }
         },
         "required": [
@@ -4038,21 +4430,13 @@
           "from": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-06-22T14:30:00.000+00:00",
             "description": "ISO 8601 (with timezone) start time of result"
           },
           "to": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-08-12T12:00:00.000Z",
+            "example": "2026-06-22T14:45:00.000+02:00",
             "description": "ISO 8601 (with timezone) end time of result"
           },
           "delivery": {
@@ -4347,42 +4731,38 @@
             "example": "35f300d6-03e5-441d-b430-ec476cee48fb"
           },
           "connectedAt": {
+            "type": "string",
             "description": "When the sparky was connected to the address",
-            "example": "2026-01-01T00:00:00.000Z",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "format": "date-time",
+            "example": "2026-03-15T10:00:00.000+00:00"
           },
           "disconnectedAt": {
+            "type": "string",
             "description": "When the sparky was disconnected from the address (null if still connected)",
-            "example": "2026-01-01T00:00:00.000Z",
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "format": "date-time",
+            "example": "2026-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "createdAt": {
-            "description": "When the sparky was created",
-            "example": "2026-01-01T00:00:00.000Z",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
+            "description": "When the sparky was created"
           },
           "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "When the sparky was last updated",
-            "example": "2026-01-01T00:00:00.000Z",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "nullable": true
           }
         },
         "required": [
@@ -4427,42 +4807,38 @@
             "example": "35f300d6-03e5-441d-b430-ec476cee48fb"
           },
           "connectedAt": {
+            "type": "string",
             "description": "When the flint was connected to the address",
-            "example": "2026-01-01T00:00:00.000Z",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "format": "date-time",
+            "example": "2026-03-15T10:00:00.000+00:00"
           },
           "disconnectedAt": {
+            "type": "string",
             "description": "When the flint was disconnected from the address (null if still connected)",
-            "example": "2026-01-01T00:00:00.000Z",
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "format": "date-time",
+            "example": "2026-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "createdAt": {
-            "description": "When the flint was created",
-            "example": "2026-01-01T00:00:00.000Z",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
+            "description": "When the flint was created"
           },
           "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "externalDocs": {
+              "description": "ISO 8601",
+              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+            },
+            "example": "2026-03-15T10:00:00.000+00:00",
             "description": "When the flint was last updated",
-            "example": "2026-01-01T00:00:00.000Z",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "nullable": true
           }
         },
         "required": [
@@ -4697,7 +5073,8 @@
           "brand": {
             "type": "string",
             "example": "Tesla",
-            "description": "The brand of the vehicle"
+            "description": "Human-readable brand name as provided by the vendor.",
+            "nullable": true
           },
           "model": {
             "type": "string",
@@ -4710,14 +5087,14 @@
             "description": "The year of the vehicle"
           },
           "lastSeen": {
-            "type": "object",
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the last update (ISO 8601).",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the last update.",
             "nullable": true
           }
         },
         "required": [
-          "brand",
           "model",
           "year",
           "lastSeen"
@@ -4749,9 +5126,10 @@
             "$ref": "#/components/schemas/LocationDto"
           },
           "time": {
-            "type": "object",
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the location update (ISO 8601).",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the location update.",
             "nullable": true
           }
         },
@@ -4769,9 +5147,10 @@
             "description": "The odometer reading in kilometers"
           },
           "time": {
-            "type": "object",
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the odometer update (ISO 8601).",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the odometer update.",
             "nullable": true
           }
         },
@@ -4784,48 +5163,49 @@
         "type": "object",
         "properties": {
           "time": {
-            "type": "object",
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the charge state update (ISO 8601).",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the charge state update.",
             "nullable": true
           },
           "isFullyCharged": {
-            "type": "object",
+            "type": "string",
             "example": "false",
             "description": "Indicates if the vehicle is currently fully charged"
           },
           "isPluggedIn": {
-            "type": "object",
+            "type": "string",
             "example": "false",
             "description": "Indicates if the vehicle is plugged in"
           },
           "isCharging": {
-            "type": "object",
+            "type": "string",
             "example": "false",
             "description": "Indicates if the vehicle is charging"
           },
           "batteryLevel": {
-            "type": "object",
+            "type": "string",
             "example": "60",
             "description": "The current battery level of the vehicle in percentage"
           },
           "range": {
-            "type": "object",
+            "type": "string",
             "example": "250",
             "description": "The current range of the vehicle in kilometers"
           },
           "batteryCapacity": {
-            "type": "object",
+            "type": "string",
             "example": "95",
             "description": "The total battery capacity of the vehicle in kilowatt-hours"
           },
           "chargeLimit": {
-            "type": "object",
+            "type": "string",
             "example": "80",
             "description": "The charge limit of the vehicle in percentage"
           },
           "maxCurrent": {
-            "type": "object",
+            "type": "string",
             "example": "13",
             "description": "The maximum current the vehicle can draw from the charger in amperes"
           },
@@ -4885,19 +5265,25 @@
             "$ref": "#/components/schemas/VehicleChargeDto"
           },
           "createdAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was created.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2024-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "updatedAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was updated.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2026-06-22T12:00:00.000+00:00",
+            "nullable": true
           },
           "deletedAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was deleted.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2026-06-22T12:00:00.000+00:00",
+            "nullable": true
           }
         },
         "required": [
@@ -4934,27 +5320,29 @@
         "type": "object",
         "properties": {
           "time": {
-            "type": "object",
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the charge state update"
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the charge state update",
+            "nullable": true
           },
           "isPluggedIn": {
-            "type": "object",
+            "type": "string",
             "example": "false",
             "description": "Indicates if the charger is plugged in"
           },
           "isCharging": {
-            "type": "object",
+            "type": "string",
             "example": "false",
             "description": "Indicates if the charger is charging"
           },
           "chargeRate": {
-            "type": "object",
+            "type": "string",
             "example": "11",
             "description": "The charge rate the charger can draw from the net in amperes"
           },
           "maxCurrent": {
-            "type": "object",
+            "type": "string",
             "example": "13",
             "description": "The maximum current the charger can draw from the net in amperes"
           },
@@ -4994,8 +5382,9 @@
           },
           "brand": {
             "type": "string",
-            "description": "The brand of the charger",
-            "example": "Tesla"
+            "description": "Human-readable brand name as provided by the vendor.",
+            "example": "Zaptec",
+            "nullable": true
           },
           "model": {
             "type": "string",
@@ -5021,24 +5410,29 @@
             "$ref": "#/components/schemas/ChargerChargeStateDto"
           },
           "createdAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was created.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2024-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "updatedAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was updated.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2026-06-22T12:00:00.000+00:00",
+            "nullable": true
           },
           "deletedAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was deleted.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2026-06-22T12:00:00.000+00:00",
+            "nullable": true
           }
         },
         "required": [
           "identifier",
-          "brand",
           "model",
           "year",
           "lastChargeState",
@@ -5071,12 +5465,8 @@
           "time": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "Timestamp of the reading"
+            "description": "Europe/Amsterdam timestamp of the reading (+01:00 or +02:00 when queried with a local offset)",
+            "example": "2026-06-22T14:30:00.000+00:00"
           },
           "power": {
             "type": "number",
@@ -5135,17 +5525,18 @@
         "properties": {
           "brand": {
             "type": "string",
-            "description": "Brand name",
-            "example": "brand"
+            "description": "Human-readable brand name as provided by the vendor.",
+            "example": "SolarEdge",
+            "nullable": true
           },
           "model": {
-            "type": "object",
+            "type": "string",
             "description": "Model name",
             "example": "model",
             "nullable": true
           },
           "isSteerable": {
-            "type": "object",
+            "type": "boolean",
             "description": "Whether the inverter is steerable",
             "example": true,
             "nullable": true
@@ -5168,7 +5559,6 @@
           }
         },
         "required": [
-          "brand",
           "liveDataSupported"
         ]
       },
@@ -5178,12 +5568,8 @@
           "time": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
             "description": "Timestamp of the production state",
+            "example": "2026-01-01T00:00:00.000+00:00",
             "nullable": true
           },
           "isProducing": {
@@ -5238,22 +5624,14 @@
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "Created at timestamp"
+            "description": "Created at timestamp",
+            "example": "2026-01-01T00:00:00.000+00:00"
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
             "description": "Updated at timestamp",
+            "example": "2026-01-01T00:00:00.000+00:00",
             "nullable": true
           }
         },
@@ -5288,12 +5666,8 @@
           "time": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "Timestamp of the reading"
+            "description": "Timestamp of the reading",
+            "example": "2026-01-01T00:00:00.000+00:00"
           },
           "power": {
             "type": "number",
@@ -5351,12 +5725,12 @@
         "type": "object",
         "properties": {
           "powerlimit": {
-            "type": "object",
+            "type": "integer",
             "description": "Power limit percentage (0-100). Mutually exclusive with zeroExport",
             "example": 100
           },
           "zeroExport": {
-            "type": "object",
+            "type": "boolean",
             "description": "Enable zero export. Mutually exclusive with powerlimit",
             "example": false
           },
@@ -5382,7 +5756,7 @@
             "example": "d16163a7-1714-424f-b5a4-62346846df3b"
           },
           "powerlimit": {
-            "type": "object",
+            "type": "integer",
             "example": 100,
             "nullable": true
           },
@@ -5437,7 +5811,7 @@
             "example": "123e4567-e89b-12d3-a456-426614174000"
           },
           "groupGridTargetKw": {
-            "type": "object",
+            "type": "integer",
             "description": "Group grid target in kilowatts. Null means solar inverters operate at 100% (no limitation).",
             "example": 100,
             "nullable": true
@@ -5472,16 +5846,18 @@
             ]
           },
           "updatedAt": {
-            "type": "object",
+            "type": "string",
             "description": "Schedule update time (ISO 8601)",
             "example": "2026-03-24T13:59:49.050+00:00",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           },
           "deletedAt": {
-            "type": "object",
+            "type": "string",
             "description": "Schedule deletion time (ISO 8601)",
             "example": "2026-03-24T13:59:49.050+00:00",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           }
         },
         "required": [
@@ -5516,17 +5892,14 @@
           "start": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of interval"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "Europe/Amsterdam timestamp of the interval (+01:00 or +02:00)"
           },
           "whSum": {
-            "type": "number",
+            "type": "integer",
             "example": 1000,
-            "description": "The Wh sum of the interval in Wh"
+            "description": "The Wh sum of the interval in Wh",
+            "nullable": true
           }
         },
         "required": [
@@ -5549,10 +5922,9 @@
           },
           "intervals": {
             "description": "The intervals of the solar inverter production forecast",
-            "nullable": true,
             "example": [
               {
-                "start": "2025-01-01T00:00:00.000Z",
+                "start": "2026-06-22T14:30:00.000+00:00",
                 "whSum": 1000
               }
             ],
@@ -5564,12 +5936,8 @@
           "processedTime": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the processed time of the solar inverter production forecast"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "Europe/Amsterdam timestamp of the processed time of the solar inverter production forecast"
           },
           "modelVersion": {
             "type": "string",
@@ -5605,12 +5973,8 @@
           "forecastTime": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp when the forecast was generated"
+            "example": "2026-06-22T00:00:00.000+02:00",
+            "description": "Europe/Amsterdam timestamp when the forecast was generated"
           }
         },
         "required": [
@@ -5618,7 +5982,6 @@
           "solarInverterIdentifier",
           "intervals",
           "processedTime",
-          "modelVersion",
           "forecastTags"
         ]
       },
@@ -5720,22 +6083,14 @@
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2024-01-01T00:00:00.000+00:00",
-            "description": "Created at timestamp"
+            "description": "Created at timestamp",
+            "example": "2024-01-01T00:00:00.000+00:00"
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000+00:00",
             "description": "Updated at timestamp",
+            "example": "2026-01-01T00:00:00.000+00:00",
             "nullable": true
           }
         },
@@ -6070,17 +6425,14 @@
           "start": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-01-01T00:00:00.000Z",
-            "description": "The timestamp of interval"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "Europe/Amsterdam timestamp of the interval (ISO 8601 with +01:00 or +02:00 offset)"
           },
           "whSum": {
-            "type": "number",
+            "type": "integer",
             "example": 1000,
-            "description": "The Wh sum of the interval in Wh"
+            "description": "The Wh sum of the interval in Wh",
+            "nullable": true
           }
         },
         "required": [
@@ -6105,7 +6457,7 @@
             "description": "The intervals of the smart meter delivery forecast",
             "example": [
               {
-                "start": "2025-01-01T00:00:00.000Z",
+                "start": "2026-06-22T14:30:00.000+00:00",
                 "whSum": 1000
               }
             ],
@@ -6117,12 +6469,8 @@
           "processedTime": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the processed time of the smart meter delivery forecast"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "Europe/Amsterdam timestamp when the forecast was generated/computed (processed_time_ts)."
           },
           "modelVersion": {
             "type": "string",
@@ -6132,7 +6480,7 @@
           "forecastType": {
             "type": "string",
             "example": "hourly",
-            "description": "The type of forecast"
+            "description": "Opaque forecast type label from the model (no published enum). Use forecastTags for filtering when available."
           },
           "forecastQuality": {
             "type": "number",
@@ -6152,18 +6500,14 @@
           },
           "forecastDuration": {
             "type": "number",
-            "example": 168,
-            "description": "The duration of the forecast in hours"
+            "example": 900,
+            "description": "Length of each forecast interval in seconds (e.g. 900 for 15 minutes, 3600 for hourly). Not the total forecast horizon."
           },
           "forecastTime": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp when the forecast was generated"
+            "example": "2026-06-22T00:00:00.000+02:00",
+            "description": "Europe/Amsterdam start/anchor timestamp of the forecast series (hour 0 of the full forecast run), not when the forecast was generated."
           }
         },
         "required": [
@@ -6199,17 +6543,14 @@
           "start": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2025-01-01T00:00:00.000Z",
-            "description": "The timestamp of interval"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "Europe/Amsterdam timestamp of the interval (ISO 8601 with +01:00 or +02:00 offset)"
           },
           "whSum": {
-            "type": "number",
+            "type": "integer",
             "example": 1000,
-            "description": "The Wh sum of the interval in Wh"
+            "description": "The Wh sum of the interval in Wh",
+            "nullable": true
           }
         },
         "required": [
@@ -6232,10 +6573,9 @@
           },
           "intervals": {
             "description": "The intervals of the smart meter return forecast",
-            "nullable": true,
             "example": [
               {
-                "start": "2025-01-01T00:00:00.000Z",
+                "start": "2026-06-22T14:30:00.000+00:00",
                 "whSum": 1000
               }
             ],
@@ -6247,12 +6587,8 @@
           "processedTime": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the processed time of the smart meter return forecast"
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "Europe/Amsterdam timestamp when the forecast was generated/computed (processed_time_ts)."
           },
           "modelVersion": {
             "type": "string",
@@ -6262,7 +6598,7 @@
           "forecastType": {
             "type": "string",
             "example": "hourly",
-            "description": "The type of forecast"
+            "description": "Opaque forecast type label from the model (no published enum). Use forecastTags for filtering when available."
           },
           "forecastQuality": {
             "type": "number",
@@ -6282,18 +6618,14 @@
           },
           "forecastDuration": {
             "type": "number",
-            "example": 168,
-            "description": "The duration of the forecast in hours"
+            "example": 900,
+            "description": "Length of each forecast interval in seconds (e.g. 900 for 15 minutes, 3600 for hourly). Not the total forecast horizon."
           },
           "forecastTime": {
             "type": "string",
             "format": "date-time",
-            "externalDocs": {
-              "description": "ISO 8601",
-              "url": "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
-            },
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp when the forecast was generated"
+            "example": "2026-06-22T00:00:00.000+02:00",
+            "description": "Europe/Amsterdam start/anchor timestamp of the forecast series (hour 0 of the full forecast run), not when the forecast was generated."
           }
         },
         "required": [
@@ -6327,21 +6659,19 @@
         "type": "object",
         "properties": {
           "time": {
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the HVAC state update in milliseconds",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DateTime"
-              }
-            ]
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the HVAC state update",
+            "nullable": true
           },
           "currentTemperature": {
-            "type": "object",
+            "type": "string",
             "example": "11",
             "description": "The current temperature from the hvac in celsius"
           },
           "isActive": {
-            "type": "object",
+            "type": "string",
             "example": "false",
             "description": "Indicates if the hvac is active"
           }
@@ -6362,8 +6692,9 @@
           },
           "brand": {
             "type": "string",
-            "description": "The brand of the hvac",
-            "example": "Daikin"
+            "description": "Human-readable brand name as provided by the vendor.",
+            "example": "Daikin",
+            "nullable": true
           },
           "model": {
             "type": "string",
@@ -6389,19 +6720,22 @@
             "$ref": "#/components/schemas/HvacTemperatureStateDto"
           },
           "createdAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was created.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2024-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "updatedAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was updated.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2026-06-22T12:00:00.000+00:00",
+            "nullable": true
           }
         },
         "required": [
           "identifier",
-          "brand",
           "model",
           "displayName",
           "groupName",
@@ -6433,29 +6767,37 @@
         "type": "object",
         "properties": {
           "time": {
-            "type": "object",
-            "example": "2026-01-01T00:00:00.000Z",
-            "description": "The timestamp of the charge state update (ISO 8601).",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the charge state update",
             "nullable": true
           },
           "status": {
-            "type": "object",
-            "example": "1",
-            "description": "The current status of the battery [UNKNOWN = 0, IDLE = 1, CHARGING = 2, DISCHARGING = 3, FAULT = 4,UNRECOGNIZED = -1]"
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "IDLE",
+              "CHARGING",
+              "DISCHARGING",
+              "FAULT"
+            ],
+            "example": "IDLE",
+            "description": "The current status of the battery"
           },
           "batteryCapacity": {
-            "type": "object",
-            "example": "10000",
-            "description": "The total capacity of the battery in watts"
+            "type": "number",
+            "example": 10000,
+            "description": "The total capacity of the battery in Wh"
           },
           "batteryLevel": {
-            "type": "object",
-            "example": "100",
+            "type": "number",
+            "example": 65,
             "description": "The current battery level from the battery in percentage"
           },
           "chargeRate": {
-            "type": "object",
-            "example": "1000",
+            "type": "number",
+            "example": 500,
             "description": "The charge rate of the battery in watts"
           }
         },
@@ -6477,8 +6819,9 @@
           },
           "brand": {
             "type": "string",
-            "description": "The brand of the battery",
-            "example": "Tesla"
+            "description": "Human-readable brand name as provided by the vendor.",
+            "example": "Tesla",
+            "nullable": true
           },
           "model": {
             "type": "string",
@@ -6494,24 +6837,29 @@
             "$ref": "#/components/schemas/BatteryChargeStateDto"
           },
           "installationDate": {
-            "type": "object",
-            "description": "The timestamp this battert was installed.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp this battery was installed.",
+            "example": "2024-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "createdAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was created.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2024-03-15T10:00:00.000+00:00",
+            "nullable": true
           },
           "updatedAt": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this resource was updated.",
-            "example": "2026-01-01T00:00:00.000Z"
+            "example": "2026-06-22T12:00:00.000+00:00",
+            "nullable": true
           }
         },
         "required": [
           "identifier",
-          "brand",
           "model",
           "siteName",
           "lastChargeState",
@@ -6537,6 +6885,235 @@
           "meta",
           "results"
         ]
+      },
+      "BatteryForecastStrategyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "SOLAR_SELF_CONSUMPTION",
+              "COST_OPTIMIZED",
+              "SOLAR_COST_OPTIMIZED"
+            ],
+            "example": "COST_OPTIMIZED",
+            "description": "The strategy identifier used in forecast requests"
+          },
+          "description": {
+            "type": "string",
+            "example": "Minimize electricity cost using price signals",
+            "description": "Human-readable description of the optimization strategy"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "PaginatedBatteryForecastStrategyDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatteryForecastStrategyDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "BatteryForecastIntervalDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp of the forecast interval"
+          },
+          "stateOfChargePerc": {
+            "type": "number",
+            "example": 65.5,
+            "description": "State of charge at the interval as a percentage (0–100)"
+          },
+          "chargeRateWh": {
+            "type": "number",
+            "example": -500,
+            "description": "Net charge rate for the interval in Wh (negative = discharging, positive = charging)"
+          },
+          "expectedCapacityWh": {
+            "type": "number",
+            "example": 6500,
+            "description": "Expected usable battery capacity at the interval in Wh"
+          }
+        },
+        "required": [
+          "time",
+          "stateOfChargePerc",
+          "chargeRateWh",
+          "expectedCapacityWh"
+        ]
+      },
+      "BatteryForecastDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "The uuid of the battery forecast",
+            "example": "d16163a7-1714-424f-b5a4-62346846df3b"
+          },
+          "batteryIdentifier": {
+            "type": "string",
+            "description": "The uuid of the battery",
+            "example": "550e8400-e29b-41d4-a716-446655440008"
+          },
+          "intervals": {
+            "description": "Forecast intervals (15-minute steps)",
+            "example": [
+              {
+                "time": "2026-06-22T14:30:00.000+00:00",
+                "stateOfChargePerc": 65.5,
+                "chargeRateWh": -500,
+                "expectedCapacityWh": 6500
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatteryForecastIntervalDto"
+            }
+          },
+          "processedTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "When the forecast was computed"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "SOLAR_SELF_CONSUMPTION",
+              "COST_OPTIMIZED",
+              "SOLAR_COST_OPTIMIZED"
+            ],
+            "example": "COST_OPTIMIZED",
+            "description": "Optimization strategy used for this forecast"
+          },
+          "forecastQuality": {
+            "type": "number",
+            "example": 95,
+            "description": "The quality score of the forecast (0–100)"
+          },
+          "forecastTags": {
+            "example": [
+              "high_confidence"
+            ],
+            "description": "Tags associated with the forecast",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forecastDuration": {
+            "type": "number",
+            "example": 24,
+            "description": "The duration of the forecast in hours"
+          },
+          "forecastTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "description": "The timestamp when the forecast was generated"
+          }
+        },
+        "required": [
+          "identifier",
+          "batteryIdentifier",
+          "intervals",
+          "processedTime",
+          "strategy",
+          "forecastTags"
+        ]
+      },
+      "PaginatedBatteryForecastDtoResponse": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PaginatedMeta"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatteryForecastDto"
+            }
+          }
+        },
+        "required": [
+          "meta",
+          "results"
+        ]
+      },
+      "BatteryForecastPriceDto": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "example": "2026-06-22T14:30:00.000+00:00",
+            "format": "date-time",
+            "description": "Interval boundary for the price (15-minute resolution, UTC)"
+          },
+          "priceEurPerKwh": {
+            "type": "number",
+            "example": 0.12,
+            "description": "Electricity price in EUR/kWh"
+          }
+        },
+        "required": [
+          "time",
+          "priceEurPerKwh"
+        ]
+      },
+      "BatteryForecastWithPricesRequestDto": {
+        "type": "object",
+        "properties": {
+          "strategies": {
+            "type": "array",
+            "description": "Optimization strategies to include. Omit to compute all supported strategies.",
+            "example": [
+              "COST_OPTIMIZED"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "SOLAR_SELF_CONSUMPTION",
+                "COST_OPTIMIZED",
+                "SOLAR_COST_OPTIMIZED"
+              ]
+            }
+          },
+          "prices": {
+            "description": "Electricity prices (EUR/kWh) for the forecast window. Omit to fall back to EPEX day-ahead prices (same behaviour as the GET endpoint). When provided, entries must be on 15-minute boundaries and exactly 15 minutes apart.",
+            "example": [
+              {
+                "time": "2026-07-01T10:00:00.000+00:00",
+                "priceEurPerKwh": 0.12
+              },
+              {
+                "time": "2026-07-01T10:15:00.000+00:00",
+                "priceEurPerKwh": 0.15
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatteryForecastPriceDto"
+            }
+          }
+        }
       },
       "PhaseCapacityDto": {
         "type": "object",
@@ -6600,15 +7177,17 @@
             ]
           },
           "installationDate": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this grid connection was installed.",
-            "example": "2026-01-01T00:00:00.000Z",
+            "example": "2024-03-15T10:00:00.000+00:00",
             "nullable": true
           },
           "endDate": {
-            "type": "object",
+            "type": "string",
+            "format": "date-time",
             "description": "The timestamp this grid connection was ended.",
-            "example": "2026-01-01T00:00:00.000Z",
+            "example": "2026-06-22T12:00:00.000+00:00",
             "nullable": true
           }
         },

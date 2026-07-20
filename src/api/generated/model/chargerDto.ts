@@ -6,15 +6,15 @@
  * OpenAPI spec version: 2.0.0
  */
 import type { ChargerChargeStateDto } from './chargerChargeStateDto';
-import type { ChargerDtoCreatedAt } from './chargerDtoCreatedAt';
-import type { ChargerDtoUpdatedAt } from './chargerDtoUpdatedAt';
-import type { ChargerDtoDeletedAt } from './chargerDtoDeletedAt';
 
 export interface ChargerDto {
   /** The uuid of the charger */
   identifier: string;
-  /** The brand of the charger */
-  brand: string;
+  /**
+   * Human-readable brand name as provided by the vendor.
+   * @nullable
+   */
+  brand?: string | null;
   /** The model of the charger */
   model: string;
   /** The year of the charger */
@@ -24,10 +24,19 @@ export interface ChargerDto {
   /** Whether the charger supports live data streaming */
   liveDataSupported?: boolean;
   lastChargeState: ChargerChargeStateDto;
-  /** The timestamp this resource was created. */
-  createdAt: ChargerDtoCreatedAt;
-  /** The timestamp this resource was updated. */
-  updatedAt: ChargerDtoUpdatedAt;
-  /** The timestamp this resource was deleted. */
-  deletedAt: ChargerDtoDeletedAt;
+  /**
+   * The timestamp this resource was created.
+   * @nullable
+   */
+  createdAt: string | null;
+  /**
+   * The timestamp this resource was updated.
+   * @nullable
+   */
+  updatedAt: string | null;
+  /**
+   * The timestamp this resource was deleted.
+   * @nullable
+   */
+  deletedAt: string | null;
 }

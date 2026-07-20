@@ -9,7 +9,7 @@ import type { ChargerProductionReadingDtoCurrent } from './chargerProductionRead
 import type { ChargerProductionReadingDtoVoltage } from './chargerProductionReadingDtoVoltage';
 
 export interface ChargerProductionReadingDto {
-  /** Timestamp of the reading */
+  /** Europe/Amsterdam timestamp of the reading (+01:00 or +02:00 when queried with a local offset) */
   time: string;
   /** Instantaneous AC power output in watts */
   power: number;

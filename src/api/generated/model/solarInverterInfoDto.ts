@@ -5,22 +5,23 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { SolarInverterInfoDtoModel } from './solarInverterInfoDtoModel';
-import type { SolarInverterInfoDtoIsSteerable } from './solarInverterInfoDtoIsSteerable';
 
 export interface SolarInverterInfoDto {
-  /** Brand name */
-  brand: string;
+  /**
+   * Human-readable brand name as provided by the vendor.
+   * @nullable
+   */
+  brand?: string | null;
   /**
    * Model name
    * @nullable
    */
-  model?: SolarInverterInfoDtoModel;
+  model?: string | null;
   /**
    * Whether the inverter is steerable
    * @nullable
    */
-  isSteerable?: SolarInverterInfoDtoIsSteerable;
+  isSteerable?: boolean | null;
   /** Indicates if the inverter supports solar live updates */
   liveDataSupported: boolean;
   /**

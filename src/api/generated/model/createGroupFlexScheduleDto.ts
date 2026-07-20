@@ -5,9 +5,6 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { CreateGroupFlexScheduleDtoGroupGridTargetKw } from './createGroupFlexScheduleDtoGroupGridTargetKw';
-import type { CreateGroupFlexScheduleDtoAddressGridTargetW } from './createGroupFlexScheduleDtoAddressGridTargetW';
-import type { CreateGroupFlexScheduleDtoSolarInverterCapacityPercentage } from './createGroupFlexScheduleDtoSolarInverterCapacityPercentage';
 import type { DateTime } from './dateTime';
 
 export interface CreateGroupFlexScheduleDto {
@@ -15,18 +12,18 @@ export interface CreateGroupFlexScheduleDto {
    * Group grid target in kilowatts. Mutually exclusive with addressGridTargetW and solarInverterCapacityPercentage.
    * @nullable
    */
-  groupGridTargetKw?: CreateGroupFlexScheduleDtoGroupGridTargetKw;
+  groupGridTargetKw?: number | null;
   /**
    * Address-level grid target in watts. Mutually exclusive with groupGridTargetKw and solarInverterCapacityPercentage.
    * @nullable
    */
-  addressGridTargetW?: CreateGroupFlexScheduleDtoAddressGridTargetW;
+  addressGridTargetW?: number | null;
   /**
    * Solar inverter capacity percentage (0 to 100).
    * @minimum 0
    * @maximum 100
    */
-  solarInverterCapacityPercentage?: CreateGroupFlexScheduleDtoSolarInverterCapacityPercentage;
+  solarInverterCapacityPercentage?: number;
   /** Schedule execution time (ISO 8601). */
   time: DateTime;
 }

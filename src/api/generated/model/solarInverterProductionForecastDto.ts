@@ -12,15 +12,12 @@ export interface SolarInverterProductionForecastDto {
   identifier: string;
   /** The uuid of the solar inverter */
   solarInverterIdentifier: string;
-  /**
-   * The intervals of the solar inverter production forecast
-   * @nullable
-   */
-  intervals: SolarInverterProductionForecastIntervalsDto[] | null;
-  /** The timestamp of the processed time of the solar inverter production forecast */
+  /** The intervals of the solar inverter production forecast */
+  intervals: SolarInverterProductionForecastIntervalsDto[];
+  /** Europe/Amsterdam timestamp of the processed time of the solar inverter production forecast */
   processedTime: string;
   /** The version of model used to make the solar inverter production forecast */
-  modelVersion: string;
+  modelVersion?: string;
   /** The type of forecast */
   forecastType?: string;
   /** The quality score of the forecast (0-100) */
@@ -29,6 +26,6 @@ export interface SolarInverterProductionForecastDto {
   forecastTags: string[];
   /** The duration of the forecast in hours */
   forecastDuration?: number;
-  /** The timestamp when the forecast was generated */
+  /** Europe/Amsterdam timestamp when the forecast was generated */
   forecastTime?: string;
 }

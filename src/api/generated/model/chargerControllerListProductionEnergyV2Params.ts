@@ -9,11 +9,11 @@ import type { ChargerControllerListProductionEnergyV2SortBy } from './chargerCon
 
 export type ChargerControllerListProductionEnergyV2Params = {
 /**
- * ISO 8601 start time
+ * The start date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)
  */
 fromDate?: string;
 /**
- * ISO 8601 end time
+ * The end date (ISO 8601 with offset, e.g. 2026-01-01T00:00:00+01:00)
  */
 toDate?: string;
 sortBy?: ChargerControllerListProductionEnergyV2SortBy;

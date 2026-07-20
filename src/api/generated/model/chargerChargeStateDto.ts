@@ -5,24 +5,22 @@
  * API v2
  * OpenAPI spec version: 2.0.0
  */
-import type { ChargerChargeStateDtoTime } from './chargerChargeStateDtoTime';
-import type { ChargerChargeStateDtoIsPluggedIn } from './chargerChargeStateDtoIsPluggedIn';
-import type { ChargerChargeStateDtoIsCharging } from './chargerChargeStateDtoIsCharging';
-import type { ChargerChargeStateDtoChargeRate } from './chargerChargeStateDtoChargeRate';
-import type { ChargerChargeStateDtoMaxCurrent } from './chargerChargeStateDtoMaxCurrent';
 import type { ChargerChargeStateDtoPowerDeliveryState } from './chargerChargeStateDtoPowerDeliveryState';
 
 export interface ChargerChargeStateDto {
-  /** The timestamp of the charge state update */
-  time: ChargerChargeStateDtoTime;
+  /**
+   * The timestamp of the charge state update
+   * @nullable
+   */
+  time: string | null;
   /** Indicates if the charger is plugged in */
-  isPluggedIn: ChargerChargeStateDtoIsPluggedIn;
+  isPluggedIn: string;
   /** Indicates if the charger is charging */
-  isCharging: ChargerChargeStateDtoIsCharging;
+  isCharging: string;
   /** The charge rate the charger can draw from the net in amperes */
-  chargeRate: ChargerChargeStateDtoChargeRate;
+  chargeRate: string;
   /** The maximum current the charger can draw from the net in amperes */
-  maxCurrent: ChargerChargeStateDtoMaxCurrent;
+  maxCurrent: string;
   /** The current state of the charger */
   powerDeliveryState: ChargerChargeStateDtoPowerDeliveryState;
 }
