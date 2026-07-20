@@ -503,9 +503,9 @@
           "high": "High confidence",
           "low": "Low confidence"
         },
-        "estimateNote": "Curtailed energy is estimated by interpolating solar production from the uncurtailed hour before and after the event.",
-        "lowNote": "Low confidence: the event likely spans the solar peak, so the interpolated baseline under-reads potential — treat the curtailed figure as a lower bound. A true figure needs a solar hindcast.",
-        "noEstimate": "Not enough uncurtailed context around the event to estimate the counterfactual; showing measured energy only."
+        "estimateNote": "Curtailed energy is estimated against a clear-sky solar shape (assuming an NL location), scaled per curtailment period to the group's uncurtailed production around it. The dashed line shows the estimated potential within each period.",
+        "lowNote": "Low confidence: limited uncurtailed daylight on one side of the event to anchor the clear-sky curve — treat the figure as indicative.",
+        "noEstimate": "Not enough uncurtailed daylight around the event to anchor the clear-sky curve; showing measured energy only."
       }
     }
   },

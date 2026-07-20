@@ -13,6 +13,14 @@ import {
 import { format } from 'date-fns'
 import type { SeriesDef } from '@/features/telemetry/TimeSeriesChart'
 
+/** Round up to a "nice" value (…/50/100/…) so the top tick clears the data. */
+function niceCeil(v: number): number {
+  if (v <= 0) return 0
+  const mag = Math.pow(10, Math.floor(Math.log10(v)))
+  const step = mag / 2
+  return Math.ceil(v / step) * step
+}
+
 interface CurtailmentChartProps {
   data: object[]
   /** Numeric time axis domain in epoch ms. */
@@ -86,6 +94,8 @@ export function CurtailmentChart({
         <YAxis
           tick={{ fontSize: 11, fill: '#696969' }}
           width={64}
+          domain={[0, (dataMax: number) => niceCeil(dataMax * 1.1)]}
+          allowDecimals={false}
           tickFormatter={(v: number) => num(v)}
           label={unit ? { value: unit, angle: -90, position: 'insideLeft', fontSize: 11, fill: '#696969' } : undefined}
         />

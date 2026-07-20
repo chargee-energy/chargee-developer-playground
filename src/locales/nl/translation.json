@@ -503,9 +503,9 @@
           "high": "Hoge betrouwbaarheid",
           "low": "Lage betrouwbaarheid"
         },
-        "estimateNote": "De gecurtailde energie is geschat door de zonproductie te interpoleren uit het niet-gecurtailde uur vóór en na de gebeurtenis.",
-        "lowNote": "Lage betrouwbaarheid: de gebeurtenis valt waarschijnlijk over de zonnepiek, dus de geïnterpoleerde baseline onderschat het potentieel — beschouw de gecurtailde waarde als een ondergrens. Een exacte waarde vereist een zon-hindcast.",
-        "noEstimate": "Onvoldoende niet-gecurtailde context rond de gebeurtenis om het contrafeitelijke te schatten; alleen gemeten energie wordt getoond."
+        "estimateNote": "De gecurtailde energie is geschat aan de hand van een clear-sky zoncurve (met aanname van een NL-locatie), per curtailmentperiode geschaald op de niet-gecurtailde productie eromheen. De stippellijn toont het geschatte potentieel binnen elke periode.",
+        "lowNote": "Lage betrouwbaarheid: beperkte niet-gecurtailde daglichtdata aan één kant van de gebeurtenis om de clear-sky curve te verankeren — beschouw de waarde als indicatief.",
+        "noEstimate": "Onvoldoende niet-gecurtaild daglicht rond de gebeurtenis om de clear-sky curve te verankeren; alleen gemeten energie wordt getoond."
       }
     }
   },

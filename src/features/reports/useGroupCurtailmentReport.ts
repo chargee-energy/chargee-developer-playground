@@ -21,6 +21,8 @@ const AGG_PAGE = 1000 // server max per page
 // buckets on arrival so memory stays small regardless.
 const MAX_AGG_PAGES = 60
 const DAY_MS = 24 * 60 * 60 * 1000
+// The aggregation endpoint rejects requests spanning more than 1 day; stay just under.
+const CHUNK_MS = DAY_MS - 60 * 1000
 
 export type CurtailmentTargetType = 'group' | 'address' | 'inverter' | 'none'
 
@@ -191,35 +193,36 @@ async function pageAggregation(
 ): Promise<{ truncated: boolean }> {
   const fromMs = new Date(fromDate).getTime()
   const toMs = new Date(toDate).getTime()
-  let cursor = fromDate
+  // Rough page estimate for the progress bar (~16 min of ~1s data per page).
+  const estTotal = Math.min(MAX_AGG_PAGES, Math.max(1, Math.ceil((toMs - fromMs) / (16 * 60 * 1000))))
+  let cursorMs = fromMs
   let lastMs = Number.NEGATIVE_INFINITY
-  let estTotal = 1
-  let truncated = false
-  for (let page = 0; page < MAX_AGG_PAGES; page++) {
+  let pages = 0
+  // The endpoint rejects any request spanning more than 1 day, so each request
+  // uses a sliding ≤1-day window [cursor, cursor+CHUNK]. A full page means more
+  // data remains in the window (continue from the last row); a short page means
+  // the window is exhausted (jump to its end, which also skips night gaps).
+  while (cursorMs < toMs && pages < MAX_AGG_PAGES) {
     if (signal.aborted) break
+    const chunkTo = Math.min(cursorMs + CHUNK_MS, toMs)
     const res = await groupFlexAggregationControllerListAggregatesV2(
       groupUuid,
-      { fromDate: cursor, toDate, sortBy: 'ASC', limit: AGG_PAGE },
+      { fromDate: new Date(cursorMs).toISOString(), toDate: new Date(chunkTo).toISOString(), sortBy: 'ASC', limit: AGG_PAGE },
       undefined,
       signal,
     )
+    pages++
     const batch = res.results ?? []
-    if (batch.length === 0) break
     const fresh = batch.filter((b) => tOf(b) > lastMs)
-    if (fresh.length === 0) break
-    onBatch(fresh)
-    const newMs = tOf(fresh[fresh.length - 1])
-    if (!Number.isFinite(newMs) || newMs <= lastMs) break
-    if (page === 0) {
-      const span = Math.max(1, newMs - fromMs)
-      estTotal = Math.min(MAX_AGG_PAGES, Math.max(1, Math.ceil((toMs - fromMs) / span)))
+    if (fresh.length > 0) {
+      onBatch(fresh)
+      lastMs = tOf(fresh[fresh.length - 1])
     }
-    lastMs = newMs
-    onProgress(page + 1, Math.max(estTotal, page + 1))
-    if (page === MAX_AGG_PAGES - 1 && newMs < toMs) truncated = true
-    cursor = new Date(newMs).toISOString()
+    onProgress(pages, Math.max(estTotal, pages))
+    // Continue within the window only while pages come back full and advancing.
+    cursorMs = batch.length >= AGG_PAGE && fresh.length > 0 && lastMs > cursorMs ? lastMs : chunkTo
   }
-  return { truncated }
+  return { truncated: cursorMs < toMs && pages >= MAX_AGG_PAGES }
 }
 
 interface MinuteAcc {
