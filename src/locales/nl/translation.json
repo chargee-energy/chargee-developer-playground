@@ -596,6 +596,10 @@
     "create": "Nieuw flex-schema",
     "selectGroupFirst": "Selecteer een groep om de flex-data te bekijken.",
     "groupGridTarget": "Groep netdoel (kW)",
+    "addressGridTarget": "Adres netdoel (W)",
+    "solarInverterCapacity": "Omvormercapaciteit (%)",
+    "targetType": "Type doel",
+    "noTarget": "Geen limiet (omvormers op 100%)",
     "deleteConfirm": "Dit flex-schema verwijderen?",
     "empty": "Geen flex-schema's."
   },

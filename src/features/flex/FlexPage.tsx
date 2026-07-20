@@ -17,6 +17,8 @@ import {
   useGroupFlexScheduleControllerDeleteV2,
 } from '@/api/generated/groups/groups'
 
+type TargetType = 'groupGridTargetKw' | 'addressGridTargetW' | 'solarInverterCapacityPercentage'
+
 export function FlexPage() {
   const { t } = useTranslation()
   const { groupUuid, groupName } = useContextStore()
@@ -25,9 +27,27 @@ export function FlexPage() {
 
   const [showCreate, setShowCreate] = useState(false)
   const [warnOpen, setWarnOpen] = useState(false)
-  const [targetKw, setTargetKw] = useState(0)
+  const [targetType, setTargetType] = useState<TargetType>('groupGridTargetKw')
+  const [targetValue, setTargetValue] = useState(0)
   const [time, setTime] = useState('')
   const [toDelete, setToDelete] = useState<GroupFlexScheduleDto | null>(null)
+
+  // A schedule carries exactly one of three mutually-exclusive targets (or none,
+  // meaning "no limit"). Render whichever one the API returned, with its unit.
+  const targetLabels: Record<TargetType, string> = {
+    groupGridTargetKw: t('flex.groupGridTarget'),
+    addressGridTargetW: t('flex.addressGridTarget'),
+    solarInverterCapacityPercentage: t('flex.solarInverterCapacity'),
+  }
+  const describeTarget = (s: GroupFlexScheduleDto) => {
+    const kw = s.groupGridTargetKw as unknown as number | null | undefined
+    if (kw != null) return `${targetLabels.groupGridTargetKw}: ${kw}`
+    if (s.addressGridTargetW != null)
+      return `${targetLabels.addressGridTargetW}: ${s.addressGridTargetW}`
+    if (s.solarInverterCapacityPercentage != null)
+      return `${targetLabels.solarInverterCapacityPercentage}: ${s.solarInverterCapacityPercentage}`
+    return t('flex.noTarget')
+  }
 
   const latest = useGroupFlexAggregationControllerLatestAggregateV2(group, enabled)
   const schedulesQuery = useGroupFlexScheduleControllerListV2(group, undefined, enabled)
@@ -45,7 +65,7 @@ export function FlexPage() {
     addMutation.mutate(
       {
         groupUuid: group,
-        data: { groupGridTargetKw: targetKw, time: iso } as unknown as CreateGroupFlexScheduleDto,
+        data: { [targetType]: targetValue, time: iso } as unknown as CreateGroupFlexScheduleDto,
       },
       { onSuccess: () => setShowCreate(false) },
     )
@@ -85,14 +105,28 @@ export function FlexPage() {
 
       {showCreate && (
         <div className="card space-y-4 p-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="label">{t('flex.groupGridTarget')}</label>
+              <label className="label">{t('flex.targetType')}</label>
+              <select
+                className="input"
+                value={targetType}
+                onChange={(e) => setTargetType(e.target.value as TargetType)}
+              >
+                <option value="groupGridTargetKw">{t('flex.groupGridTarget')}</option>
+                <option value="addressGridTargetW">{t('flex.addressGridTarget')}</option>
+                <option value="solarInverterCapacityPercentage">
+                  {t('flex.solarInverterCapacity')}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label className="label">{targetLabels[targetType]}</label>
               <input
                 type="number"
                 className="input"
-                value={targetKw}
-                onChange={(e) => setTargetKw(Number(e.target.value))}
+                value={targetValue}
+                onChange={(e) => setTargetValue(Number(e.target.value))}
               />
             </div>
             <div>
@@ -146,9 +180,7 @@ export function FlexPage() {
               <li key={s.uuid} className="flex items-center justify-between gap-4 py-3">
                 <div>
                   <p className="font-semibold text-dark-blue">{fmtDateTime(s.time)}</p>
-                  <p className="text-13 text-text-gray">
-                    {t('flex.groupGridTarget')}: {String(s.groupGridTargetKw ?? '—')}
-                  </p>
+                  <p className="text-13 text-text-gray">{describeTarget(s)}</p>
                 </div>
                 <button className="btn-ghost text-red" onClick={() => setToDelete(s)}>
                   <TrashIcon className="size-4" />
