@@ -223,6 +223,7 @@
     "subtitle": "Generate group-wide and individual address reports.",
     "selectGroupFirst": "Select a group to generate reports.",
     "selectAddressFirst": "Select an address in the bar above to run this report.",
+    "curtailmentPoolOnly": "This report is only available for curtailment pool groups.",
     "selectAddressHint": "These reports run for the address selected in the bar above.",
     "sectionIndividual": "Individual reports",
     "sectionGroup": "Group reports",

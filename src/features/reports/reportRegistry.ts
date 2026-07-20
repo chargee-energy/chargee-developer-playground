@@ -28,6 +28,8 @@ export interface ReportTemplate {
   icon: ComponentType<SVGProps<SVGSVGElement>>
   scope: ReportScope
   Component: ComponentType
+  /** Only available when the selected group is a curtailment pool. */
+  curtailmentPoolOnly?: boolean
 }
 
 // Add new report templates here — they appear automatically in the hub gallery.
@@ -40,5 +42,5 @@ export const reportTemplates: ReportTemplate[] = [
   { id: 'allHvacs', icon: FireIcon, scope: 'group', Component: AllHvacsReport },
   { id: 'allBatteries', icon: Battery50Icon, scope: 'group', Component: AllBatteriesReport },
   { id: 'allMeters', icon: BoltIcon, scope: 'group', Component: AllMetersReport },
-  { id: 'groupCurtailment', icon: BoltSlashIcon, scope: 'group', Component: GroupCurtailmentReport },
+  { id: 'groupCurtailment', icon: BoltSlashIcon, scope: 'group', Component: GroupCurtailmentReport, curtailmentPoolOnly: true },
 ]

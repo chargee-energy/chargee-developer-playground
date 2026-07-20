@@ -223,6 +223,7 @@
     "subtitle": "Genereer groepsbrede en individuele adresrapporten.",
     "selectGroupFirst": "Selecteer een groep om rapporten te genereren.",
     "selectAddressFirst": "Selecteer een adres in de balk hierboven om dit rapport uit te voeren.",
+    "curtailmentPoolOnly": "Dit rapport is alleen beschikbaar voor curtailment pool-groepen.",
     "selectAddressHint": "Deze rapporten draaien voor het adres dat in de balk hierboven is geselecteerd.",
     "sectionIndividual": "Individuele rapporten",
     "sectionGroup": "Groepsrapporten",

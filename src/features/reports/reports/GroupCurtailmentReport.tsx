@@ -41,6 +41,10 @@ function ImpactTile({ label, value, sub, accent }: { label: string; value: strin
   )
 }
 
+/** Energy value with a fixed 1 decimal so tiles line up (12.0 kWh, not 12 kWh). */
+const fmtKwh = (v: number) =>
+  `${v.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kWh`
+
 /** Human-readable minutes, e.g. "1h 30m" / "45m" / "—". */
 function fmtDuration(minutes: number | null): string {
   if (minutes == null) return '—'
@@ -287,7 +291,7 @@ export function GroupCurtailmentReport() {
                 <>
                   <ImpactTile
                     label={t('reports.curtailment.impact.curtailed')}
-                    value={`${fmtNumber(impact.curtailedKwh, 1)} kWh`}
+                    value={fmtKwh(impact.curtailedKwh)}
                     sub={t('reports.curtailment.impact.estimated')}
                     accent
                   />
@@ -305,9 +309,9 @@ export function GroupCurtailmentReport() {
                   />
                 </>
               )}
-              <ImpactTile label={t('reports.curtailment.impact.produced')} value={`${fmtNumber(impact.producedKwh, 1)} kWh`} />
-              <ImpactTile label={t('reports.curtailment.impact.exported')} value={`${fmtNumber(impact.exportedKwh, 1)} kWh`} />
-              <ImpactTile label={t('reports.curtailment.impact.imported')} value={`${fmtNumber(impact.importedKwh, 1)} kWh`} />
+              <ImpactTile label={t('reports.curtailment.impact.produced')} value={fmtKwh(impact.producedKwh)} />
+              <ImpactTile label={t('reports.curtailment.impact.exported')} value={fmtKwh(impact.exportedKwh)} />
+              <ImpactTile label={t('reports.curtailment.impact.imported')} value={fmtKwh(impact.importedKwh)} />
             </div>
             <p className="text-11 text-text-gray">
               {impact.confidence === 'none'
