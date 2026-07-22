@@ -1,6 +1,6 @@
 import type { FlexAggregateMinute } from './useGroupCurtailmentReport'
 
-const MIN_TO_KWH = 1 / 60000 // avg W over 1 min → kWh
+const MIN_TO_KWH = 1 / 60 // avg kW over 1 min → kWh (group flex aggregation is in kW)
 const DAYLIGHT_MIN = 0.02 // ignore near-night samples when anchoring the shape
 const MIN_ANCHORS = 10 // minutes of uncurtailed daylight needed for a stable scale
 const MERGE_GAP_MS = 60 * 1000 // bands closer than this are one curtailment window
@@ -21,7 +21,7 @@ export interface CurtailmentImpact {
   potentialKwh: number
   curtailedKwh: number
   curtailedPct: number
-  peakShavedW: number
+  peakShavedKw: number
   confidence: ImpactConfidence
 }
 
@@ -97,7 +97,7 @@ export function computeCurtailmentImpact(
     potentialKwh: 0,
     curtailedKwh: 0,
     curtailedPct: 0,
-    peakShavedW: 0,
+    peakShavedKw: 0,
     confidence: 'none',
   }
   if (minutes.length === 0 || bands.length === 0) return { impact: empty, potentialByT }
@@ -137,34 +137,34 @@ export function computeCurtailmentImpact(
   let producedKwh = 0
   let exportedKwh = 0
   let importedKwh = 0
-  let potentialKwh = 0
   let curtailedKwh = 0
-  let peakShavedW = 0
+  let peakShavedKw = 0
 
   for (const m of minutes) {
+    producedKwh += m.solarProduction * MIN_TO_KWH // whole-day production
     const wi = windowOf(m.t)
-    if (wi < 0) continue // outside any curtailment window
-    producedKwh += m.solarProduction * MIN_TO_KWH
+    if (wi < 0) continue // grid flows + curtailment only within curtailment windows
     exportedKwh += m.return * MIN_TO_KWH
     importedKwh += m.delivery * MIN_TO_KWH
     const scale = scales[wi]
     if (scale != null) {
       const base = scale * clearSkyShape(m.t)
       potentialByT.set(m.t, base)
-      potentialKwh += base * MIN_TO_KWH
       const shave = Math.max(0, base - m.solarProduction)
       curtailedKwh += shave * MIN_TO_KWH
-      peakShavedW = Math.max(peakShavedW, shave)
+      peakShavedKw = Math.max(peakShavedKw, shave)
     }
   }
 
+  // Whole-day potential = what was produced + what was curtailed away.
+  const potentialKwh = producedKwh + curtailedKwh
   const withEstimate = confidences.filter((c) => c !== 'none')
   const confidence: ImpactConfidence =
     withEstimate.length === 0 ? 'none' : confidences.every((c) => c === 'high') ? 'high' : 'low'
   const curtailedPct = potentialKwh > 0 ? (curtailedKwh / potentialKwh) * 100 : 0
 
   return {
-    impact: { producedKwh, exportedKwh, importedKwh, potentialKwh, curtailedKwh, curtailedPct, peakShavedW, confidence },
+    impact: { producedKwh, exportedKwh, importedKwh, potentialKwh, curtailedKwh, curtailedPct, peakShavedKw, confidence },
     potentialByT,
   }
 }

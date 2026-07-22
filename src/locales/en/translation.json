@@ -430,7 +430,54 @@
       "groupCurtailment": {
         "title": "Group curtailment",
         "description": "Curtailment activity for the group on a chosen day or date range: every flex schedule and the time period it applied, with its grid target."
+      },
+      "addressCurtailment": {
+        "title": "Solar curtailment (address)",
+        "description": "Solar curtailment for this address on a chosen day or range: group and inverter flex schedules, plus actual vs hindcast production to measure the curtailed volume."
       }
+    },
+    "addrCurtailment": {
+      "hint": "Address-level view for steerable inverters. Curtailment can come from a group schedule (all inverters) or an inverter schedule. Curtailed volume is measured as the 15-min production hindcast minus actual production.",
+      "col": {
+        "source": "Source",
+        "inverter": "Inverter"
+      },
+      "source": {
+        "group": "Group",
+        "inverter": "Inverter"
+      },
+      "allInverters": "All inverters",
+      "zeroExport": "Zero export",
+      "metrics": {
+        "curtailed": "Curtailed",
+        "reduction": "Reduction",
+        "produced": "Produced",
+        "potential": "Potential",
+        "delivery": "Grid delivery",
+        "return": "Grid return",
+        "quality": "Hindcast quality",
+        "qualitySub": "avg forecast quality"
+      },
+      "series": {
+        "actual": "Actual production",
+        "hindcast": "Hindcast (potential)",
+        "delivery": "Grid delivery",
+        "return": "Grid return"
+      },
+      "legend": {
+        "group": "Group curtailment",
+        "inverter": "Inverter curtailment"
+      },
+      "timeline": {
+        "title": "Production vs hindcast",
+        "subtitle": "15-min actual production against the hindcast potential, curtailment periods shaded.",
+        "hint": "The gap between hindcast and actual during shaded periods is the curtailed volume."
+      },
+      "perInverter": "Per inverter",
+      "tags": "Hindcast tags",
+      "fetching": "Fetching production & hindcast… {{done}} / {{total}}",
+      "emptySchedules": "No flex schedules active in the selected period.",
+      "noInverters": "No steerable inverters at this address."
     },
     "curtailment": {
       "dateMode": "Period",
@@ -496,6 +543,7 @@
         "reduction": "Reduction",
         "peakShaved": "Peak shaved",
         "produced": "Solar produced",
+        "potential": "Potential",
         "exported": "Grid exported",
         "imported": "Grid imported",
         "estimated": "estimated",

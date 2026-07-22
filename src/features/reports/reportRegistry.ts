@@ -9,6 +9,7 @@ import {
   BoltIcon,
   ScaleIcon,
   BoltSlashIcon,
+  ArrowTrendingDownIcon,
 } from '@heroicons/react/24/outline'
 import { AllSolarInvertersReport } from './reports/AllSolarInvertersReport'
 import { AllVehiclesReport } from './reports/AllVehiclesReport'
@@ -19,6 +20,7 @@ import { AllMetersReport } from './reports/AllMetersReport'
 import { BenchmarkReport } from './reports/BenchmarkReport'
 import { BatteryReport } from './reports/BatteryReport'
 import { GroupCurtailmentReport } from './reports/GroupCurtailmentReport'
+import { AddressCurtailmentReport } from './reports/AddressCurtailmentReport'
 
 export type ReportScope = 'group' | 'address'
 
@@ -36,6 +38,13 @@ export interface ReportTemplate {
 export const reportTemplates: ReportTemplate[] = [
   { id: 'benchmark', icon: ScaleIcon, scope: 'address', Component: BenchmarkReport },
   { id: 'batteryAdvice', icon: Battery100Icon, scope: 'address', Component: BatteryReport },
+  {
+    id: 'addressCurtailment',
+    icon: ArrowTrendingDownIcon,
+    scope: 'address',
+    Component: AddressCurtailmentReport,
+    curtailmentPoolOnly: true,
+  },
   { id: 'allSolarInverters', icon: SunIcon, scope: 'group', Component: AllSolarInvertersReport },
   { id: 'allVehicles', icon: TruckIcon, scope: 'group', Component: AllVehiclesReport },
   { id: 'allChargers', icon: PowerIcon, scope: 'group', Component: AllChargersReport },
