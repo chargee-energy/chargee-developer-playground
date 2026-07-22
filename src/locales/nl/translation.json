@@ -430,7 +430,54 @@
       "groupCurtailment": {
         "title": "Groepscurtailment",
         "description": "Curtailmentactiviteit voor de groep op een gekozen dag of periode: elk flex-schema en de periode waarin het gold, met het netdoel."
+      },
+      "addressCurtailment": {
+        "title": "Zonne-curtailment (adres)",
+        "description": "Zonne-curtailment voor dit adres op een gekozen dag of periode: groeps- en omvormer-flexschema's, plus werkelijke vs. hindcast-productie om het gecurtailde volume te meten."
       }
+    },
+    "addrCurtailment": {
+      "hint": "Weergave op adresniveau voor stuurbare omvormers. Curtailment kan komen van een groepsschema (alle omvormers) of een omvormerschema. Het gecurtailde volume wordt gemeten als de 15-minuten productiehindcast minus de werkelijke productie.",
+      "col": {
+        "source": "Bron",
+        "inverter": "Omvormer"
+      },
+      "source": {
+        "group": "Groep",
+        "inverter": "Omvormer"
+      },
+      "allInverters": "Alle omvormers",
+      "zeroExport": "Nul-export",
+      "metrics": {
+        "curtailed": "Gecurtaild",
+        "reduction": "Reductie",
+        "produced": "Geproduceerd",
+        "potential": "Potentieel",
+        "delivery": "Netlevering",
+        "return": "Netteruglevering",
+        "quality": "Hindcast-kwaliteit",
+        "qualitySub": "gem. forecast-kwaliteit"
+      },
+      "series": {
+        "actual": "Werkelijke productie",
+        "hindcast": "Hindcast (potentieel)",
+        "delivery": "Netlevering",
+        "return": "Netteruglevering"
+      },
+      "legend": {
+        "group": "Groepscurtailment",
+        "inverter": "Omvormercurtailment"
+      },
+      "timeline": {
+        "title": "Productie vs. hindcast",
+        "subtitle": "Werkelijke productie per 15 min tegen het hindcast-potentieel, curtailmentperiodes gearceerd.",
+        "hint": "Het verschil tussen hindcast en werkelijk tijdens gearceerde periodes is het gecurtailde volume."
+      },
+      "perInverter": "Per omvormer",
+      "tags": "Hindcast-tags",
+      "fetching": "Productie & hindcast ophalen… {{done}} / {{total}}",
+      "emptySchedules": "Geen flex-schema's actief in de gekozen periode.",
+      "noInverters": "Geen stuurbare omvormers op dit adres."
     },
     "curtailment": {
       "dateMode": "Periode",
@@ -496,6 +543,7 @@
         "reduction": "Reductie",
         "peakShaved": "Piek afgetopt",
         "produced": "Zon geproduceerd",
+        "potential": "Potentieel",
         "exported": "Net geleverd",
         "imported": "Net afgenomen",
         "estimated": "geschat",

@@ -301,14 +301,9 @@ export function GroupCurtailmentReport() {
                     sub={t('reports.curtailment.impact.estimated')}
                     accent
                   />
-                  <ImpactTile
-                    label={t('reports.curtailment.impact.peakShaved')}
-                    value={`${fmtNumber(impact.peakShavedW, 0)} W`}
-                    sub={t('reports.curtailment.impact.estimated')}
-                    accent
-                  />
                 </>
               )}
+              <ImpactTile label={t('reports.curtailment.impact.potential')} value={fmtKwh(impact.potentialKwh)} />
               <ImpactTile label={t('reports.curtailment.impact.produced')} value={fmtKwh(impact.producedKwh)} />
               <ImpactTile label={t('reports.curtailment.impact.exported')} value={fmtKwh(impact.exportedKwh)} />
               <ImpactTile label={t('reports.curtailment.impact.imported')} value={fmtKwh(impact.importedKwh)} />
@@ -354,7 +349,7 @@ export function GroupCurtailmentReport() {
                   : undefined
               }
               range={{ key: 'solarBand', name: t('reports.curtailment.series.solarRange'), color: '#6245DE' }}
-              unit="W"
+              unit="kW"
               height={300}
             />
             <p className="text-11 text-text-gray">{t('reports.curtailment.overview.hint')}</p>
@@ -419,7 +414,7 @@ export function GroupCurtailmentReport() {
                 domain={detailDomain}
                 bands={bands}
                 series={chartSeries}
-                unit="W"
+                unit="kW"
                 height={300}
                 withSeconds
               />

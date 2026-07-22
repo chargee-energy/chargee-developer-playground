@@ -16,7 +16,13 @@ export function ContextBar() {
   const { groupUuid, addressUuid, setGroup, setAddress } = useContextStore()
 
   const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 })
-  const groups = useMemo(() => groupsQuery.data?.results ?? [], [groupsQuery.data])
+  const groups = useMemo(
+    () =>
+      [...(groupsQuery.data?.results ?? [])].sort((a, b) =>
+        (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' }),
+      ),
+    [groupsQuery.data],
+  )
 
   const showAddress = ADDRESS_ROUTES.includes(pathname) && !!groupUuid
 

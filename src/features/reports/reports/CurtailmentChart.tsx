@@ -27,6 +27,11 @@ interface CurtailmentChartProps {
   domain: [number, number]
   /** Curtailment periods (epoch ms) to shade — one band each. */
   bands?: { start: number; end: number }[]
+  /** Colour for `bands` (default group-purple). */
+  bandColor?: string
+  /** Optional second band set in a distinct colour (e.g. inverter-scoped curtailment). */
+  bands2?: { start: number; end: number }[]
+  band2Color?: string
   series: SeriesDef[]
   /** Optional dashed lines (e.g. an estimated counterfactual), drawn with gaps. */
   dashed?: SeriesDef[]
@@ -48,6 +53,9 @@ export function CurtailmentChart({
   data,
   domain,
   bands,
+  bandColor = '#6245DE',
+  bands2,
+  band2Color = '#FF8500',
   series,
   dashed,
   range,
@@ -62,9 +70,12 @@ export function CurtailmentChart({
 
   // Clamp each band to the visible domain so it still renders when a curtailment
   // period starts/ends outside the current view (e.g. a detail block).
-  const visibleBands = (bands ?? [])
-    .map((b) => ({ start: Math.max(b.start, domain[0]), end: Math.min(b.end, domain[1]) }))
-    .filter((b) => b.end > b.start)
+  const clamp = (bs?: { start: number; end: number }[]) =>
+    (bs ?? [])
+      .map((b) => ({ start: Math.max(b.start, domain[0]), end: Math.min(b.end, domain[1]) }))
+      .filter((b) => b.end > b.start)
+  const visibleBands = clamp(bands)
+  const visibleBands2 = clamp(bands2)
 
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -72,13 +83,25 @@ export function CurtailmentChart({
         <CartesianGrid strokeDasharray="3 3" stroke="#D5D3CE" vertical={false} />
         {visibleBands.map((b, i) => (
           <ReferenceArea
-            key={i}
+            key={`b1-${i}`}
             x1={b.start}
             x2={b.end}
-            fill="#6245DE"
+            fill={bandColor}
             fillOpacity={0.08}
-            stroke="#6245DE"
+            stroke={bandColor}
             strokeOpacity={0.25}
+            ifOverflow="extendDomain"
+          />
+        ))}
+        {visibleBands2.map((b, i) => (
+          <ReferenceArea
+            key={`b2-${i}`}
+            x1={b.start}
+            x2={b.end}
+            fill={band2Color}
+            fillOpacity={0.1}
+            stroke={band2Color}
+            strokeOpacity={0.3}
             ifOverflow="extendDomain"
           />
         ))}
