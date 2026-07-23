@@ -244,12 +244,15 @@
     "emptyMeters": "No smart meters found across this group.",
     "metrics": {
       "total": "Inverters",
+      "connectedInverters": "Connected inverters",
+      "connectedInvertersSub": "{{local}} local · {{cloud}} cloud",
+      "staleDisconnectedInverters": "Stale & disconnected inverters",
       "totalVehicles": "Vehicles",
       "totalChargers": "Chargers",
       "totalHvacs": "HVAC units",
       "totalBatteries": "Batteries",
       "totalMeters": "Meters",
-      "addressCoverage": "Addresses with inverters",
+      "addressCoverage": "Addresses with connected inverters",
       "addressCoverageVehicles": "Addresses with vehicles",
       "addressCoverageChargers": "Addresses with chargers",
       "addressCoverageHvacs": "Addresses with HVAC",
@@ -257,8 +260,7 @@
       "addressCoverageMeters": "Addresses with meters",
       "addressCoverageSub": "{{covered}} of {{total}} addresses",
       "distribution": "Local vs Cloud",
-      "distributionSub": "{{local}} local · {{cloud}} cloud",
-      "working": "Working",
+      "distributionSub": "% of inverters · {{local}} local, {{cloud}} cloud",
       "connected": "Connected",
       "pluggedIn": "Plugged in",
       "charging": "Charging",
@@ -267,6 +269,10 @@
       "withGas": "With gas EAN",
       "stale": "Stale",
       "disconnected": "Disconnected",
+      "staleDisconnected": "Stale / Disconnected",
+      "staleDisconnectedSub": "% of inverters · {{stale}} stale, {{disconnected}} disconnected",
+      "localConnected": "Local & connected",
+      "localConnectedSub": "{{pct}}% of shown · curtailment candidates",
       "ofTotal": "{{n}} inverters",
       "ofTotalVehicles": "{{n}} vehicles"
     },
@@ -282,6 +288,7 @@
       "activity": "Activity",
       "connection": "Connection",
       "status": "Production",
+      "sparkyStatus": "Sparky",
       "lastProduction": "Last production",
       "battery": "Battery",
       "charge": "Charge",
@@ -299,6 +306,22 @@
       "connected": "Connected",
       "stale": "Stale",
       "disconnected": "Disconnected"
+    },
+    "sparkyStatus": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "none": "No Sparky"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Address, serial, brand, model…",
+      "sortBy": "Sort by",
+      "clear": "Clear filters",
+      "noMatches": "No inverters match the current filters.",
+      "dir": {
+        "asc": "Ascending",
+        "desc": "Descending"
+      }
     },
     "chargeState": {
       "charging": "Charging",

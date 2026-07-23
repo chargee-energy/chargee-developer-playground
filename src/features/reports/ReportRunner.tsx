@@ -36,6 +36,8 @@ interface ReportRunnerProps<TRow> {
   canRun?: boolean
   /** Optional controls (e.g. a date picker) rendered above the header card. */
   filters?: ReactNode
+  /** Optional controls (e.g. table filters) rendered inside the results card, above the table. */
+  tableToolbar?: ReactNode
   /** Override the running-progress label (defaults to the per-address message). */
   progressText?: string
 }
@@ -62,6 +64,7 @@ export function ReportRunner<TRow extends Record<string, any>>({
   emptyMessage,
   canRun = true,
   filters,
+  tableToolbar,
   progressText,
 }: ReportRunnerProps<TRow>) {
   const { t } = useTranslation()
@@ -143,6 +146,7 @@ export function ReportRunner<TRow extends Record<string, any>>({
 
       {finished && (
         <div className="card p-5">
+          {tableToolbar && <div className="mb-4">{tableToolbar}</div>}
           <p className="mb-3 text-13 text-text-gray">{t('reports.resultCount', { n: rows.length })}</p>
           {rows.length > 0 ? (
             <DataTable rows={rows} columns={columns} rowKey={rowKey} />
