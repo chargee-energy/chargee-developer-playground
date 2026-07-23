@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   solarInvertersControllerListV2,
+  solarInvertersControllerGetProductionEnergyV2,
   solarInverterFlexScheduleControllerListV2,
   solarInverterScheduleControllerListV2,
   solarInverterForecastControllerGetProductionForecastForSolarInverterV2,
@@ -8,6 +9,7 @@ import {
 } from '@/api/generated/solar-inverters/solar-inverters'
 import {
   smartMetersControllerGetSmartMetersForAddressV2,
+  smartMetersControllerGetElectricityReadingsV2,
   smartMetersAggregationControllerGetElectricityIntervalsV2,
 } from '@/api/generated/smart-meters/smart-meters'
 import type { SolarInverterFlexScheduleDto, ScheduleDto } from '@/api/generated/model'
@@ -19,6 +21,15 @@ const SCHEDULE_PAGE = 1000
 const SLOT_MS = 15 * 60 * 1000 // 15-minute buckets (native resolution here)
 const DAY_MS = 24 * 60 * 60 * 1000
 const FETCH_CONCURRENCY = 4
+// On-demand block detail: raw device readings are capped at 1000 rows per page
+// (offset is ignored), which at ~1s resolution covers only ~16 min. We page by
+// time to cover the whole 15-min block ±15 min window.
+const DETAIL_LIMIT = 1000
+const MAX_DETAIL_PAGES = 12
+// Delivery/return (meter) and solar production (inverter) come from separate
+// endpoints with independent timestamps. Bucketing both onto a common grid aligns
+// them so a single tooltip shows all three series at each point.
+const DETAIL_BUCKET_MS = 10 * 1000
 // The 15-min solar hindcast — the counterfactual "what production would have been".
 // The endpoint returns it as rolling ~1h chunks; we combine them across the day.
 const HINDCAST_TYPE = 'solar_hindcast_15min_900'
@@ -51,6 +62,19 @@ export interface ProductionPoint {
   hindcast: number
   delivery: number
   return: number
+}
+
+/**
+ * Raw block-detail sample (W). Delivery/return come from the address smart
+ * meter(s), solar production from the inverter(s) — separate endpoints with
+ * independent timestamps, so each point carries only the series it observed and
+ * the chart bridges the gaps (connectNulls).
+ */
+export interface AddressDetailPoint {
+  t: number
+  solarProduction?: number
+  delivery?: number
+  return?: number
 }
 
 export interface InverterImpactRow {
@@ -94,6 +118,7 @@ const EMPTY_IMPACT: AddressCurtailmentImpact = {
 
 interface CachedReport {
   inverters: string[]
+  meters: string[]
   rows: AddressCurtailmentPeriodRow[]
   timeline: ProductionPoint[]
   groupBands: Band[]
@@ -177,6 +202,43 @@ function curtailmentBands(periods: Period[], windowStart: number, windowEnd: num
 
 const inBands = (t: number, bands: Band[]) => bands.some((b) => t >= b.start && t < b.end)
 
+/**
+ * Page a raw-reading endpoint by time. These endpoints ignore `offset` and cap at
+ * DETAIL_LIMIT rows (~16 min of ~1s data), so we advance `fromDate` past the last
+ * returned row each page (dropping the repeated boundary sample) until a short
+ * page signals the window is exhausted. Mirrors the group report's aggregation
+ * pager. `onRows` receives each page's fresh rows.
+ */
+async function pageReadings<T>(
+  fromMs: number,
+  toMs: number,
+  fetchPage: (fromIso: string, toIso: string) => Promise<T[]>,
+  timeOf: (row: T) => number,
+  onRows: (rows: T[]) => void,
+  signal: AbortSignal,
+): Promise<void> {
+  const toIso = new Date(toMs).toISOString()
+  let cursorMs = fromMs
+  let lastMs = Number.NEGATIVE_INFINITY
+  let pages = 0
+  while (cursorMs < toMs && pages < MAX_DETAIL_PAGES) {
+    if (signal.aborted) break
+    const rows = await fetchPage(new Date(cursorMs).toISOString(), toIso)
+    pages++
+    const fresh = rows.filter((r) => {
+      const t = timeOf(r)
+      return Number.isFinite(t) && t > lastMs
+    })
+    if (fresh.length > 0) {
+      onRows(fresh)
+      lastMs = timeOf(fresh[fresh.length - 1])
+    }
+    // Full page & advancing → more data remains; otherwise the window is done.
+    if (rows.length >= DETAIL_LIMIT && fresh.length > 0 && lastMs > cursorMs) cursorMs = lastMs
+    else break
+  }
+}
+
 async function loadFlexSchedules(addressUuid: string, invId: string, signal: AbortSignal): Promise<SolarInverterFlexScheduleDto[]> {
   const res = await solarInverterFlexScheduleControllerListV2(addressUuid, invId, { limit: SCHEDULE_PAGE }, undefined, signal)
   return res.results ?? []
@@ -202,6 +264,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
   const seed = readCache(cacheKey)
   const [status, setStatus] = useState<ReportStatus>(() => (seed ? 'done' : 'idle'))
   const [inverters, setInverters] = useState<string[]>(() => seed?.data.inverters ?? [])
+  const [meters, setMeters] = useState<string[]>(() => seed?.data.meters ?? [])
   const [rows, setRows] = useState<AddressCurtailmentPeriodRow[]>(() => seed?.data.rows ?? [])
   const [timeline, setTimeline] = useState<ProductionPoint[]>(() => seed?.data.timeline ?? [])
   const [groupBands, setGroupBands] = useState<Band[]>(() => seed?.data.groupBands ?? [])
@@ -214,10 +277,21 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
   const [error, setError] = useState<unknown>(null)
   const abortRef = useRef<AbortController | null>(null)
 
+  // On-demand block detail (raw device readings for a 15-min block ±15 min).
+  const [detail, setDetail] = useState<AddressDetailPoint[]>([])
+  const [detailLoading, setDetailLoading] = useState(false)
+  const detailCache = useRef<Map<string, AddressDetailPoint[]>>(new Map())
+  const detailAbortRef = useRef<AbortController | null>(null)
+  // Device ids the detail fetch reads from, kept in a ref so loadDetail stays
+  // stable (only depends on addressUuid) instead of re-firing when ids update.
+  const idsRef = useRef<{ meters: string[]; inverters: string[] }>({ meters: [], inverters: [] })
+
   useEffect(() => {
     const cached = readCache(cacheKey)
     if (cached) {
       setInverters(cached.data.inverters)
+      setMeters(cached.data.meters ?? [])
+      idsRef.current = { meters: cached.data.meters ?? [], inverters: cached.data.inverters }
       setRows(cached.data.rows)
       setTimeline(cached.data.timeline)
       setGroupBands(cached.data.groupBands)
@@ -229,6 +303,8 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
       setStatus('done')
     } else {
       setInverters([])
+      setMeters([])
+      idsRef.current = { meters: [], inverters: [] }
       setRows([])
       setTimeline([])
       setGroupBands([])
@@ -240,6 +316,8 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
       setStatus('idle')
     }
     setError(null)
+    setDetail([])
+    detailCache.current.clear()
   }, [cacheKey])
 
   const cancel = useCallback(() => abortRef.current?.abort(), [])
@@ -254,6 +332,8 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
     setStatus('running')
     setError(null)
     setProgress({ done: 0, total: 0 })
+    setDetail([])
+    detailCache.current.clear()
 
     const windowStart = dayStart(range.from).getTime()
     const windowEnd = dayStart(range.to).getTime() + DAY_MS
@@ -479,7 +559,9 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
 
       const tags = [...tagSet]
       const stamp = new Date().toISOString()
+      idsRef.current = { meters, inverters: steerable }
       setInverters(steerable)
+      setMeters(meters)
       setRows(periodRows)
       setTimeline(timelineArr)
       setGroupBands(groupBandsAll)
@@ -493,6 +575,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
         cacheKey,
         {
           inverters: steerable,
+          meters,
           rows: periodRows,
           timeline: timelineArr,
           groupBands: groupBandsAll,
@@ -512,10 +595,147 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
     }
   }, [addressUuid, cacheKey, range, setEntry])
 
+  // Fetch raw device readings for a detail window on demand: delivery/return from
+  // the address smart meter(s), solar production from the inverter(s). Results are
+  // summed per timestamp and cached per window key.
+  const loadDetail = useCallback(
+    async (fromMs: number, toMs: number) => {
+      if (!addressUuid) return
+      const from = new Date(fromMs).toISOString()
+      const to = new Date(toMs).toISOString()
+      const key = `${from}|${to}`
+      const cached = detailCache.current.get(key)
+      if (cached) {
+        setDetail(cached)
+        setDetailLoading(false)
+        return
+      }
+      detailAbortRef.current?.abort()
+      const controller = new AbortController()
+      detailAbortRef.current = controller
+      const { signal } = controller
+      setDetailLoading(true)
+      setDetail([])
+
+      const { meters: meterIds, inverters: invIds } = idsRef.current
+      // Shared per-bucket points on a regular grid so every series lines up.
+      const byBucket = new Map<number, AddressDetailPoint>()
+      const bucketPoint = (b: number) => {
+        let p = byBucket.get(b)
+        if (!p) {
+          p = { t: b }
+          byBucket.set(b, p)
+        }
+        return p
+      }
+      const bucketOf = (t: number) => Math.floor(t / DETAIL_BUCKET_MS) * DETAIL_BUCKET_MS
+      const readingTime = <R extends { time?: unknown }>(iv: R) => new Date(iv.time as unknown as string).getTime()
+
+      // Per-device bucket accumulator: mean power within each bucket. Devices are
+      // averaged individually, then summed into the shared grid so multi-device
+      // addresses total correctly (rather than blending sample counts).
+      type Acc = Map<number, { sum: number; n: number }>
+      const addSample = (acc: Acc, b: number, v: number) => {
+        const a = acc.get(b)
+        if (a) {
+          a.sum += v
+          a.n += 1
+        } else {
+          acc.set(b, { sum: v, n: 1 })
+        }
+      }
+      const foldDevice = (acc: Acc, assign: (p: AddressDetailPoint, avg: number) => void) => {
+        for (const [b, { sum, n }] of acc) if (n > 0) assign(bucketPoint(b), sum / n)
+      }
+
+      try {
+        // Grid delivery/return (W) from the smart meter active-power readings.
+        await mapWithConcurrency(
+          meterIds,
+          FETCH_CONCURRENCY,
+          async (smId) => {
+            const del: Acc = new Map()
+            const ret: Acc = new Map()
+            await pageReadings(
+              fromMs,
+              toMs,
+              async (fromIso, toIso) => {
+                const r = await smartMetersControllerGetElectricityReadingsV2(
+                  addressUuid,
+                  smId,
+                  { fromDate: fromIso, toDate: toIso, sortBy: 'ASC', limit: DETAIL_LIMIT },
+                  undefined,
+                  signal,
+                )
+                return r.results ?? []
+              },
+              readingTime,
+              (rows) => {
+                for (const iv of rows) {
+                  const b = bucketOf(readingTime(iv))
+                  const d = num(iv.activePower?.total?.delivering)
+                  const rt = num(iv.activePower?.total?.returning)
+                  if (d != null) addSample(del, b, d)
+                  if (rt != null) addSample(ret, b, rt)
+                }
+              },
+              signal,
+            )
+            foldDevice(del, (p, avg) => (p.delivery = (p.delivery ?? 0) + avg))
+            foldDevice(ret, (p, avg) => (p.return = (p.return ?? 0) + avg))
+          },
+          { signal },
+        )
+        // Solar production (W) from the inverter energy/production readings.
+        await mapWithConcurrency(
+          invIds,
+          FETCH_CONCURRENCY,
+          async (invId) => {
+            const sol: Acc = new Map()
+            await pageReadings(
+              fromMs,
+              toMs,
+              async (fromIso, toIso) => {
+                const r = await solarInvertersControllerGetProductionEnergyV2(
+                  addressUuid,
+                  invId,
+                  { fromDate: fromIso, toDate: toIso, sortBy: 'ASC', limit: DETAIL_LIMIT },
+                  undefined,
+                  signal,
+                )
+                return r.results ?? []
+              },
+              readingTime,
+              (rows) => {
+                for (const iv of rows) {
+                  const pw = num(iv.power)
+                  if (pw != null) addSample(sol, bucketOf(readingTime(iv)), pw)
+                }
+              },
+              signal,
+            )
+            foldDevice(sol, (p, avg) => (p.solarProduction = (p.solarProduction ?? 0) + avg))
+          },
+          { signal },
+        )
+        if (signal.aborted) return
+        const arr = [...byBucket.values()].sort((a, b) => a.t - b.t)
+        detailCache.current.set(key, arr)
+        setDetail(arr)
+      } catch {
+        if (!signal.aborted) setDetail([])
+      } finally {
+        if (!signal.aborted) setDetailLoading(false)
+      }
+    },
+    [addressUuid],
+  )
+
   return {
     status,
     progress,
     inverters,
+    meters,
     rows,
     timeline,
     groupBands,
@@ -527,5 +747,8 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
     error,
     run,
     cancel,
+    detail,
+    detailLoading,
+    loadDetail,
   }
 }
