@@ -19,7 +19,7 @@ interface SolarProductionStatusBadgeProps {
 export function SolarProductionStatusBadge({ lastProductionState, isSteerable }: SolarProductionStatusBadgeProps) {
   const { t } = useTranslation()
 
-  const status = deriveProductionStatus(lastProductionState, isSteerable)
+  const status = deriveProductionStatus(lastProductionState, { isSteerable })
   const local = isSteerable === true
 
   if (status === 'disconnected') {

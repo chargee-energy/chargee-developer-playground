@@ -244,12 +244,15 @@
     "emptyMeters": "Geen slimme meters gevonden in deze groep.",
     "metrics": {
       "total": "Omvormers",
+      "connectedInverters": "Verbonden omvormers",
+      "connectedInvertersSub": "{{local}} lokaal · {{cloud}} cloud",
+      "staleDisconnectedInverters": "Verouderde & niet-verbonden omvormers",
       "totalVehicles": "Voertuigen",
       "totalChargers": "Laders",
       "totalHvacs": "HVAC-units",
       "totalBatteries": "Batterijen",
       "totalMeters": "Meters",
-      "addressCoverage": "Adressen met omvormers",
+      "addressCoverage": "Adressen met verbonden omvormers",
       "addressCoverageVehicles": "Adressen met voertuigen",
       "addressCoverageChargers": "Adressen met laders",
       "addressCoverageHvacs": "Adressen met HVAC",
@@ -257,8 +260,7 @@
       "addressCoverageMeters": "Adressen met meters",
       "addressCoverageSub": "{{covered}} van {{total}} adressen",
       "distribution": "Lokaal vs Cloud",
-      "distributionSub": "{{local}} lokaal · {{cloud}} cloud",
-      "working": "Werkend",
+      "distributionSub": "% van omvormers · {{local}} lokaal, {{cloud}} cloud",
       "connected": "Verbonden",
       "pluggedIn": "Ingeplugd",
       "charging": "Laden",
@@ -267,6 +269,10 @@
       "withGas": "Met gas-EAN",
       "stale": "Verouderd",
       "disconnected": "Niet verbonden",
+      "staleDisconnected": "Verouderd / Niet verbonden",
+      "staleDisconnectedSub": "% van omvormers · {{stale}} verouderd, {{disconnected}} niet verbonden",
+      "localConnected": "Lokaal & verbonden",
+      "localConnectedSub": "{{pct}}% van getoond · curtailment-kandidaten",
       "ofTotal": "{{n}} omvormers",
       "ofTotalVehicles": "{{n}} voertuigen"
     },
@@ -282,6 +288,7 @@
       "activity": "Activiteit",
       "connection": "Verbinding",
       "status": "Productie",
+      "sparkyStatus": "Sparky",
       "lastProduction": "Laatste productie",
       "battery": "Accu",
       "charge": "Laadstatus",
@@ -299,6 +306,22 @@
       "connected": "Verbonden",
       "stale": "Verouderd",
       "disconnected": "Niet verbonden"
+    },
+    "sparkyStatus": {
+      "active": "Actief",
+      "inactive": "Inactief",
+      "none": "Geen Sparky"
+    },
+    "filters": {
+      "search": "Zoeken",
+      "searchPlaceholder": "Adres, serienummer, merk, model…",
+      "sortBy": "Sorteren op",
+      "clear": "Filters wissen",
+      "noMatches": "Geen omvormers voldoen aan de huidige filters.",
+      "dir": {
+        "asc": "Oplopend",
+        "desc": "Aflopend"
+      }
     },
     "chargeState": {
       "charging": "Laden",
