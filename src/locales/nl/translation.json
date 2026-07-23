@@ -438,6 +438,15 @@
     },
     "addrCurtailment": {
       "hint": "Weergave op adresniveau voor stuurbare omvormers. Curtailment kan komen van een groepsschema (alle omvormers) of een omvormerschema. Het gecurtailde volume wordt gemeten als de 15-minuten productiehindcast minus de werkelijke productie.",
+      "lookup": {
+        "label": "Adres-UUID",
+        "placeholder": "Plak een adres-UUID om op te zoeken…",
+        "apply": "Adres gebruiken"
+      },
+      "result": {
+        "address": "Adres",
+        "sparky": "Sparky SN"
+      },
       "col": {
         "source": "Bron",
         "inverter": "Omvormer"
@@ -461,6 +470,7 @@
       "series": {
         "actual": "Werkelijke productie",
         "hindcast": "Hindcast (potentieel)",
+        "solarProduction": "Zonneproductie",
         "delivery": "Netlevering",
         "return": "Netteruglevering"
       },

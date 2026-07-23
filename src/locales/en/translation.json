@@ -438,6 +438,15 @@
     },
     "addrCurtailment": {
       "hint": "Address-level view for steerable inverters. Curtailment can come from a group schedule (all inverters) or an inverter schedule. Curtailed volume is measured as the 15-min production hindcast minus actual production.",
+      "lookup": {
+        "label": "Address UUID",
+        "placeholder": "Paste an address UUID to look up…",
+        "apply": "Use address"
+      },
+      "result": {
+        "address": "Address",
+        "sparky": "Sparky SN"
+      },
       "col": {
         "source": "Source",
         "inverter": "Inverter"
@@ -461,6 +470,7 @@
       "series": {
         "actual": "Actual production",
         "hindcast": "Hindcast (potential)",
+        "solarProduction": "Solar production",
         "delivery": "Grid delivery",
         "return": "Grid return"
       },

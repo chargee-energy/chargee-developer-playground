@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   ComposedChart,
   Line,
@@ -42,6 +43,10 @@ interface CurtailmentChartProps {
   height?: number
   /** Include seconds in axis/tooltip time labels (detail view). */
   withSeconds?: boolean
+  /** Bridge gaps in the main series (for points that carry only some keys, e.g. detail merged from separate endpoints). */
+  connectNulls?: boolean
+  /** Allow clicking legend entries to show/hide individual series. */
+  toggleable?: boolean
 }
 
 /**
@@ -63,7 +68,22 @@ export function CurtailmentChart({
   decimals = 0,
   height = 300,
   withSeconds = false,
+  connectNulls = false,
+  toggleable = false,
 }: CurtailmentChartProps) {
+  const [hidden, setHidden] = useState<Set<string>>(new Set())
+  const toggle = (key?: string | number | ((obj: unknown) => unknown)) => {
+    if (!toggleable || (typeof key !== 'string' && typeof key !== 'number')) return
+    const k = String(key)
+    setHidden((prev) => {
+      const next = new Set(prev)
+      if (next.has(k)) next.delete(k)
+      else next.add(k)
+      return next
+    })
+  }
+  const isHidden = (key?: string | number | ((obj: unknown) => unknown)) =>
+    (typeof key === 'string' || typeof key === 'number') && hidden.has(String(key))
   const timeFmt = (ms: number) => format(new Date(ms), withSeconds ? 'HH:mm:ss' : 'HH:mm')
   const num = (v: number) =>
     v.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
@@ -131,7 +151,22 @@ export function CurtailmentChart({
             return [unit ? `${num(value)} ${unit}` : num(value), name]
           }}
         />
-        <Legend wrapperStyle={{ fontSize: 12 }} />
+        <Legend
+          wrapperStyle={{ fontSize: 12 }}
+          onClick={toggleable ? (e: { dataKey?: string | number | ((obj: unknown) => unknown) }) => toggle(e.dataKey) : undefined}
+          formatter={
+            toggleable
+              ? (value: string, entry: { dataKey?: string | number | ((obj: unknown) => unknown) }) => {
+                  const off = isHidden(entry?.dataKey)
+                  return (
+                    <span style={{ cursor: 'pointer', color: off ? '#9AA0A6' : undefined, textDecoration: off ? 'line-through' : undefined }}>
+                      {value}
+                    </span>
+                  )
+                }
+              : undefined
+          }
+        />
         {range && (
           <Area
             dataKey={range.key}
@@ -153,6 +188,8 @@ export function CurtailmentChart({
             strokeWidth={2}
             dot={false}
             isAnimationActive={false}
+            connectNulls={connectNulls}
+            hide={hidden.has(s.key)}
           />
         ))}
         {(dashed ?? []).map((s) => (
@@ -167,6 +204,7 @@ export function CurtailmentChart({
             dot={false}
             isAnimationActive={false}
             connectNulls={false}
+            hide={hidden.has(s.key)}
           />
         ))}
       </ComposedChart>
