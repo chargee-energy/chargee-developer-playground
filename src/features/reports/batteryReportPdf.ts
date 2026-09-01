@@ -1,13 +1,24 @@
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import logoUrl from '@/assets/brand/chargee-logo.png'
+import {
+  COLORS,
+  MARGIN,
+  FOOTER_LINE_Y,
+  drawFooters,
+  drawHeader,
+  drawLegend,
+  ensureSpace,
+  loadLogoDataUrl,
+  sectionTitle,
+  type PdfLanguage,
+} from './pdfChrome'
 import type { CapacitySweepRow } from './batterySizing'
+
+export type { PdfLanguage }
 
 // Chargee-branded PDF export of the battery advice report. The copy is
 // self-contained (NL default, EN alternative) so the export language is
 // independent of the app language.
-
-export type PdfLanguage = 'nl' | 'en'
 
 export interface MonthlyEnergyRow {
   month: string
@@ -48,21 +59,6 @@ export interface BatteryPdfInput {
   totalChargedKwh: number
   totalDischargedKwh: number
 }
-
-const COLORS = {
-  darkBlue: [29, 21, 67] as [number, number, number],
-  darkPurple: [98, 69, 222] as [number, number, number],
-  mediumPurple: [156, 135, 248] as [number, number, number],
-  textGray: [105, 105, 105] as [number, number, number],
-  beige: [245, 244, 242] as [number, number, number],
-  beige2: [213, 211, 206] as [number, number, number],
-  green: [22, 179, 100] as [number, number, number],
-  orange: [255, 133, 0] as [number, number, number],
-}
-
-const MARGIN = 14
-const FOOTER_LINE_Y = 280
-const MAX_Y = FOOTER_LINE_Y - 10
 
 interface Copy {
   title: string
@@ -258,84 +254,6 @@ function dayLabel(date: string, locale: string): string {
   })
 }
 
-// Official Chargee logo (267×150 px), loaded once and reused across exports.
-let logoDataUrlCache: string | null = null
-async function loadLogoDataUrl(): Promise<string | null> {
-  if (logoDataUrlCache) return logoDataUrlCache
-  try {
-    const blob = await fetch(logoUrl).then((r) => r.blob())
-    logoDataUrlCache = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-    return logoDataUrlCache
-  } catch {
-    return null
-  }
-}
-
-const LOGO_ASPECT = 267 / 150
-
-function drawHeader(doc: jsPDF, title: string, logoDataUrl: string | null): number {
-  const pageWidth = doc.internal.pageSize.getWidth()
-  if (logoDataUrl) {
-    const logoH = 14
-    doc.addImage(logoDataUrl, 'PNG', MARGIN - 2, 8, logoH * LOGO_ASPECT, logoH)
-  } else {
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(16)
-    doc.setTextColor(...COLORS.darkBlue)
-    doc.text('Chargee', MARGIN, 18)
-  }
-
-  doc.setDrawColor(...COLORS.darkBlue)
-  doc.setLineWidth(0.4)
-  doc.line(MARGIN, 26, pageWidth - MARGIN, 26)
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(20)
-  doc.setTextColor(...COLORS.darkBlue)
-  doc.text(title, MARGIN, 37)
-  return 47
-}
-
-function drawFooters(doc: jsPDF, copy: Copy) {
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const totalPages = doc.getNumberOfPages()
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p)
-    doc.setDrawColor(...COLORS.darkBlue)
-    doc.setLineWidth(0.3)
-    doc.line(MARGIN, FOOTER_LINE_Y, pageWidth - MARGIN, FOOTER_LINE_Y)
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(9)
-    doc.setTextColor(...COLORS.darkBlue)
-    doc.text('chargee.energy', MARGIN, FOOTER_LINE_Y + 6)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...COLORS.textGray)
-    const pageText = copy.page(p, totalPages)
-    doc.text(pageText, pageWidth - MARGIN - doc.getTextWidth(pageText), FOOTER_LINE_Y + 6)
-  }
-}
-
-function sectionTitle(doc: jsPDF, text: string, y: number): number {
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-  doc.setTextColor(...COLORS.darkBlue)
-  doc.text(text, MARGIN, y)
-  return y + 7
-}
-
-function ensureSpace(doc: jsPDF, y: number, needed: number): number {
-  if (y + needed > MAX_Y) {
-    doc.addPage()
-    return 20
-  }
-  return y
-}
-
 /** Grouped bar chart (two series) drawn directly with rects; supports negatives. */
 function drawGroupedBars(
   doc: jsPDF,
@@ -391,23 +309,6 @@ function drawGroupedBars(
   if (minV < 0) doc.text(minV.toFixed(0), x - 1, y + h, { align: 'right' })
 }
 
-function drawLegend(
-  doc: jsPDF,
-  x: number,
-  y: number,
-  items: Array<{ label: string; color: [number, number, number] }>,
-): void {
-  let cx = x
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  for (const item of items) {
-    doc.setFillColor(...item.color)
-    doc.rect(cx, y - 2.4, 3, 3, 'F')
-    doc.setTextColor(...COLORS.textGray)
-    doc.text(item.label, cx + 4.5, y)
-    cx += 4.5 + doc.getTextWidth(item.label) + 8
-  }
-}
 
 export async function buildBatteryPdf(input: BatteryPdfInput): Promise<jsPDF> {
   const copy = COPY[input.language]
@@ -640,6 +541,6 @@ export async function buildBatteryPdf(input: BatteryPdfInput): Promise<jsPDF> {
   doc.setTextColor(...COLORS.textGray)
   doc.text(doc.splitTextToSize(copy.disclaimer, contentW), MARGIN, y)
 
-  drawFooters(doc, copy)
+  drawFooters(doc, copy.page)
   return doc
 }
