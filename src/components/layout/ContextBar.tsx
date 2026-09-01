@@ -13,7 +13,7 @@ const ADDRESS_ROUTES = ['/devices', '/schedules', '/telemetry', '/reports']
 export function ContextBar() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
-  const { groupUuid, addressUuid, setGroup, setAddress } = useContextStore()
+  const { groupUuid, groupName, addressUuid, setGroup, setGroupName, setAddress } = useContextStore()
 
   const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 })
   const groups = useMemo(
@@ -33,6 +33,14 @@ export function ContextBar() {
   useEffect(() => {
     if (!groupUuid && groups.length === 1) setGroup(groups[0].uuid, groups[0].name)
   }, [groups, groupUuid, setGroup])
+
+  // Hydrating from ?group=<uuid> gives no name, so backfill it once the groups
+  // load. Consumers use the name for display and as a type-to-confirm word.
+  useEffect(() => {
+    if (!groupUuid || groupName) return
+    const found = groups.find((g) => g.uuid === groupUuid)
+    if (found?.name) setGroupName(found.name)
+  }, [groups, groupUuid, groupName, setGroupName])
   const idx = addresses.findIndex((a) => a.uuid === addressUuid)
   const goTo = (i: number) => {
     const a = addresses[i]

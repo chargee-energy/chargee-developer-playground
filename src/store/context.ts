@@ -12,6 +12,12 @@ interface ContextState {
   /** Serial of the address's sparky, when known (powers sparky telemetry). */
   addressSerial: string | null
   setGroup: (uuid: string | null, name?: string | null) => void
+  /**
+   * Fill in the name for the already-selected group. Hydrating from the URL
+   * gives us a uuid but no name, so this backfills it once the groups load —
+   * without touching the selected address the way `setGroup` does.
+   */
+  setGroupName: (name: string | null) => void
   setAddress: (uuid: string | null, record?: GroupAddressDto | null) => void
   reset: () => void
 }
@@ -25,6 +31,7 @@ export const useContextStore = create<ContextState>((set) => ({
   setGroup: (uuid, name = null) =>
     // Changing group clears the selected address.
     set({ groupUuid: uuid, groupName: name, addressUuid: null, addressRecord: null, addressSerial: null }),
+  setGroupName: (name) => set({ groupName: name }),
   setAddress: (uuid, record = null) =>
     set({ addressUuid: uuid, addressRecord: record, addressSerial: record?.sparky?.serialNumber ?? null }),
   reset: () =>
