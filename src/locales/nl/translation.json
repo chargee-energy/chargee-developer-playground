@@ -452,7 +452,7 @@
       },
       "groupCurtailment": {
         "title": "Groepscurtailment",
-        "description": "Curtailmentactiviteit voor de groep op een gekozen dag of periode: elk flex-schema en de periode waarin het gold, met het netdoel."
+        "description": "Curtailmentactiviteit voor de groep op een gekozen dag of periode: elk flex-schema en de periode waarin het gold, met het netdoel. Optioneel inclusief individuele curtailment per omvormer."
       },
       "addressCurtailment": {
         "title": "Zonne-curtailment (adres)",
@@ -521,29 +521,49 @@
       "date": "Datum",
       "from": "Van",
       "to": "Tot",
+      "includeIndividual": "Individuele curtailment meenemen",
+      "showTelemetry": "Telemetriegrafiek tonen",
       "groupHint": "Weergave op groepsniveau. Elk flex-schema stelt een netdoel in dat geldt totdat het volgende schema het overneemt.",
+      "includeIndividualHint": "Scant daarnaast elke stuurbare omvormer in de groep op individueel geadresseerde curtailment — zowel het flexschema van de omvormer als zijn eigen schema (vermogenslimiet / nul-teruglevering). Commando’s die binnen dezelfde minuut naar meerdere omvormers gaan, worden tot één regel samengevoegd. Dit kost één request per adres plus twee per stuurbare omvormer en kan bij grote pools even duren.",
+      "telemetryOffHint": "Telemetrie staat uit, dus alleen schema’s worden gelezen — er wordt geen vermogensdata opgehaald. Schema’s worden serverzijdig niet op datum gefilterd, dus een brede periode kost niet meer dan één dag.",
+      "telemetryOnHint": "Telemetrie staat aan: de vermogenstijdlijn wordt opgehaald voor het curtailmentvenster ±1u. Dit is het trage deel — houd de periode smal.",
       "ongoing": "Lopend",
       "noLimit": "Geen limiet (100%)",
       "empty": "Geen flex-schema's actief in de gekozen periode.",
+      "noWindow": {
+        "groupOnly": "Geen curtailment gevonden in deze periode, dus er is geen telemetrievenster opgehaald. Deze groep heeft geen flexschema’s op groepsniveau — wordt er per omvormer gestuurd, vink dan “Individuele curtailment meenemen” aan en draai opnieuw.",
+        "scanned": "Geen curtailment gevonden in deze periode, niet uit groepsflexschema’s en niet uit de individuele scan per omvormer, dus er is geen telemetrievenster opgehaald."
+      },
+      "noAggregation": "Er zijn curtailmentperiodes gevonden, maar de flexaggregatie van de groep gaf geen data voor dit venster. Die aggregatie wordt alleen gevuld voor groepen die de flex-engine daadwerkelijk aanstuurt, dus een groep die geen curtailment pool is komt meestal leeg terug — kijk in dat geval naar de pool-groep.",
       "fetching": "Aggregatie ophalen… {{done}} / {{total}} pagina's",
+      "fetchingSchedules": "Flexschema’s van de groep laden…",
+      "fetchingAddresses": "Omvormers inventariseren… {{done}} / {{total}} adressen",
+      "fetchingInverters": "Schema’s lezen… {{done}} / {{total}} stuurbare omvormers",
+      "fetchingProduction": "Omvormerproductie optellen… {{done}} / {{total}} omvormers",
       "truncated": "Het aggregatievenster is groot (1-seconde-data) en is afgekapt vóór het einde. Kies een kleiner datumbereik om het volledige venster te zien.",
       "col": {
         "start": "Start",
         "end": "Einde",
         "duration": "Duur",
         "type": "Type doel",
-        "target": "Doel"
+        "target": "Doel",
+        "source": "Bron",
+        "scope": "Bereik"
       },
       "type": {
         "group": "Groep-net",
         "address": "Adres-net",
         "inverter": "Omvormercapaciteit",
+        "zeroExport": "Nul-teruglevering",
         "none": "Geen"
       },
       "metrics": {
         "curtailmentPeriods": "Curtailmentperiodes",
         "curtailedTime": "Tijd gecurtaild",
-        "totalSchedules": "Totaal flex-schema's"
+        "totalSchedules": "Totaal flex-schema's",
+        "individualSchedules": "Individuele schema’s",
+        "individualSchedulesSub": "{{inverters}} stuurbare omvormers op {{addresses}} adressen",
+        "standingNote": "plus {{duration}} aan al actieve staande limieten"
       },
       "timeline": {
         "inverters": "{{n}} omvormers",
@@ -552,7 +572,8 @@
       "overview": {
         "title": "Dagoverzicht",
         "subtitle": "{{from}} → {{to}} · curtailmentperiode gearceerd",
-        "hint": "Groeps-flexaggregatie met 1u context rond curtailment, als gemiddelden per minuut met een zon min–max-band. Gebruik Blokdetail hieronder voor volledige 1-seconde-resolutie."
+        "hint": "Groeps-flexaggregatie met 1u context rond curtailment, als gemiddelden per minuut met een zon min–max-band. Gebruik Blokdetail hieronder voor volledige 1-seconde-resolutie.",
+        "inverterHint": "Deze groep heeft geen flexaggregatie, dus de productie wordt opgeteld uit de losse omvormers op kwartierresolutie — vandaar de trapsgewijze lijn. Netlevering en -teruglevering zijn op dit pad niet beschikbaar. Gebruik Blokdetail voor apparaatresolutie."
       },
       "detail": {
         "title": "Blokdetail",
@@ -560,7 +581,8 @@
         "endBlock": "Eindblok",
         "window": "{{from}} → {{to}} · volledige resolutie",
         "loading": "Data op volledige resolutie ophalen…",
-        "empty": "Geen samples in dit blok."
+        "empty": "Geen samples in dit blok.",
+        "loadingInverters": "Omvormerproductie lezen… {{done}} / {{total}} omvormers"
       },
       "series": {
         "solarProduction": "Zonproductie",
@@ -587,6 +609,80 @@
         "estimateNote": "De gecurtailde energie is geschat aan de hand van een clear-sky zoncurve (met aanname van een NL-locatie), per curtailmentperiode geschaald op de niet-gecurtailde productie eromheen. De stippellijn toont het geschatte potentieel binnen elke periode.",
         "lowNote": "Lage betrouwbaarheid: beperkte niet-gecurtailde daglichtdata aan één kant van de gebeurtenis om de clear-sky curve te verankeren — beschouw de waarde als indicatief.",
         "noEstimate": "Onvoldoende niet-gecurtaild daglicht rond de gebeurtenis om de clear-sky curve te verankeren; alleen gemeten energie wordt getoond."
+      },
+      "source": {
+        "group": "Groepsflex",
+        "flex": "Omvormerflex",
+        "schedule": "Omvormerschema",
+        "inverterSum": "Opgeteld uit omvormers"
+      },
+      "scope": {
+        "wholeGroup": "Hele groep",
+        "inverters": "{{inverters}} omvormers · {{addresses}} adressen"
+      },
+      "bandLegend": {
+        "group": "Groepscurtailment",
+        "individual": "Individuele curtailment",
+        "standing": "Staande limiet (al actief)"
+      },
+      "coverage": {
+        "title": "Dekking omvormers",
+        "summary": "{{reporting}} van {{total}} leverden productie",
+        "subtitle": "{{n}} stuurbare omvormers leverden geen productiedata voor dit venster. Curtailmentschema’s staan per omvormer, dus een ingeplande omvormer staat nog steeds in de tabel hierboven, ook als hij hier niets rapporteert.",
+        "allReporting": "Alle stuurbare omvormers leverden productiedata voor dit venster.",
+        "export": "Dekking exporteren (CSV)",
+        "hint": "De status komt uit de laatste productiestatus van de omvormer, niet uit dit venster: “Niet verbonden” betekent dat het apparaat nooit heeft gerapporteerd, “Verouderd” dat het gestopt is. Een “Verbonden” omvormer zonder data hier betekent meestal dat de intervalaggregatie voor deze periode ontbreekt, niet dat het apparaat uit staat.",
+        "col": {
+          "inverter": "Omvormer",
+          "address": "Adres-UUID",
+          "device": "Apparaat",
+          "connection": "Verbinding",
+          "status": "Productiestatus",
+          "lastSeen": "Laatste productie",
+          "curtailed": "Gecurtaild",
+          "sparky": "Sparky"
+        },
+        "connection": {
+          "local": "Lokaal",
+          "cloud": "Cloud"
+        },
+        "status": {
+          "connected": "Verbonden",
+          "stale": "Verouderd",
+          "disconnected": "Niet verbonden"
+        },
+        "curtailedYes": "Aangestuurd",
+        "curtailedNo": "—",
+        "curtailedSilent": "{{silent}} van de {{total}} omvormers met een curtailmentcommando leverden geen productiedata, dus het effect van de curtailment is voor die apparaten niet te verifiëren. De groepstotalen en de geschatte impact zijn alleen gebaseerd op de omvormers die wél rapporteerden.",
+        "curtailedAllReporting": "Alle {{total}} omvormers met een curtailmentcommando leverden productiedata — de stille omvormers zijn in dit venster niet gecurtaild.",
+        "sparky": {
+          "check": "Sparky-verbinding controleren",
+          "checking": "Sparky’s controleren… {{done}} / {{total}}",
+          "connected": "Verbonden",
+          "since": "Losgekoppeld {{at}}",
+          "none": "Geen Sparky"
+        }
+      },
+      "funnel": {
+        "title": "Curtailmenttrechter",
+        "subtitle": "Elke stap is een deelverzameling van de stap erboven, dus het gat tussen twee regels laat zien waar omvormers afvallen.",
+        "found": "Omvormers in de groep",
+        "steerable": "Stuurbaar",
+        "commanded": "Commando ontvangen",
+        "provable": "Productiedata geleverd",
+        "dropped": "−{{n}} hier afgevallen",
+        "noTelemetry": "Zet de telemetriegrafiek aan om de laatste stap toe te voegen — of de aangestuurde omvormers daadwerkelijk productiedata leverden die bewijst dat de curtailment is aangekomen.",
+        "hint": "“Commando ontvangen” telt stuurbare omvormers met een curtailmentperiode die het venster overlapt, inclusief limieten die eerder zijn gezet. Omvormers die bij “Stuurbaar” afvallen zijn cloud-only en kunnen helemaal niet gecurtaild worden."
+      },
+      "exportPdf": "PDF exporteren",
+      "exportingPdf": "PDF maken…",
+      "header": {
+        "withIndividual": "individuele curtailment meegenomen",
+        "groupOnly": "alleen groepsschema’s",
+        "telemetryOff": "telemetrie uit",
+        "telemetryAggregation": "telemetrie uit flexaggregatie",
+        "telemetryInverters": "telemetrie opgeteld uit omvormers",
+        "telemetryEmpty": "telemetrie gaf geen data"
       }
     }
   },

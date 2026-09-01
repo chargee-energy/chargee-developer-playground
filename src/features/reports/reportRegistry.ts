@@ -51,5 +51,7 @@ export const reportTemplates: ReportTemplate[] = [
   { id: 'allHvacs', icon: FireIcon, scope: 'group', Component: AllHvacsReport },
   { id: 'allBatteries', icon: Battery50Icon, scope: 'group', Component: AllBatteriesReport },
   { id: 'allMeters', icon: BoltIcon, scope: 'group', Component: AllMetersReport },
-  { id: 'groupCurtailment', icon: BoltSlashIcon, scope: 'group', Component: GroupCurtailmentReport, curtailmentPoolOnly: true },
+  // Not pool-gated: the group flex endpoints answer for any group, and a
+  // non-pool group is a useful control when comparing curtailment behaviour.
+  { id: 'groupCurtailment', icon: BoltSlashIcon, scope: 'group', Component: GroupCurtailmentReport },
 ]

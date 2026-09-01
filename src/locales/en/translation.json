@@ -452,7 +452,7 @@
       },
       "groupCurtailment": {
         "title": "Group curtailment",
-        "description": "Curtailment activity for the group on a chosen day or date range: every flex schedule and the time period it applied, with its grid target."
+        "description": "Curtailment activity for the group on a chosen day or date range: every flex schedule and the time period it applied, with its grid target. Optionally includes individual, per-inverter curtailment."
       },
       "addressCurtailment": {
         "title": "Solar curtailment (address)",
@@ -521,29 +521,49 @@
       "date": "Date",
       "from": "From",
       "to": "To",
+      "includeIndividual": "Include individual curtailment",
+      "showTelemetry": "Show telemetry graph",
       "groupHint": "Group-level view. Each flex schedule sets a grid target that holds until the next schedule takes over.",
+      "includeIndividualHint": "Also scans every steerable inverter in the group for individually addressed curtailment — both the inverter's flex schedule and its own schedule (power limit / zero export). Commands sent to many inverters within the same minute are folded into one row. This costs one request per address plus two per steerable inverter, so it can take a while on large pools.",
+      "telemetryOffHint": "Telemetry is off, so only schedules are read — no power data is fetched. Schedules aren’t date-filtered server-side, so a wide date range costs no more than a single day.",
+      "telemetryOnHint": "Telemetry is on: the power timeline is fetched for the curtailment window ±1h. This is the slow part — keep the date range narrow.",
       "ongoing": "Ongoing",
       "noLimit": "No limit (100%)",
       "empty": "No flex schedules active in the selected period.",
+      "noWindow": {
+        "groupOnly": "No curtailment found in this period, so no telemetry window was fetched. This group has no group-level flex schedules — if it is steered per inverter, tick “Include individual curtailment” and run again.",
+        "scanned": "No curtailment found in this period, from either group flex schedules or the individual per-inverter scan, so no telemetry window was fetched."
+      },
+      "noAggregation": "Curtailment periods were found, but the group flex aggregation returned no data for this window. That aggregation is only populated for groups the flex engine actually steers, so a non-curtailment-pool group will usually come back empty — check the pool group instead.",
       "fetching": "Fetching aggregation… {{done}} / {{total}} pages",
+      "fetchingSchedules": "Loading group flex schedules…",
+      "fetchingAddresses": "Listing inverters… {{done}} / {{total}} addresses",
+      "fetchingInverters": "Reading schedules… {{done}} / {{total}} steerable inverters",
+      "fetchingProduction": "Summing inverter production… {{done}} / {{total}} inverters",
       "truncated": "The aggregation window is large (1-second data) and was capped before the end. Narrow the date range to see the full window.",
       "col": {
         "start": "Start",
         "end": "End",
         "duration": "Duration",
         "type": "Target type",
-        "target": "Target"
+        "target": "Target",
+        "source": "Source",
+        "scope": "Scope"
       },
       "type": {
         "group": "Group grid",
         "address": "Address grid",
         "inverter": "Inverter capacity",
+        "zeroExport": "Zero export",
         "none": "None"
       },
       "metrics": {
         "curtailmentPeriods": "Curtailment periods",
         "curtailedTime": "Time curtailed",
-        "totalSchedules": "Total flex schedules"
+        "totalSchedules": "Total flex schedules",
+        "individualSchedules": "Individual schedules",
+        "individualSchedulesSub": "{{inverters}} steerable inverters across {{addresses}} addresses",
+        "standingNote": "plus {{duration}} of standing limits already in effect"
       },
       "timeline": {
         "inverters": "{{n}} solar inverters",
@@ -552,7 +572,8 @@
       "overview": {
         "title": "Day overview",
         "subtitle": "{{from}} → {{to}} · curtailment period shaded",
-        "hint": "Group flex aggregation with 1h of context around curtailment, as per-minute averages with a solar min–max band. Use Block detail below for full 1-second resolution."
+        "hint": "Group flex aggregation with 1h of context around curtailment, as per-minute averages with a solar min–max band. Use Block detail below for full 1-second resolution.",
+        "inverterHint": "This group has no flex aggregation, so production is summed from the individual inverters at 15-minute resolution — hence the stepped line. Grid delivery and return are unavailable on this path. Use Block detail for device-resolution data."
       },
       "detail": {
         "title": "Block detail",
@@ -560,7 +581,8 @@
         "endBlock": "End block",
         "window": "{{from}} → {{to}} · full resolution",
         "loading": "Fetching full-resolution data…",
-        "empty": "No samples in this block."
+        "empty": "No samples in this block.",
+        "loadingInverters": "Reading inverter production… {{done}} / {{total}} inverters"
       },
       "series": {
         "solarProduction": "Solar production",
@@ -587,6 +609,80 @@
         "estimateNote": "Curtailed energy is estimated against a clear-sky solar shape (assuming an NL location), scaled per curtailment period to the group's uncurtailed production around it. The dashed line shows the estimated potential within each period.",
         "lowNote": "Low confidence: limited uncurtailed daylight on one side of the event to anchor the clear-sky curve — treat the figure as indicative.",
         "noEstimate": "Not enough uncurtailed daylight around the event to anchor the clear-sky curve; showing measured energy only."
+      },
+      "source": {
+        "group": "Group flex",
+        "flex": "Inverter flex",
+        "schedule": "Inverter schedule",
+        "inverterSum": "Summed from inverters"
+      },
+      "scope": {
+        "wholeGroup": "Whole group",
+        "inverters": "{{inverters}} inverters · {{addresses}} addresses"
+      },
+      "bandLegend": {
+        "group": "Group curtailment",
+        "individual": "Individual curtailment",
+        "standing": "Standing limit (already in effect)"
+      },
+      "coverage": {
+        "title": "Inverter coverage",
+        "summary": "{{reporting}} of {{total}} returned production",
+        "subtitle": "{{n}} steerable inverters returned no production data for this window. Curtailment schedules are stored per inverter, so a scheduled inverter still appears in the table above even when it reports nothing here.",
+        "allReporting": "Every steerable inverter returned production data for this window.",
+        "export": "Export coverage CSV",
+        "hint": "Status comes from the inverter’s last production state, not from this window: “Disconnected” means the device has never reported, “Stale” that it stopped. A “Connected” inverter with no data here usually means the interval aggregation is missing for this period rather than the device being down.",
+        "col": {
+          "inverter": "Inverter",
+          "address": "Address UUID",
+          "device": "Device",
+          "connection": "Connection",
+          "status": "Production status",
+          "lastSeen": "Last production",
+          "curtailed": "Curtailed",
+          "sparky": "Sparky"
+        },
+        "connection": {
+          "local": "Local",
+          "cloud": "Cloud"
+        },
+        "status": {
+          "connected": "Connected",
+          "stale": "Stale",
+          "disconnected": "Disconnected"
+        },
+        "curtailedYes": "Commanded",
+        "curtailedNo": "—",
+        "curtailedSilent": "{{silent}} of the {{total}} inverters under a curtailment command returned no production data, so the effect of the curtailment cannot be verified for those devices. The group totals and the estimated impact are based only on the inverters that did report.",
+        "curtailedAllReporting": "All {{total}} inverters under a curtailment command returned production data — the silent inverters were never curtailed in this window.",
+        "sparky": {
+          "check": "Check Sparky connection",
+          "checking": "Checking Sparkies… {{done}} / {{total}}",
+          "connected": "Connected",
+          "since": "Disconnected {{at}}",
+          "none": "No Sparky"
+        }
+      },
+      "funnel": {
+        "title": "Curtailment funnel",
+        "subtitle": "Each step is a subset of the one above it, so the gap between two rows is where inverters drop out.",
+        "found": "Inverters in the group",
+        "steerable": "Steerable",
+        "commanded": "Received a command",
+        "provable": "Returned production data",
+        "dropped": "−{{n}} dropped here",
+        "noTelemetry": "Turn on the telemetry graph to add the final step — whether the commanded inverters actually returned production data to prove the curtailment landed.",
+        "hint": "“Received a command” counts steerable inverters with a curtailment period overlapping the window, including limits set before it. Inverters that dropped at “Steerable” are cloud-only and cannot be curtailed at all."
+      },
+      "exportPdf": "Export PDF",
+      "exportingPdf": "Building PDF…",
+      "header": {
+        "withIndividual": "individual curtailment included",
+        "groupOnly": "group schedules only",
+        "telemetryOff": "telemetry off",
+        "telemetryAggregation": "telemetry from group flex aggregation",
+        "telemetryInverters": "telemetry summed from inverters",
+        "telemetryEmpty": "telemetry returned no data"
       }
     }
   },

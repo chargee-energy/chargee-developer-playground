@@ -33,6 +33,13 @@ interface CurtailmentChartProps {
   /** Optional second band set in a distinct colour (e.g. inverter-scoped curtailment). */
   bands2?: { start: number; end: number }[]
   band2Color?: string
+  /**
+   * Optional third band set drawn much fainter — for background state that holds
+   * across the whole view (e.g. a limit already in effect before it opened) and
+   * would otherwise read as "everything is curtailed".
+   */
+  bands3?: { start: number; end: number }[]
+  band3Color?: string
   series: SeriesDef[]
   /** Optional dashed lines (e.g. an estimated counterfactual), drawn with gaps. */
   dashed?: SeriesDef[]
@@ -61,6 +68,8 @@ export function CurtailmentChart({
   bandColor = '#6245DE',
   bands2,
   band2Color = '#FF8500',
+  bands3,
+  band3Color = '#696969',
   series,
   dashed,
   range,
@@ -96,11 +105,23 @@ export function CurtailmentChart({
       .filter((b) => b.end > b.start)
   const visibleBands = clamp(bands)
   const visibleBands2 = clamp(bands2)
+  const visibleBands3 = clamp(bands3)
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={data} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#D5D3CE" vertical={false} />
+        {visibleBands3.map((b, i) => (
+          <ReferenceArea
+            key={`b3-${i}`}
+            x1={b.start}
+            x2={b.end}
+            fill={band3Color}
+            fillOpacity={0.04}
+            stroke="none"
+            ifOverflow="extendDomain"
+          />
+        ))}
         {visibleBands.map((b, i) => (
           <ReferenceArea
             key={`b1-${i}`}
