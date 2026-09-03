@@ -19,7 +19,7 @@ function MetricCard({ label, value, sub }: ReportMetric) {
 
 interface ReportRunnerProps<TRow> {
   title: string
-  description: string
+  description: ReactNode
   status: ReportStatus
   progress: { done: number; total: number }
   rows: TRow[]
@@ -40,6 +40,10 @@ interface ReportRunnerProps<TRow> {
   tableToolbar?: ReactNode
   /** Override the running-progress label (defaults to the per-address message). */
   progressText?: string
+  /** Extra buttons rendered in the header card beside Regenerate / Download CSV. */
+  extraActions?: ReactNode
+  /** Put the header card above the filters instead of below them. */
+  headerFirst?: boolean
 }
 
 /**
@@ -66,6 +70,8 @@ export function ReportRunner<TRow extends Record<string, any>>({
   filters,
   tableToolbar,
   progressText,
+  extraActions,
+  headerFirst = false,
 }: ReportRunnerProps<TRow>) {
   const { t } = useTranslation()
 
@@ -74,38 +80,44 @@ export function ReportRunner<TRow extends Record<string, any>>({
   const progressPct = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
   const finished = status === 'done' || status === 'cancelled'
 
-  return (
-    <div className="space-y-5">
-      {filters}
-
-      <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-dark-blue">{title}</p>
-          <p className="mt-1 text-13 text-text-gray">{description}</p>
-          {generatedAt && !running && (
-            <p className="mt-1 text-11 text-text-gray">
-              {t('reports.generatedAt', { time: new Date(generatedAt).toLocaleString() })}
-            </p>
-          )}
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {running ? (
-            <button className="btn-secondary" onClick={onCancel}>
-              <StopIcon className="size-4" />
-              {t('reports.cancel')}
-            </button>
-          ) : (
-            <button className="btn-primary" onClick={onRun} disabled={!canRun}>
-              <ArrowPathIcon className="size-4" />
-              {finished ? t('reports.regenerate') : t('reports.generate')}
-            </button>
-          )}
-          <button className="btn-secondary" onClick={() => downloadCsv(csvFilename, rows)} disabled={rows.length === 0}>
-            <ArrowDownTrayIcon className="size-4" />
-            {t('reports.downloadCsv')}
-          </button>
-        </div>
+  const header = (
+    <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-dark-blue">{title}</p>
+        <p className="mt-1 text-13 text-text-gray">{description}</p>
+        {generatedAt && !running && (
+          <p className="mt-1 text-11 text-text-gray">
+            {t('reports.generatedAt', { time: new Date(generatedAt).toLocaleString() })}
+          </p>
+        )}
       </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        {running ? (
+          <button className="btn-secondary" onClick={onCancel}>
+            <StopIcon className="size-4" />
+            {t('reports.cancel')}
+          </button>
+        ) : (
+          <button className="btn-primary" onClick={onRun} disabled={!canRun}>
+            <ArrowPathIcon className="size-4" />
+            {finished ? t('reports.regenerate') : t('reports.generate')}
+          </button>
+        )}
+        <button className="btn-secondary" onClick={() => downloadCsv(csvFilename, rows)} disabled={rows.length === 0}>
+          <ArrowDownTrayIcon className="size-4" />
+          {t('reports.downloadCsv')}
+        </button>
+        {extraActions}
+      </div>
+    </div>
+  )
+
+  return (
+    // data-pdf-group marks this as a layout wrapper, so the PDF export captures
+    // the cards inside it individually rather than as one oversized canvas.
+    <div className="space-y-5" data-pdf-group>
+      {headerFirst ? header : filters}
+      {headerFirst ? filters : header}
 
       {running && (
         <div className="card space-y-3 p-5">
