@@ -53,8 +53,12 @@ interface TabModel {
 export function DevicesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { addressUuid, addressRecord, addressSerial } = useContextStore()
+  const { groupUuid, addressUuid, addressRecord, addressSerial } = useContextStore()
   const a = addressUuid ?? ''
+  // Sparky and flint only come with an address picked from a group's list. For
+  // a looked-up address (or one hydrated from the URL) a missing device is
+  // unknown rather than absent — no endpoint returns them per address.
+  const devicesUnknown = !groupUuid || !addressRecord
   const enabled = { query: { enabled: !!addressUuid } }
   const [detail, setDetail] = useState<DeviceDetail | null>(null)
 
@@ -169,13 +173,13 @@ export function DevicesPage() {
       rows: addressRecord?.sparky ? [addressRecord.sparky] : [],
       telemetry: 'sparky',
       idField: 'serialNumber',
-      emptyMessage: t('devices.emptySparky'),
+      emptyMessage: t(devicesUnknown ? 'devices.unknownSparky' : 'devices.emptySparky'),
       cols: [
         { key: 'serialNumber', header: 'serial' },
         { key: 'boxCode', header: 'box code', render: (r) => formatBoxCode(r.boxCode) },
       ],
     },
-    { key: 'flint', icon: CpuChipIcon, rows: addressRecord?.flint ? [addressRecord.flint] : [], idField: 'serialNumber', emptyMessage: t('devices.emptyFlint') },
+    { key: 'flint', icon: CpuChipIcon, rows: addressRecord?.flint ? [addressRecord.flint] : [], idField: 'serialNumber', emptyMessage: t(devicesUnknown ? 'devices.unknownFlint' : 'devices.emptyFlint') },
   ]
 
   const openDetail = (tab: TabModel, row: any) => {

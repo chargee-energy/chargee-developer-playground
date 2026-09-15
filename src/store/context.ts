@@ -40,12 +40,22 @@ export const useContextStore = create<ContextState>((set) => ({
   setAddress: (uuid, record = null) =>
     set({ addressUuid: uuid, addressRecord: record, addressSerial: record?.sparky?.serialNumber ?? null }),
   selectLookedUpAddress: (record) =>
-    set({
-      groupUuid: null,
-      groupName: null,
-      addressUuid: record.uuid,
-      addressRecord: record,
-      addressSerial: record.sparky?.serialNumber ?? null,
+    set((state) => {
+      // A lookup only knows the device it was found by, so keep the devices
+      // earlier lookups found for the same address (e.g. its sparky, then its flint).
+      const known = state.addressUuid === record.uuid ? state.addressRecord : null
+      const merged: GroupAddressDto = {
+        ...record,
+        sparky: record.sparky ?? known?.sparky ?? null,
+        flint: record.flint ?? known?.flint ?? null,
+      }
+      return {
+        groupUuid: null,
+        groupName: null,
+        addressUuid: merged.uuid,
+        addressRecord: merged,
+        addressSerial: merged.sparky?.serialNumber ?? null,
+      }
     }),
   reset: () =>
     set({ groupUuid: null, groupName: null, addressUuid: null, addressRecord: null, addressSerial: null }),

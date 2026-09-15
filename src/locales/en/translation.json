@@ -214,6 +214,8 @@
     "empty": "No devices of this type",
     "emptySparky": "No sparky connected to this address.",
     "emptyFlint": "No flint connected to this address.",
+    "unknownSparky": "Sparky not known: this address wasn't picked from a group. Look up its sparky serial or box code to add it.",
+    "unknownFlint": "Flint not known: this address wasn't picked from a group. Look up its flint serial to add it.",
     "live": "Live",
     "cloud": "Cloud",
     "connected": "Connected",
