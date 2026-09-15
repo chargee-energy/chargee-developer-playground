@@ -135,6 +135,9 @@
     "scheduleWarnTitle": "For debugging only",
     "scheduleWarnBody": "The playground is not meant to manage schedules and may only be used for debugging or early testing.",
     "typeGroupToConfirm": "To continue, type the group name: {{name}}",
+    "address": "Address",
+    "typeAddressToConfirm": "To continue, type the address identifier: {{name}}",
+    "readOnlyRole": "Your role has read-only access.",
     "select": "Select",
     "none": "None",
     "yes": "Yes",
@@ -146,7 +149,11 @@
     "selectGroup": "Select a group",
     "selectAddress": "Select an address",
     "noGroup": "No group selected",
-    "noAddress": "No address selected"
+    "noAddress": "No address selected",
+    "lookup": "Find",
+    "lookupPlaceholder": "UUID, serial, box code or EAN",
+    "lookupNotFound": "No address found, or you don't have access to it.",
+    "clearAddress": "Clear address"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -173,7 +180,9 @@
     "viewDevices": "View devices",
     "selectGroupFirst": "Select a group to list its addresses.",
     "searchNote": "Search matches across all addresses in the group.",
-    "loadedNote": "Showing the first {{loaded}} of {{total}} addresses."
+    "loadedNote": "Showing the first {{loaded}} of {{total}} addresses.",
+    "lookupTitle": "Look up an address",
+    "lookupBody": "Select a group to browse its addresses, or find a single address by its UUID, sparky or flint serial, box code or EAN."
   },
   "devices": {
     "title": "Devices",
@@ -222,6 +231,8 @@
     "title": "Reports",
     "subtitle": "Generate group-wide and individual address reports.",
     "selectGroupFirst": "Select a group to generate reports.",
+    "selectGroupOrAddress": "Select a group, or look up an address in the bar above, to generate reports.",
+    "selectGroupHint": "Select a group to run these reports.",
     "selectAddressFirst": "Select an address in the bar above to run this report.",
     "curtailmentPoolOnly": "This report is only available for curtailment pool groups.",
     "selectAddressHint": "These reports run for the address selected in the bar above.",
@@ -743,6 +754,52 @@
     "resolutionLabel": "Resolution",
     "elecRange": "Electricity readings",
     "gasRange": "Gas readings",
+    "charger": {
+      "period": "Period",
+      "mode": {
+        "single": "Single day",
+        "range": "Date range"
+      },
+      "date": "Date",
+      "from": "From",
+      "to": "To",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "hint": "Raw charger readings for the selected period. The API returns at most 1000 readings per request, so longer periods are fetched page by page — keep the period narrow for high-resolution chargers.",
+      "invalid": "The end of the period must be after its start.",
+      "fetching": "Fetching readings… {{pages}} pages",
+      "truncated": "Stopped after {{pages}} pages ({{readings}} readings); the data ends at {{time}}. Narrow the period to see the rest.",
+      "metric": {
+        "power": "Power",
+        "current": "Current",
+        "voltage": "Voltage"
+      },
+      "powerRange": "Power min–max",
+      "metrics": {
+        "energy": "Energy",
+        "energySub": "Integrated from power",
+        "peak": "Peak power",
+        "peakSub": "at {{time}}",
+        "charging": "Time charging",
+        "chargingSub": "Power above {{watts}} W",
+        "readings": "Readings",
+        "readingsSub": "~{{interval}} between readings"
+      },
+      "overview": {
+        "title": "Overview",
+        "subtitle": "{{from}} → {{to}}",
+        "hintAveraged": "Averaged per {{bucket}}. Use Block detail below for full resolution.",
+        "hintRaw": "Full resolution — every reading in the period."
+      },
+      "detail": {
+        "title": "Block detail",
+        "startBlock": "Start block",
+        "peakBlock": "Peak block",
+        "endBlock": "End block",
+        "window": "{{from}} → {{to}} · full resolution",
+        "empty": "No readings in this block."
+      }
+    },
     "noReadings": "No readings for the selected period."
   },
   "schedules": {

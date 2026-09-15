@@ -14,6 +14,7 @@ import {
 } from '@/api/generated/smart-meters/smart-meters'
 import type { SolarInverterFlexScheduleDto, ScheduleDto } from '@/api/generated/model'
 import { AbortedError, mapWithConcurrency } from '@/utils/concurrency'
+import { pageReadings } from '@/utils/pageReadings'
 import { useReportCache } from '@/store/reportCache'
 import type { ReportStatus } from './useAddressReport'
 
@@ -201,43 +202,6 @@ function curtailmentBands(periods: Period[], windowStart: number, windowEnd: num
 }
 
 const inBands = (t: number, bands: Band[]) => bands.some((b) => t >= b.start && t < b.end)
-
-/**
- * Page a raw-reading endpoint by time. These endpoints ignore `offset` and cap at
- * DETAIL_LIMIT rows (~16 min of ~1s data), so we advance `fromDate` past the last
- * returned row each page (dropping the repeated boundary sample) until a short
- * page signals the window is exhausted. Mirrors the group report's aggregation
- * pager. `onRows` receives each page's fresh rows.
- */
-async function pageReadings<T>(
-  fromMs: number,
-  toMs: number,
-  fetchPage: (fromIso: string, toIso: string) => Promise<T[]>,
-  timeOf: (row: T) => number,
-  onRows: (rows: T[]) => void,
-  signal: AbortSignal,
-): Promise<void> {
-  const toIso = new Date(toMs).toISOString()
-  let cursorMs = fromMs
-  let lastMs = Number.NEGATIVE_INFINITY
-  let pages = 0
-  while (cursorMs < toMs && pages < MAX_DETAIL_PAGES) {
-    if (signal.aborted) break
-    const rows = await fetchPage(new Date(cursorMs).toISOString(), toIso)
-    pages++
-    const fresh = rows.filter((r) => {
-      const t = timeOf(r)
-      return Number.isFinite(t) && t > lastMs
-    })
-    if (fresh.length > 0) {
-      onRows(fresh)
-      lastMs = timeOf(fresh[fresh.length - 1])
-    }
-    // Full page & advancing → more data remains; otherwise the window is done.
-    if (rows.length >= DETAIL_LIMIT && fresh.length > 0 && lastMs > cursorMs) cursorMs = lastMs
-    else break
-  }
-}
 
 async function loadFlexSchedules(addressUuid: string, invId: string, signal: AbortSignal): Promise<SolarInverterFlexScheduleDto[]> {
   const res = await solarInverterFlexScheduleControllerListV2(addressUuid, invId, { limit: SCHEDULE_PAGE }, undefined, signal)
@@ -680,6 +644,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
                 }
               },
               signal,
+              { limit: DETAIL_LIMIT, maxPages: MAX_DETAIL_PAGES },
             )
             foldDevice(del, (p, avg) => (p.delivery = (p.delivery ?? 0) + avg))
             foldDevice(ret, (p, avg) => (p.return = (p.return ?? 0) + avg))
@@ -713,6 +678,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
                 }
               },
               signal,
+              { limit: DETAIL_LIMIT, maxPages: MAX_DETAIL_PAGES },
             )
             foldDevice(sol, (p, avg) => (p.solarProduction = (p.solarProduction ?? 0) + avg))
           },

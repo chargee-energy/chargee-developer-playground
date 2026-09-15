@@ -32,11 +32,13 @@ export interface ReportTemplate {
   Component: ComponentType
   /** Only available when the selected group is a curtailment pool. */
   curtailmentPoolOnly?: boolean
+  /** Address-scoped, but also needs a selected group (e.g. to sample peers). */
+  requiresGroup?: boolean
 }
 
 // Add new report templates here — they appear automatically in the hub gallery.
 export const reportTemplates: ReportTemplate[] = [
-  { id: 'benchmark', icon: ScaleIcon, scope: 'address', Component: BenchmarkReport },
+  { id: 'benchmark', icon: ScaleIcon, scope: 'address', Component: BenchmarkReport, requiresGroup: true },
   { id: 'batteryAdvice', icon: Battery100Icon, scope: 'address', Component: BatteryReport },
   {
     id: 'addressCurtailment',

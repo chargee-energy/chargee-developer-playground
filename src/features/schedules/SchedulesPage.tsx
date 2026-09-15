@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/common/EmptyState'
 import { TypeToConfirmDialog } from '@/components/common/TypeToConfirmDialog'
 import { ScheduleModal } from './ScheduleModal'
 import { useContextStore } from '@/store/context'
+import { useIsReadOnly } from '@/store/auth'
 import { fmtDateTime } from '@/utils/format'
 import type { CreateScheduleDto, ScheduleDto } from '@/api/generated/model'
 import { useSolarInvertersControllerListV2 } from '@/api/generated/solar-inverters/solar-inverters'
@@ -18,12 +19,21 @@ import {
 
 export function SchedulesPage() {
   const { t } = useTranslation()
-  const { addressUuid, groupName } = useContextStore()
+  const { addressUuid, addressSerial, groupName } = useContextStore()
+  const readOnly = useIsReadOnly()
   const addr = addressUuid ?? ''
   const [warnOpen, setWarnOpen] = useState(false)
   const [inverterId, setInverterId] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [toDelete, setToDelete] = useState<ScheduleDto | null>(null)
+
+  // Writes are confirmed by typing the group name. An address looked up
+  // without a group has none, so confirm with its sparky serial or UUID prefix.
+  const confirmWord = groupName ?? addressSerial ?? addr.slice(0, 8)
+  const confirmCopy = groupName
+    ? {}
+    : { wordLabel: t('common.address'), wordHint: t('common.typeAddressToConfirm', { name: confirmWord }) }
+  const readOnlyTitle = readOnly ? t('common.readOnlyRole') : undefined
 
   const invertersQuery = useSolarInvertersControllerListV2(addr, {
     query: { enabled: !!addressUuid },
@@ -83,7 +93,8 @@ export function SchedulesPage() {
         action={
           <button
             className="btn-primary"
-            disabled={!activeInverter}
+            disabled={!activeInverter || readOnly}
+            title={readOnlyTitle}
             onClick={() => setWarnOpen(true)}
           >
             <PlusIcon className="size-4" />
@@ -130,7 +141,12 @@ export function SchedulesPage() {
                           : `${t('schedules.powerLimit')}: ${String(s.powerlimit ?? '—')}`}
                       </p>
                     </div>
-                    <button className="btn-ghost text-red" onClick={() => setToDelete(s)}>
+                    <button
+                      className="btn-ghost text-red"
+                      disabled={readOnly}
+                      title={readOnlyTitle}
+                      onClick={() => setToDelete(s)}
+                    >
                       <TrashIcon className="size-4" />
                       {t('common.delete')}
                     </button>
@@ -146,7 +162,8 @@ export function SchedulesPage() {
         open={warnOpen}
         title={t('common.scheduleWarnTitle')}
         body={t('common.scheduleWarnBody')}
-        confirmWord={groupName ?? ''}
+        confirmWord={confirmWord}
+        {...confirmCopy}
         onClose={() => setWarnOpen(false)}
         onConfirm={() => {
           setWarnOpen(false)
@@ -164,7 +181,8 @@ export function SchedulesPage() {
         destructive
         title={t('common.delete')}
         body={`${t('schedules.deleteConfirm')} ${t('common.scheduleWarnBody')}`}
-        confirmWord={groupName ?? ''}
+        confirmWord={confirmWord}
+        {...confirmCopy}
         confirmLabel={t('common.delete')}
         busy={deleteMutation.isPending}
         onConfirm={handleDelete}

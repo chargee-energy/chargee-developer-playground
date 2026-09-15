@@ -9,6 +9,10 @@ interface TypeToConfirmDialogProps {
   body: string
   /** The exact word the user must type to enable confirmation (e.g. group name). */
   confirmWord: string
+  /** Label above the input; defaults to "Group name". */
+  wordLabel?: string
+  /** Instruction naming the word to type; defaults to the group-name prompt. */
+  wordHint?: string
   confirmLabel?: string
   destructive?: boolean
   busy?: boolean
@@ -22,6 +26,8 @@ export function TypeToConfirmDialog({
   title,
   body,
   confirmWord,
+  wordLabel,
+  wordHint,
   confirmLabel,
   destructive,
   busy,
@@ -76,10 +82,10 @@ export function TypeToConfirmDialog({
 
               <div className="mt-5">
                 <label className="label" htmlFor="confirm-word">
-                  {t('common.groupName')}
+                  {wordLabel ?? t('common.groupName')}
                 </label>
                 <p className="mb-1.5 text-13 text-text-gray">
-                  {t('common.typeGroupToConfirm', { name: confirmWord })}
+                  {wordHint ?? t('common.typeGroupToConfirm', { name: confirmWord })}
                 </p>
                 <input
                   id="confirm-word"
