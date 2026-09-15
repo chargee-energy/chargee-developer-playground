@@ -743,6 +743,52 @@
     "resolutionLabel": "Resolutie",
     "elecRange": "Elektriciteitsmetingen",
     "gasRange": "Gasmetingen",
+    "charger": {
+      "period": "Periode",
+      "mode": {
+        "single": "Eén dag",
+        "range": "Periode"
+      },
+      "date": "Datum",
+      "from": "Van",
+      "to": "Tot",
+      "startTime": "Starttijd",
+      "endTime": "Eindtijd",
+      "hint": "Ruwe laadpaalmetingen voor de gekozen periode. De API geeft maximaal 1000 metingen per request terug, dus langere periodes worden pagina voor pagina opgehaald — houd de periode smal bij laadpalen met een hoge resolutie.",
+      "invalid": "Het einde van de periode moet na het begin liggen.",
+      "fetching": "Metingen ophalen… {{pages}} pagina's",
+      "truncated": "Gestopt na {{pages}} pagina's ({{readings}} metingen); de data eindigt om {{time}}. Kies een kortere periode om de rest te zien.",
+      "metric": {
+        "power": "Vermogen",
+        "current": "Stroom",
+        "voltage": "Spanning"
+      },
+      "powerRange": "Vermogen min–max",
+      "metrics": {
+        "energy": "Energie",
+        "energySub": "Berekend uit vermogen",
+        "peak": "Piekvermogen",
+        "peakSub": "om {{time}}",
+        "charging": "Laadtijd",
+        "chargingSub": "Vermogen boven {{watts}} W",
+        "readings": "Metingen",
+        "readingsSub": "~{{interval}} tussen metingen"
+      },
+      "overview": {
+        "title": "Overzicht",
+        "subtitle": "{{from}} → {{to}}",
+        "hintAveraged": "Gemiddeld per {{bucket}}. Gebruik Blokdetail hieronder voor volledige resolutie.",
+        "hintRaw": "Volledige resolutie — elke meting in de periode."
+      },
+      "detail": {
+        "title": "Blokdetail",
+        "startBlock": "Startblok",
+        "peakBlock": "Piekblok",
+        "endBlock": "Eindblok",
+        "window": "{{from}} → {{to}} · volledige resolutie",
+        "empty": "Geen metingen in dit blok."
+      }
+    },
     "noReadings": "Geen metingen voor de geselecteerde periode."
   },
   "schedules": {

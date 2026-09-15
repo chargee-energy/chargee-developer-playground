@@ -7,7 +7,7 @@ import { downloadCsv } from '@/utils/csv'
 import type { ReportStatus } from './useAddressReport'
 import type { ReportMetric } from './reportMetrics'
 
-function MetricCard({ label, value, sub }: ReportMetric) {
+export function MetricCard({ label, value, sub }: ReportMetric) {
   return (
     <div className="rounded-2xl border border-beige-2 bg-white p-4">
       <p className="text-11 font-bold uppercase tracking-wide text-text-gray">{label}</p>
