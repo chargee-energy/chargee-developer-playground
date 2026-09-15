@@ -214,6 +214,8 @@
     "empty": "Geen apparaten van dit type",
     "emptySparky": "Geen sparky verbonden met dit adres.",
     "emptyFlint": "Geen flint verbonden met dit adres.",
+    "unknownSparky": "Sparky onbekend: dit adres is niet via een groep gekozen. Zoek het sparky-serienummer of de box-code op om die toe te voegen.",
+    "unknownFlint": "Flint onbekend: dit adres is niet via een groep gekozen. Zoek het flint-serienummer op om die toe te voegen.",
     "live": "Live",
     "cloud": "Cloud",
     "connected": "Verbonden",

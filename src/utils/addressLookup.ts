@@ -12,6 +12,15 @@ import {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const EAN_RE = /^\d{18}$/
+// Whitespace plus invisible format characters (zero-width spaces, BOM) that ride along when copying.
+const STRAY_CHARS_RE = /[\s\p{Cf}]+/gu
+
+/**
+ * Strip every space, tab and newline from lookup input. No identifier contains
+ * whitespace, and a pasted value often carries a stray one that makes an
+ * otherwise valid lookup miss.
+ */
+export const normalizeLookupInput = (input: string) => input.replace(STRAY_CHARS_RE, '')
 
 function addressRecord(
   uuid: string,
@@ -34,7 +43,7 @@ function addressRecord(
  * only if nothing matched and a request never got a response (network).
  */
 export async function lookupAddress(input: string, signal?: AbortSignal): Promise<GroupAddressDto | null> {
-  const q = input.trim()
+  const q = normalizeLookupInput(input)
   if (!q) return null
   if (UUID_RE.test(q)) return addressRecord(q.toLowerCase())
 
