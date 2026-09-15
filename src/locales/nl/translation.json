@@ -135,6 +135,9 @@
     "scheduleWarnTitle": "Alleen voor debugging",
     "scheduleWarnBody": "De playground is niet bedoeld om schema's te beheren en mag alleen voor debugging of vroege tests worden gebruikt.",
     "typeGroupToConfirm": "Typ ter bevestiging de groepsnaam: {{name}}",
+    "address": "Adres",
+    "typeAddressToConfirm": "Typ ter bevestiging de adres-identificatie: {{name}}",
+    "readOnlyRole": "Je rol heeft alleen leesrechten.",
     "select": "Selecteer",
     "none": "Geen",
     "yes": "Ja",
@@ -146,7 +149,11 @@
     "selectGroup": "Selecteer een groep",
     "selectAddress": "Selecteer een adres",
     "noGroup": "Geen groep geselecteerd",
-    "noAddress": "Geen adres geselecteerd"
+    "noAddress": "Geen adres geselecteerd",
+    "lookup": "Zoek",
+    "lookupPlaceholder": "UUID, serienummer, box-code of EAN",
+    "lookupNotFound": "Geen adres gevonden, of je hebt er geen toegang toe.",
+    "clearAddress": "Adres wissen"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -173,7 +180,9 @@
     "viewDevices": "Bekijk apparaten",
     "selectGroupFirst": "Selecteer een groep om de adressen te tonen.",
     "searchNote": "Zoeken doorzoekt alle adressen in de groep.",
-    "loadedNote": "Eerste {{loaded}} van {{total}} adressen getoond."
+    "loadedNote": "Eerste {{loaded}} van {{total}} adressen getoond.",
+    "lookupTitle": "Zoek een adres",
+    "lookupBody": "Selecteer een groep om de adressen te bekijken, of zoek één adres op via de UUID, het sparky- of flint-serienummer, de box-code of EAN."
   },
   "devices": {
     "title": "Apparaten",
@@ -222,6 +231,8 @@
     "title": "Rapporten",
     "subtitle": "Genereer groepsbrede en individuele adresrapporten.",
     "selectGroupFirst": "Selecteer een groep om rapporten te genereren.",
+    "selectGroupOrAddress": "Selecteer een groep, of zoek een adres op in de balk hierboven, om rapporten te genereren.",
+    "selectGroupHint": "Selecteer een groep om deze rapporten uit te voeren.",
     "selectAddressFirst": "Selecteer een adres in de balk hierboven om dit rapport uit te voeren.",
     "curtailmentPoolOnly": "Dit rapport is alleen beschikbaar voor curtailment pool-groepen.",
     "selectAddressHint": "Deze rapporten draaien voor het adres dat in de balk hierboven is geselecteerd.",

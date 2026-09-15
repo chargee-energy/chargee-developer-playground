@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowRightIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { ArrowRightIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import { PageHeader } from '@/components/PageHeader'
 import { EmptyState } from '@/components/common/EmptyState'
 import { useContextStore } from '@/store/context'
+import { useCanLookupAddresses } from '@/store/auth'
 import { useGroupControllerGetGroupsV2 } from '@/api/generated/groups/groups'
 import { reportTemplates, type ReportTemplate } from './reportRegistry'
 
@@ -35,6 +36,7 @@ function TemplateCard({ tpl, onOpen }: { tpl: ReportTemplate; onOpen: () => void
 export function ReportsPage() {
   const { t } = useTranslation()
   const { groupUuid, addressUuid } = useContextStore()
+  const canLookup = useCanLookupAddresses()
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   // Whether the selected group is a curtailment pool (gates pool-only reports).
@@ -42,13 +44,16 @@ export function ReportsPage() {
   const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 }, { query: { enabled: !!groupUuid } })
   const isCurtailmentPool =
     groupsQuery.data?.results?.find((g) => g.uuid === groupUuid)?.groupKind === 'CURTAILMENT_POOL'
-  const canSee = (tpl: ReportTemplate) => !tpl.curtailmentPoolOnly || isCurtailmentPool
+  // An address looked up without a group has no pool to check against, so
+  // pool-only reports stay available and the API decides whether there's data.
+  const canSee = (tpl: ReportTemplate) => !tpl.curtailmentPoolOnly || !groupUuid || isCurtailmentPool
+  const needsGroup = (tpl: ReportTemplate) => (tpl.scope === 'group' || !!tpl.requiresGroup) && !groupUuid
 
-  if (!groupUuid) {
+  if (!groupUuid && !addressUuid) {
     return (
       <div className="space-y-8">
         <PageHeader eyebrow={t('reports.eyebrow')} title={t('reports.title')} hideInspector />
-        <EmptyState title={t('reports.selectGroupFirst')} />
+        <EmptyState title={canLookup ? t('reports.selectGroupOrAddress') : t('reports.selectGroupFirst')} />
       </div>
     )
   }
@@ -68,7 +73,9 @@ export function ReportsPage() {
           onBack={() => setSelectedId(null)}
           hideInspector
         />
-        {needsPool ? (
+        {needsGroup(selected) ? (
+          <EmptyState title={t('reports.selectGroupFirst')} />
+        ) : needsPool ? (
           <EmptyState title={t('reports.curtailmentPoolOnly')} />
         ) : needsAddress ? (
           <EmptyState title={t('reports.selectAddressFirst')} />
@@ -111,7 +118,15 @@ export function ReportsPage() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-15 font-bold text-dark-blue">{t('reports.sectionGroup')}</h2>
+        <div>
+          <h2 className="text-15 font-bold text-dark-blue">{t('reports.sectionGroup')}</h2>
+          {!groupUuid && (
+            <p className="mt-1 inline-flex items-center gap-1 text-13 text-text-gray">
+              <UserGroupIcon className="size-4" />
+              {t('reports.selectGroupHint')}
+            </p>
+          )}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           {groupReports.map((tpl) => (
             <TemplateCard key={tpl.id} tpl={tpl} onOpen={() => setSelectedId(tpl.id)} />

@@ -8,6 +8,7 @@ import { TypeToConfirmDialog } from '@/components/common/TypeToConfirmDialog'
 import { InsightCards } from '@/components/common/InsightCards'
 import { RefreshButton } from '@/components/common/RefreshButton'
 import { useContextStore } from '@/store/context'
+import { useIsReadOnly } from '@/store/auth'
 import { fmtDateTime } from '@/utils/format'
 import type { GroupFlexScheduleDto, CreateGroupFlexScheduleDto } from '@/api/generated/model'
 import {
@@ -22,6 +23,8 @@ type TargetType = 'groupGridTargetKw' | 'addressGridTargetW' | 'solarInverterCap
 export function FlexPage() {
   const { t } = useTranslation()
   const { groupUuid, groupName } = useContextStore()
+  const readOnly = useIsReadOnly()
+  const readOnlyTitle = readOnly ? t('common.readOnlyRole') : undefined
   const group = groupUuid ?? ''
   const enabled = { query: { enabled: !!groupUuid } }
 
@@ -96,7 +99,12 @@ export function FlexPage() {
         subtitle={t('flex.subtitle')}
         primaryCall={{ method: 'GET', url: `/api/v2/groups/${group}/flex/aggregates/latest` }}
         action={
-          <button className="btn-primary" onClick={() => (showCreate ? setShowCreate(false) : setWarnOpen(true))}>
+          <button
+            className="btn-primary"
+            disabled={readOnly}
+            title={readOnlyTitle}
+            onClick={() => (showCreate ? setShowCreate(false) : setWarnOpen(true))}
+          >
             <PlusIcon className="size-4" />
             {t('flex.create')}
           </button>
@@ -182,7 +190,12 @@ export function FlexPage() {
                   <p className="font-semibold text-dark-blue">{fmtDateTime(s.time)}</p>
                   <p className="text-13 text-text-gray">{describeTarget(s)}</p>
                 </div>
-                <button className="btn-ghost text-red" onClick={() => setToDelete(s)}>
+                <button
+                  className="btn-ghost text-red"
+                  disabled={readOnly}
+                  title={readOnlyTitle}
+                  onClick={() => setToDelete(s)}
+                >
                   <TrashIcon className="size-4" />
                   {t('common.delete')}
                 </button>

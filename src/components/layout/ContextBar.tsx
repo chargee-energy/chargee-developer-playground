@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useContextStore } from '@/store/context'
+import { useCanLookupAddresses } from '@/store/auth'
 import { useGroupControllerGetGroupsV2 } from '@/api/generated/groups/groups'
 import { useGroupAddresses } from '@/hooks/useGroupAddresses'
+import { AddressLookup } from '@/components/common/AddressLookup'
 
 // Pages where picking a specific address is meaningful. Elsewhere (dashboard,
 // addresses, flex, console) the address control is hidden.
@@ -13,7 +15,8 @@ const ADDRESS_ROUTES = ['/devices', '/schedules', '/telemetry', '/reports']
 export function ContextBar() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
-  const { groupUuid, groupName, addressUuid, setGroup, setGroupName, setAddress } = useContextStore()
+  const { groupUuid, groupName, addressUuid, addressSerial, setGroup, setGroupName, setAddress } = useContextStore()
+  const canLookup = useCanLookupAddresses()
 
   const groupsQuery = useGroupControllerGetGroupsV2({ limit: 1000 })
   const groups = useMemo(
@@ -24,7 +27,13 @@ export function ContextBar() {
     [groupsQuery.data],
   )
 
-  const showAddress = ADDRESS_ROUTES.includes(pathname) && !!groupUuid
+  const onAddressRoute = ADDRESS_ROUTES.includes(pathname)
+  const showAddress = onAddressRoute && !!groupUuid
+  // Without a group (e.g. after a direct lookup) there's no list to page
+  // through, so just show which address is selected.
+  const showLookedUp = onAddressRoute && !groupUuid && !!addressUuid
+  // Roles without a group limit can also jump straight to any single address.
+  const showLookup = onAddressRoute && canLookup
 
   // Full address list (chunked), only fetched where the control is shown.
   const { addresses } = useGroupAddresses(groupUuid, showAddress)
@@ -114,6 +123,25 @@ export function ContextBar() {
           </div>
         </div>
       )}
+
+      {showLookedUp && (
+        <div className="flex items-center gap-2">
+          <span className="text-11 font-bold uppercase tracking-wide text-text-gray">
+            {t('context.address')}
+          </span>
+          <div className="flex h-9 min-w-0 items-center gap-1 rounded-full border border-beige-2 bg-white pl-3 pr-1">
+            <span className="max-w-[55vw] truncate font-mono text-13 text-dark-blue">
+              {addressSerial ? `${addressSerial} · ` : ''}
+              {addressUuid}
+            </span>
+            <button className={navBtn} onClick={() => setAddress(null)} aria-label={t('context.clearAddress')}>
+              <XMarkIcon className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showLookup && <AddressLookup />}
     </div>
   )
 }

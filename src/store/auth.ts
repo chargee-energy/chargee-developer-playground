@@ -75,3 +75,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }))
+
+// Internal Chargee roles that aren't limited to assigned groups. Compared as
+// strings: the generated role enum predates `support` (`npm run api:sync`).
+const UNSCOPED_ROLES = ['admin', 'support']
+// Roles whose write requests the API rejects.
+const READ_ONLY_ROLES = ['support']
+
+const hasRole = (roles: string[]) => (s: AuthState) => roles.includes(String(s.user?.role ?? ''))
+
+/** Whether the user can look up any single address, not just their groups'. */
+export const useCanLookupAddresses = () => useAuthStore(hasRole(UNSCOPED_ROLES))
+
+/** Whether the user can only read, so write actions should be disabled. */
+export const useIsReadOnly = () => useAuthStore(hasRole(READ_ONLY_ROLES))

@@ -6,7 +6,9 @@ import { PageHeader } from '@/components/PageHeader'
 import { DataState } from '@/components/common/DataState'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Pagination } from '@/components/common/Pagination'
+import { AddressLookup } from '@/components/common/AddressLookup'
 import { useContextStore } from '@/store/context'
+import { useCanLookupAddresses } from '@/store/auth'
 import { useGroupAddresses } from '@/hooks/useGroupAddresses'
 import { shortId, fmtDate } from '@/utils/format'
 import { formatBoxCode } from '@/utils/sparky'
@@ -17,6 +19,7 @@ export function AddressesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { groupUuid, addressUuid, setAddress } = useContextStore()
+  const canLookup = useCanLookupAddresses()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
 
@@ -46,7 +49,17 @@ export function AddressesPage() {
     return (
       <div className="space-y-8">
         <PageHeader eyebrow={t('addresses.eyebrow')} title={t('addresses.title')} hideInspector />
-        <EmptyState title={t('addresses.selectGroupFirst')} />
+        {canLookup ? (
+          // There's no endpoint listing every address, so roles without a group
+          // limit look up a single one instead.
+          <EmptyState
+            title={t('addresses.lookupTitle')}
+            description={t('addresses.lookupBody')}
+            action={<AddressLookup onFound={() => navigate('/devices')} />}
+          />
+        ) : (
+          <EmptyState title={t('addresses.selectGroupFirst')} />
+        )}
       </div>
     )
   }

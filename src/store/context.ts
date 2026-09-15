@@ -19,6 +19,11 @@ interface ContextState {
    */
   setGroupName: (name: string | null) => void
   setAddress: (uuid: string | null, record?: GroupAddressDto | null) => void
+  /**
+   * Select an address found by direct lookup. It may sit outside the selected
+   * group, so the group is cleared to keep the context consistent.
+   */
+  selectLookedUpAddress: (record: GroupAddressDto) => void
   reset: () => void
 }
 
@@ -34,6 +39,14 @@ export const useContextStore = create<ContextState>((set) => ({
   setGroupName: (name) => set({ groupName: name }),
   setAddress: (uuid, record = null) =>
     set({ addressUuid: uuid, addressRecord: record, addressSerial: record?.sparky?.serialNumber ?? null }),
+  selectLookedUpAddress: (record) =>
+    set({
+      groupUuid: null,
+      groupName: null,
+      addressUuid: record.uuid,
+      addressRecord: record,
+      addressSerial: record.sparky?.serialNumber ?? null,
+    }),
   reset: () =>
     set({ groupUuid: null, groupName: null, addressUuid: null, addressRecord: null, addressSerial: null }),
 }))
