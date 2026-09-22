@@ -226,7 +226,18 @@
     "viewTelemetry": "View telemetry",
     "identifier": "Identifier",
     "brand": "Brand",
-    "model": "Model"
+    "model": "Model",
+    "groups": {
+      "title": "Groups",
+      "subtitle": "No endpoint maps an address to its groups, or to its sparky and flint. Paging every group you can see answers both.",
+      "scan": "Find groups",
+      "rescan": "Scan again",
+      "progress": "Scanning groups… {{done}}/{{total}}",
+      "none": "Not found in any of the {{count}} groups you can see.",
+      "foundIn": "Found in {{count}} of {{scanned}} groups.",
+      "selectHint": "Select one to browse it with this address kept.",
+      "devicesRecovered": "Recovered from the group listing: {{devices}}."
+    }
   },
   "reports": {
     "eyebrow": "Group",

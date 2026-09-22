@@ -226,7 +226,18 @@
     "viewTelemetry": "Bekijk telemetrie",
     "identifier": "Identifier",
     "brand": "Merk",
-    "model": "Model"
+    "model": "Model",
+    "groups": {
+      "title": "Groepen",
+      "subtitle": "Geen endpoint koppelt een adres aan zijn groepen, of aan zijn sparky en flint. Alle zichtbare groepen doorlopen geeft beide antwoorden.",
+      "scan": "Zoek groepen",
+      "rescan": "Opnieuw zoeken",
+      "progress": "Groepen doorzoeken… {{done}}/{{total}}",
+      "none": "Niet gevonden in de {{count}} groepen die je kunt zien.",
+      "foundIn": "Gevonden in {{count}} van {{scanned}} groepen.",
+      "selectHint": "Kies er een om die te bekijken met dit adres actief.",
+      "devicesRecovered": "Opgehaald uit de groepslijst: {{devices}}."
+    }
   },
   "reports": {
     "eyebrow": "Groep",
