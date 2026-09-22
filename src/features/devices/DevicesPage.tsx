@@ -22,7 +22,9 @@ import { LiveBadge } from '@/components/common/LiveBadge'
 import { CloudBadge } from '@/components/common/CloudBadge'
 import { SolarProductionStatusBadge } from '@/components/common/SolarProductionStatusBadge'
 import { DeviceDetailDrawer, type DeviceDetail } from './DeviceDetailDrawer'
+import { AddressGroupsPanel } from './AddressGroupsPanel'
 import { useContextStore } from '@/store/context'
+import { useAddressGroups } from '@/hooks/useAddressGroups'
 import { useTelemetryStore } from '@/store/telemetry'
 import { cn } from '@/utils/cn'
 import { formatBoxCode } from '@/utils/sparky'
@@ -57,8 +59,12 @@ export function DevicesPage() {
   const a = addressUuid ?? ''
   // Sparky and flint only come with an address picked from a group's list. For
   // a looked-up address (or one hydrated from the URL) a missing device is
-  // unknown rather than absent — no endpoint returns them per address.
-  const devicesUnknown = !groupUuid || !addressRecord
+  // unknown rather than absent — no endpoint returns them per address. A group
+  // scan that located the address is just as authoritative as picking it from
+  // a group, so it settles the question too.
+  const groupScan = useAddressGroups(a)
+  const scanLocatedAddress = groupScan.status === 'done' && !!groupScan.result?.record
+  const devicesUnknown = (!groupUuid || !addressRecord) && !scanLocatedAddress
   const enabled = { query: { enabled: !!addressUuid } }
   const [detail, setDetail] = useState<DeviceDetail | null>(null)
 
@@ -240,6 +246,8 @@ export function DevicesPage() {
           </div>
         }
       />
+
+      <AddressGroupsPanel scan={groupScan} />
 
       <p className="text-13 text-text-gray">{t('devices.detailsHint')}</p>
 

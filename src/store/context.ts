@@ -24,6 +24,16 @@ interface ContextState {
    * group, so the group is cleared to keep the context consistent.
    */
   selectLookedUpAddress: (record: GroupAddressDto) => void
+  /**
+   * Fill in devices discovered after selection (the group scan finds the
+   * sparky a flint lookup could not return), keeping what is already known.
+   */
+  mergeAddressDevices: (record: GroupAddressDto) => void
+  /**
+   * Select a group without clearing the address, for when the address is
+   * already chosen and its group is only discovered afterwards.
+   */
+  selectGroupForAddress: (uuid: string, name?: string | null) => void
   reset: () => void
 }
 
@@ -57,6 +67,24 @@ export const useContextStore = create<ContextState>((set) => ({
         addressSerial: merged.sparky?.serialNumber ?? null,
       }
     }),
+  mergeAddressDevices: (record) =>
+    set((state) => {
+      if (state.addressUuid !== record.uuid) return state
+      const known = state.addressRecord
+      const merged: GroupAddressDto = {
+        ...(known ?? record),
+        uuid: record.uuid,
+        // Field-wise, incoming first: a group listing is the richer source.
+        // `GET /sparkies/{sn}` carries no box code, so a serial lookup leaves
+        // it null and only the group listing can fill it in.
+        sparky: record.sparky
+          ? { ...known?.sparky, ...record.sparky, boxCode: record.sparky.boxCode ?? known?.sparky?.boxCode ?? null }
+          : (known?.sparky ?? null),
+        flint: record.flint ? { ...known?.flint, ...record.flint } : (known?.flint ?? null),
+      }
+      return { addressRecord: merged, addressSerial: merged.sparky?.serialNumber ?? null }
+    }),
+  selectGroupForAddress: (uuid, name = null) => set({ groupUuid: uuid, groupName: name }),
   reset: () =>
     set({ groupUuid: null, groupName: null, addressUuid: null, addressRecord: null, addressSerial: null }),
 }))

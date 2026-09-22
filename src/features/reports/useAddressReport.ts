@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { groupControllerGetGroupSparkiesV2 } from '@/api/generated/groups/groups'
-import type { GroupAddressDto } from '@/api/generated/model'
 import { AbortedError, mapWithConcurrency } from '@/utils/concurrency'
+import type { GroupAddressDto } from '@/api/generated/model'
+import { loadAllGroupAddresses } from '@/utils/groupAddresses'
 import { useReportCache } from '@/store/reportCache'
 
 // Throttle knobs — tuned in one place to keep backend load reasonable.
-const ADDRESS_PAGE = 1000
-const MAX_ADDRESS_PAGES = 20 // up to 20k addresses
 const FETCH_CONCURRENCY = 4 // simultaneous per-address device calls
 const FETCH_STAGGER_MS = 60 // small delay between a worker's requests
 
@@ -26,25 +24,8 @@ interface CachedReport<TRow> {
 
 const EMPTY_TOTALS: ReportTotals = { addresses: 0, addressesWithData: 0 }
 
-/** Fetch every address in a group by paging through the offset/limit endpoint. */
-export async function loadAllAddresses(groupUuid: string, signal: AbortSignal): Promise<GroupAddressDto[]> {
-  const first = await groupControllerGetGroupSparkiesV2(groupUuid, { limit: ADDRESS_PAGE, offset: 0 }, undefined, signal)
-  const total = first.meta?.total ?? 0
-  const pages = Math.min(Math.ceil(total / ADDRESS_PAGE), MAX_ADDRESS_PAGES)
-  const offsets = Array.from({ length: Math.max(0, pages - 1) }, (_, i) => (i + 1) * ADDRESS_PAGE)
-
-  const rest = await mapWithConcurrency(
-    offsets,
-    FETCH_CONCURRENCY,
-    (offset) =>
-      groupControllerGetGroupSparkiesV2(groupUuid, { limit: ADDRESS_PAGE, offset }, undefined, signal).then(
-        (r) => r.results ?? [],
-      ),
-    { signal },
-  )
-
-  return [...(first.results ?? []), ...rest.flat()]
-}
+/** Fetch every address in a group. Kept as an alias: several reports import it. */
+export const loadAllAddresses = loadAllGroupAddresses
 
 /**
  * Generic engine behind every group-wide report: pages all addresses, then runs
