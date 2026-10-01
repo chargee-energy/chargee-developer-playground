@@ -106,6 +106,11 @@ export interface CurtailmentTotals {
   standingMinutes: number
   addressesScanned: number
   invertersScanned: number
+  /**
+   * Inverters whose schedules could not be read. Above zero the scan is partial,
+   * so "no curtailment" means "not proven" rather than "none happened".
+   */
+  scheduleFailures: number
 }
 
 export interface CurtailmentRange {
@@ -126,6 +131,7 @@ const EMPTY_TOTALS: CurtailmentTotals = {
   standingMinutes: 0,
   addressesScanned: 0,
   invertersScanned: 0,
+  scheduleFailures: 0,
 }
 
 interface CachedReport {
@@ -589,6 +595,7 @@ export function useGroupCurtailmentReport(
         standingMinutes,
         addressesScanned: individual?.addressesScanned ?? 0,
         invertersScanned: individual?.invertersScanned ?? 0,
+        scheduleFailures: individual?.failures.length ?? 0,
       }
 
       let nextMinutes: FlexAggregateMinute[] = []

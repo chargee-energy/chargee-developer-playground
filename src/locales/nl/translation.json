@@ -523,7 +523,9 @@
       "tags": "Hindcast-tags",
       "fetching": "Productie & hindcast ophalen… {{done}} / {{total}}",
       "emptySchedules": "Geen flex-schema's actief in de gekozen periode.",
-      "noInverters": "Geen stuurbare omvormers op dit adres."
+      "noInverters": "Geen stuurbare omvormers op dit adres.",
+      "partialScan_one": "{{count}} omvormer kon niet worden gelezen, dus er kan curtailment ontbreken in dit rapport. Probeer opnieuw of bekijk de mislukte aanvraag in de API Inspector.",
+      "partialScan_other": "{{count}} omvormers konden niet worden gelezen, dus er kan curtailment ontbreken in dit rapport. Probeer opnieuw of bekijk de mislukte aanvragen in de API Inspector."
     },
     "curtailment": {
       "dateMode": "Periode",
@@ -696,7 +698,9 @@
         "telemetryAggregation": "telemetrie uit flexaggregatie",
         "telemetryInverters": "telemetrie opgeteld uit omvormers",
         "telemetryEmpty": "telemetrie gaf geen data"
-      }
+      },
+      "partialScan_one": "{{count}} omvormer kon niet worden gelezen, dus er kan curtailment ontbreken in dit rapport. Probeer opnieuw of bekijk de mislukte aanvraag in de API Inspector.",
+      "partialScan_other": "{{count}} omvormers konden niet worden gelezen, dus er kan curtailment ontbreken in dit rapport. Probeer opnieuw of bekijk de mislukte aanvragen in de API Inspector."
     }
   },
   "telemetry": {
