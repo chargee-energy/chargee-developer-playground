@@ -16,6 +16,7 @@ import type { SolarInverterFlexScheduleDto, ScheduleDto } from '@/api/generated/
 import { AbortedError, mapWithConcurrency } from '@/utils/concurrency'
 import { pageReadings } from '@/utils/pageReadings'
 import { useReportCache } from '@/store/reportCache'
+import { readSchedules, type ScheduleFetchFailure } from './scheduleFetch'
 import type { ReportStatus } from './useAddressReport'
 
 const SCHEDULE_PAGE = 1000
@@ -127,6 +128,8 @@ interface CachedReport {
   impact: AddressCurtailmentImpact
   perInverter: InverterImpactRow[]
   forecastTags: string[]
+  /** Inverters whose schedules could not be read — the report is partial. */
+  scheduleFailures: ScheduleFetchFailure[]
 }
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null)
@@ -203,14 +206,34 @@ function curtailmentBands(periods: Period[], windowStart: number, windowEnd: num
 
 const inBands = (t: number, bands: Band[]) => bands.some((b) => t >= b.start && t < b.end)
 
-async function loadFlexSchedules(addressUuid: string, invId: string, signal: AbortSignal): Promise<SolarInverterFlexScheduleDto[]> {
-  const res = await solarInverterFlexScheduleControllerListV2(addressUuid, invId, { limit: SCHEDULE_PAGE }, undefined, signal)
-  return res.results ?? []
+function loadFlexSchedules(
+  addressUuid: string,
+  invId: string,
+  failures: ScheduleFetchFailure[],
+  signal: AbortSignal,
+): Promise<SolarInverterFlexScheduleDto[]> {
+  return readSchedules<SolarInverterFlexScheduleDto>(
+    () => solarInverterFlexScheduleControllerListV2(addressUuid, invId, { limit: SCHEDULE_PAGE }, undefined, signal),
+    { addressUuid, inverterId: invId },
+    'flex',
+    failures,
+    signal,
+  )
 }
 
-async function loadInverterSchedules(addressUuid: string, invId: string, signal: AbortSignal): Promise<ScheduleDto[]> {
-  const res = await solarInverterScheduleControllerListV2(addressUuid, invId, { limit: SCHEDULE_PAGE }, undefined, signal)
-  return res.results ?? []
+function loadInverterSchedules(
+  addressUuid: string,
+  invId: string,
+  failures: ScheduleFetchFailure[],
+  signal: AbortSignal,
+): Promise<ScheduleDto[]> {
+  return readSchedules<ScheduleDto>(
+    () => solarInverterScheduleControllerListV2(addressUuid, invId, { limit: SCHEDULE_PAGE }, undefined, signal),
+    { addressUuid, inverterId: invId },
+    'schedule',
+    failures,
+    signal,
+  )
 }
 
 /**
@@ -236,6 +259,9 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
   const [impact, setImpact] = useState<AddressCurtailmentImpact>(() => seed?.data.impact ?? EMPTY_IMPACT)
   const [perInverter, setPerInverter] = useState<InverterImpactRow[]>(() => seed?.data.perInverter ?? [])
   const [forecastTags, setForecastTags] = useState<string[]>(() => seed?.data.forecastTags ?? [])
+  const [scheduleFailures, setScheduleFailures] = useState<ScheduleFetchFailure[]>(
+    () => seed?.data.scheduleFailures ?? [],
+  )
   const [generatedAt, setGeneratedAt] = useState<string | null>(() => seed?.generatedAt ?? null)
   const [progress, setProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 })
   const [error, setError] = useState<unknown>(null)
@@ -263,6 +289,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
       setImpact(cached.data.impact)
       setPerInverter(cached.data.perInverter)
       setForecastTags(cached.data.forecastTags)
+      setScheduleFailures(cached.data.scheduleFailures ?? [])
       setGeneratedAt(cached.generatedAt)
       setStatus('done')
     } else {
@@ -276,6 +303,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
       setImpact(EMPTY_IMPACT)
       setPerInverter([])
       setForecastTags([])
+      setScheduleFailures([])
       setGeneratedAt(null)
       setStatus('idle')
     }
@@ -295,6 +323,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
 
     setStatus('running')
     setError(null)
+    setScheduleFailures([])
     setProgress({ done: 0, total: 0 })
     setDetail([])
     detailCache.current.clear()
@@ -346,15 +375,18 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
       )
       if (signal.aborted) return setStatus('cancelled')
 
+      // Collected rather than thrown: one unreadable inverter must not sink the
+      // whole address, but a partial read has to be visible (see readSchedules).
+      const failures: ScheduleFetchFailure[] = []
       const perInv = await mapWithConcurrency(
         steerable,
         FETCH_CONCURRENCY,
         async (invId) => {
-          const flex = await loadFlexSchedules(addressUuid, invId, signal)
+          const flex = await loadFlexSchedules(addressUuid, invId, failures, signal)
           tick()
           const flexPeriods = buildPeriods(flex, describeFlex, windowStart, windowEnd)
 
-          const sched = await loadInverterSchedules(addressUuid, invId, signal)
+          const sched = await loadInverterSchedules(addressUuid, invId, failures, signal)
           tick()
           const invPeriods = buildPeriods(sched, describeSchedule, windowStart, windowEnd)
 
@@ -533,6 +565,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
       setImpact(nextImpact)
       setPerInverter(perInverterRows)
       setForecastTags(tags)
+      setScheduleFailures(failures)
       setGeneratedAt(stamp)
       setStatus('done')
       setEntry<CachedReport>(
@@ -547,6 +580,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
           impact: nextImpact,
           perInverter: perInverterRows,
           forecastTags: tags,
+          scheduleFailures: failures,
         },
         stamp,
       )
@@ -709,6 +743,7 @@ export function useAddressCurtailmentReport(addressUuid: string | null, range: C
     impact,
     perInverter,
     forecastTags,
+    scheduleFailures,
     generatedAt,
     error,
     run,

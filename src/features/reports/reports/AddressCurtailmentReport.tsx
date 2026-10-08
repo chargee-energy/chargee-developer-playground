@@ -92,6 +92,7 @@ export function AddressCurtailmentReport() {
     impact,
     perInverter,
     forecastTags,
+    scheduleFailures,
     generatedAt,
     error,
     run,
@@ -307,6 +308,13 @@ export function AddressCurtailmentReport() {
         filters={filters}
         progressText={t('reports.addrCurtailment.fetching', { done: progress.done, total: progress.total })}
       />
+
+      {/* A partial scan can't tell "no curtailment" apart from "never read". */}
+      {status === 'done' && scheduleFailures.length > 0 && (
+        <div className="card border-orange/30 bg-orange/5 p-4 text-13 text-dark-blue">
+          {t('reports.addrCurtailment.partialScan', { count: scheduleFailures.length })}
+        </div>
+      )}
 
       {showResults && addressUuid && (
         <div className="card flex flex-wrap items-center gap-x-8 gap-y-2 p-4">

@@ -566,6 +566,13 @@ export function GroupCurtailmentReport() {
         progressText={progressText}
       />
 
+      {/* A partial scan can't tell "no curtailment" apart from "never read". */}
+      {status === 'done' && totals.scheduleFailures > 0 && (
+        <div className="card border-orange/30 bg-orange/5 p-4 text-13 text-dark-blue">
+          {t('reports.curtailment.partialScan', { count: totals.scheduleFailures })}
+        </div>
+      )}
+
       {/* Say why there is no chart — the two causes need different fixes. */}
       {status === 'done' && showTelemetry && !showTimeline && (
         <div className="card border-beige-2 p-4 text-13 text-text-gray">

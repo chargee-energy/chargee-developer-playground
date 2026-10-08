@@ -534,7 +534,9 @@
       "tags": "Hindcast tags",
       "fetching": "Fetching production & hindcast… {{done}} / {{total}}",
       "emptySchedules": "No flex schedules active in the selected period.",
-      "noInverters": "No steerable inverters at this address."
+      "noInverters": "No steerable inverters at this address.",
+      "partialScan_one": "{{count}} inverter could not be read, so curtailment may be missing from this report. Retry, or check the API Inspector for the failing request.",
+      "partialScan_other": "{{count}} inverters could not be read, so curtailment may be missing from this report. Retry, or check the API Inspector for the failing requests."
     },
     "curtailment": {
       "dateMode": "Period",
@@ -707,7 +709,9 @@
         "telemetryAggregation": "telemetry from group flex aggregation",
         "telemetryInverters": "telemetry summed from inverters",
         "telemetryEmpty": "telemetry returned no data"
-      }
+      },
+      "partialScan_one": "{{count}} inverter could not be read, so curtailment may be missing from this report. Retry, or check the API Inspector for the failing request.",
+      "partialScan_other": "{{count}} inverters could not be read, so curtailment may be missing from this report. Retry, or check the API Inspector for the failing requests."
     }
   },
   "telemetry": {

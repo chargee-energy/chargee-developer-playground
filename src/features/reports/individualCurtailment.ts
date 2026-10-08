@@ -4,6 +4,7 @@ import {
 } from '@/api/generated/solar-inverters/solar-inverters'
 import type { ScheduleDto, SolarInverterFlexScheduleDto } from '@/api/generated/model'
 import { mapWithConcurrency } from '@/utils/concurrency'
+import { readSchedules, type ScheduleFetchFailure } from './scheduleFetch'
 import { loadSteerableInverters, refKey, type InverterRef, type SteerableScan } from './groupProduction'
 
 const SCHEDULE_PAGE = 1000
@@ -262,6 +263,11 @@ export interface IndividualCurtailmentResult {
   invertersScanned: number
   /** Total individual schedules read (both sources, before windowing). */
   schedules: number
+  /**
+   * Inverters whose schedules could not be read. Non-empty means the scan is
+   * partial, so an empty result is "we don't know" rather than "no curtailment".
+   */
+  failures: ScheduleFetchFailure[]
   /** The steerable inverters scanned, so telemetry can reuse them. */
   refs: InverterRef[]
   scan: SteerableScan
@@ -308,19 +314,33 @@ export async function loadIndividualCurtailment(
   const events: Event[] = []
   const spans: Span[] = []
   const standingSpans: Span[] = []
+  const failures: ScheduleFetchFailure[] = []
   let schedules = 0
 
   await mapWithConcurrency(
     pairs,
     FETCH_CONCURRENCY,
     async ({ addressUuid, inverterId }) => {
-      const [flexRes, schedRes] = await Promise.all([
-        solarInverterFlexScheduleControllerListV2(addressUuid, inverterId, { limit: SCHEDULE_PAGE }, undefined, signal),
-        solarInverterScheduleControllerListV2(addressUuid, inverterId, { limit: SCHEDULE_PAGE }, undefined, signal),
+      const ref = { addressUuid, inverterId }
+      const [flexRows, own] = await Promise.all([
+        readSchedules<SolarInverterFlexScheduleDto>(
+          () =>
+            solarInverterFlexScheduleControllerListV2(addressUuid, inverterId, { limit: SCHEDULE_PAGE }, undefined, signal),
+          ref,
+          'flex',
+          failures,
+          signal,
+        ),
+        readSchedules<ScheduleDto>(
+          () => solarInverterScheduleControllerListV2(addressUuid, inverterId, { limit: SCHEDULE_PAGE }, undefined, signal),
+          ref,
+          'schedule',
+          failures,
+          signal,
+        ),
       ])
       tick()
-      const flex = (flexRes.results ?? []).filter(isLiveSchedule)
-      const own = schedRes.results ?? []
+      const flex = flexRows.filter(isLiveSchedule)
       schedules += flex.length + own.length
 
       const flexPeriods = buildStepPeriods<SolarInverterFlexScheduleDto>(
@@ -363,5 +383,6 @@ export async function loadIndividualCurtailment(
     refs: pairs,
     scan,
     schedules,
+    failures,
   }
 }
