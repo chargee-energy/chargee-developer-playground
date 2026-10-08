@@ -74,9 +74,10 @@ export function ConsolePage() {
     try {
       const res = await AXIOS_INSTANCE({ method: endpoint.method, url, params: params as any, data })
       // Persist a token returned by /auth/login or /auth/refresh so the rest of
-      // the session (and further console calls) use it.
+      // the session (and further console calls) use it. No `remember` argument:
+      // a console call must not promote a tab-only session into localStorage.
       const tok = (res.data as any)?.accessToken ?? (res.data as any)?.access_token
-      if (tok) storeTokens(tok, (res.data as any)?.refreshToken, true)
+      if (tok) storeTokens(tok, (res.data as any)?.refreshToken)
       setResult({ status: res.status, durationMs: Math.round(performance.now() - start), data: res.data })
     } catch (e: any) {
       setResult({

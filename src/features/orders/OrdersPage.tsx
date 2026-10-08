@@ -58,7 +58,7 @@ type FormValues = z.infer<typeof schema>
 
 export function OrdersPage() {
   const { t } = useTranslation()
-  const { connected, user, login, disconnect } = useOrderAuthStore()
+  const { connected, user, expired, login, disconnect } = useOrderAuthStore()
   const { groupUuid } = useContextStore()
   const setAddress = useContextStore((s) => s.setAddress)
   const navigate = useNavigate()
@@ -192,6 +192,11 @@ export function OrdersPage() {
         <PageHeader eyebrow={t('orders.eyebrow')} title={t('orders.title')} subtitle={t('orders.subtitle')} hideInspector />
         <div className="card max-w-md p-6">
           <h2 className="text-lg font-bold text-dark-blue">{t('orders.connectTitle')}</h2>
+          {expired && (
+            <p className="mt-3 rounded-xl bg-yellow/15 px-3 py-2 text-13 text-dark-blue">
+              {t('orders.sessionExpired')}
+            </p>
+          )}
           <p className="mt-2 text-13 leading-160 text-text-gray">{t('orders.connectBody')}</p>
           <form onSubmit={handleSubmit(onConnect)} className="mt-5 space-y-4">
             <div>

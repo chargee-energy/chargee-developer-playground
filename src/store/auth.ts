@@ -4,7 +4,7 @@ import {
   authControllerMeV2,
   authControllerLogoutV2,
 } from '@/api/generated/auth/auth'
-import { getToken, storeTokens, clearTokens } from '@/api/mutator'
+import { getToken, storeTokens, clearTokens, clearLoginRedirect, onSessionChange } from '@/api/mutator'
 import type { UserDto } from '@/api/generated/model'
 
 interface AuthState {
@@ -51,6 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // best-effort server-side logout; clear locally regardless
     }
     clearTokens()
+    clearLoginRedirect()
     set({ user: null, token: null, isAuthenticated: false, loading: false })
   },
 
@@ -68,13 +69,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await get().fetchUser()
     } catch {
-      clearTokens()
-      set({ user: null, token: null, isAuthenticated: false })
+      // A dead session has already been cleared by the token layer (which
+      // refreshes first and only gives up when the refresh token is rejected).
+      // Anything else — offline, API down — must not cost a valid session.
+      if (!getToken()) set({ user: null, token: null, isAuthenticated: false })
     } finally {
       set({ loading: false })
     }
   },
 }))
+
+// The token layer refreshes in the background and decides when a session is
+// really over, so mirror its token here instead of holding a stale copy.
+onSessionChange((token) => {
+  if (token) useAuthStore.setState({ token, isAuthenticated: true })
+  else useAuthStore.setState({ user: null, token: null, isAuthenticated: false, loading: false })
+})
 
 // Internal Chargee roles that aren't limited to assigned groups. Compared as
 // strings: the generated role enum predates `support` (`npm run api:sync`).

@@ -22,6 +22,16 @@ export function clearOrderToken() {
   sessionStorage.removeItem(ORDER_TOKEN_KEY)
 }
 
+// The Order API hands out no refresh token, so an expired one can only be
+// replaced by connecting again. Listeners turn that into a reconnect prompt
+// rather than every order call failing with an opaque error.
+const expiryListeners = new Set<() => void>()
+
+export function onOrderSessionExpired(fn: () => void) {
+  expiryListeners.add(fn)
+  return () => expiryListeners.delete(fn)
+}
+
 export const ORDER_AXIOS = Axios.create({
   baseURL: ORDER_ORIGIN,
   headers: { 'Content-Type': 'application/json' },
@@ -60,6 +70,10 @@ ORDER_AXIOS.interceptors.response.use(
       response: error.response?.data,
       error: error.message,
     })
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
+      clearOrderToken()
+      for (const fn of expiryListeners) fn()
+    }
     return Promise.reject(error)
   },
 )
