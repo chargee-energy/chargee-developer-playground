@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
+import { getLoginRedirect, clearLoginRedirect } from '@/api/mutator'
 import { Spinner } from '@/components/common/Spinner'
 import logo from '@/assets/logo.svg'
 
@@ -20,6 +21,9 @@ export function LoginPage() {
   const { login, isAuthenticated } = useAuthStore()
   const [serverError, setServerError] = useState('')
   const [remember, setRemember] = useState(true)
+  // Set when an expired session sent the user here: sign-in returns them to
+  // the page they were on instead of dropping them on the dashboard.
+  const [returnTo] = useState(getLoginRedirect)
 
   const {
     register,
@@ -27,13 +31,14 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) return <Navigate to={returnTo ?? '/'} replace />
 
   const onSubmit = async (values: FormValues) => {
     setServerError('')
     try {
       await login(values.email, values.password, remember)
-      navigate('/')
+      clearLoginRedirect()
+      navigate(returnTo ?? '/', { replace: true })
     } catch (err: any) {
       setServerError(err?.response?.data?.message || t('auth.loginError'))
     }
@@ -100,6 +105,11 @@ export function LoginPage() {
             {t('auth.rememberMe')}
           </label>
 
+          {returnTo && !serverError && (
+            <p className="rounded-xl bg-yellow/15 px-3 py-2 text-13 text-dark-blue">
+              {t('auth.sessionExpired')}
+            </p>
+          )}
           {serverError && (
             <p className="rounded-xl bg-red/10 px-3 py-2 text-13 text-red">{serverError}</p>
           )}
