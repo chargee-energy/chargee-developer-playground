@@ -69,7 +69,7 @@ export function OrdersPage() {
 
   const ordersQuery = useQuery({
     queryKey: ['all-orders'],
-    queryFn: getAllOrders,
+    queryFn: ({ signal }) => getAllOrders(signal),
     enabled: connected,
   })
   const orders = useMemo(() => ordersQuery.data?.orders ?? [], [ordersQuery.data])

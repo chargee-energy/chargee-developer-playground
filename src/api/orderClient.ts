@@ -1,5 +1,6 @@
 import Axios, { type AxiosError } from 'axios'
 import { useInspectorStore, nextCallId, type ApiCall } from '@/store/inspector'
+import { mapWithConcurrency } from '@/utils/concurrency'
 
 // The Order fulfillment API is a separate service with its own credentials and
 // token (independent of the Ampere session).
@@ -157,29 +158,33 @@ export async function orderLogin(email: string, password: string): Promise<Order
   return data
 }
 
-export async function getOrders(page = 1, limit = 20): Promise<OrdersResponse> {
-  const { data } = await ORDER_AXIOS.get<OrdersResponse>('/api/v1/orders', { params: { page, limit } })
+export async function getOrders(page = 1, limit = 20, signal?: AbortSignal): Promise<OrdersResponse> {
+  const { data } = await ORDER_AXIOS.get<OrdersResponse>('/api/v1/orders', { params: { page, limit }, signal })
   return data
 }
 
 /**
  * Loads every order by paging through the list endpoint, so analytics and the
  * activation cross-check run over the full set (the list itself is then paged
- * client-side). Capped to avoid runaway fetches.
+ * client-side). Remaining pages are fetched with bounded concurrency so the
+ * backend is not hit with one request per page at once.
  */
-export async function getAllOrders(): Promise<{ orders: Order[]; total: number; truncated: boolean }> {
+export async function getAllOrders(signal?: AbortSignal): Promise<{ orders: Order[]; total: number }> {
   const PAGE = 100
-  const MAX_PAGES = 50 // up to 5000 orders
-  const first = await getOrders(1, PAGE)
-  const totalPages = first.meta?.totalPages ?? 1
-  const pages = Math.min(totalPages, MAX_PAGES)
-  const rest = await Promise.all(
-    Array.from({ length: Math.max(0, pages - 1) }, (_, i) => getOrders(i + 2, PAGE)),
+  const PAGE_CONCURRENCY = 4
+  const first = await getOrders(1, PAGE, signal)
+  const total = first.meta?.total ?? first.data?.length ?? 0
+  const reportedPages = first.meta?.totalPages ?? 1
+  const pages = Math.max(reportedPages, Math.ceil(total / PAGE) || 1)
+  const rest = await mapWithConcurrency(
+    Array.from({ length: Math.max(0, pages - 1) }, (_, i) => i + 2),
+    PAGE_CONCURRENCY,
+    (page) => getOrders(page, PAGE, signal),
+    { signal },
   )
   return {
     orders: [first, ...rest].flatMap((r) => r.data ?? []),
-    total: first.meta?.total ?? 0,
-    truncated: totalPages > MAX_PAGES,
+    total,
   }
 }
 
